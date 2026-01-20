@@ -100,18 +100,46 @@
         </div>
 
         <!-- Place Order Form -->
-        <form action="{{ route('customer.order.place', $table->code) }}" method="POST" x-data="{ submitting: false }">
-            @csrf
+        <form x-data="{ 
+                submitting: false,
+                customerNote: '',
+                async placeOrder() {
+                    if (this.submitting) return;
+                    this.submitting = true;
+                    try {
+                        const response = await fetch('{{ route('customer.order.place', $table->code) }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                customer_note: this.customerNote
+                            })
+                        });
+                        const data = await response.json();
+                        if (response.ok && data.success) {
+                            window.location.href = data.redirect;
+                        } else {
+                            this.submitting = false;
+                            alert(data.message || 'Failed to place order. Please try again.');
+                        }
+                    } catch (error) {
+                        this.submitting = false;
+                        alert('Network error. Please check your connection.');
+                    }
+                }
+            }" @submit.prevent="placeOrder()">
             <div class="mb-5">
                 <label for="customer_note" class="block text-sm font-medium text-slate-700 mb-2">Special Instructions</label>
-                <textarea name="customer_note"
+                <textarea x-model="customerNote"
                           id="customer_note"
                           rows="2"
                           class="w-full border-slate-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 resize-none text-sm placeholder:text-slate-400"
                           placeholder="Any allergies or special requests for the kitchen?"></textarea>
             </div>
             <button type="submit"
-                    @click="submitting = true"
                     :disabled="submitting"
                     class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-200 disabled:opacity-70 flex items-center justify-center gap-2">
                 <svg x-show="!submitting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

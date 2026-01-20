@@ -95,6 +95,10 @@ class CustomerController extends Controller
         $cart = session()->get('cart', []);
 
         if (empty($cart)) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Cart is empty'], 400);
+            }
+
             return back()->with('error', 'Cart is empty');
         }
 
@@ -104,6 +108,14 @@ class CustomerController extends Controller
             ->first();
 
         if ($existingOrder) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You already have an active order. Please ask waiter to add items.',
+                    'redirect' => route('customer.status', $tableCode),
+                ], 400);
+            }
+
             return redirect()->route('customer.status', $tableCode)->with('error', 'You already have an active order. Please ask waiter to add items.');
         }
 
@@ -144,12 +156,30 @@ class CustomerController extends Controller
             DB::commit();
             session()->forget('cart');
 
-            \App\Events\OrderPlaced::dispatch($order);
+            // Dispatch event but don't let broadcast failure break the order
+            try {
+                \App\Events\OrderPlaced::dispatch($order);
+            } catch (\Exception $e) {
+                // Log broadcast failure but don't fail the order
+                \Log::warning('Failed to broadcast OrderPlaced event: '.$e->getMessage());
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order placed successfully',
+                    'redirect' => route('customer.status', $tableCode),
+                ]);
+            }
 
             return redirect()->route('customer.status', $tableCode);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Order failed: '.$e->getMessage()], 500);
+            }
 
             return back()->with('error', 'Order failed: '.$e->getMessage());
         }
