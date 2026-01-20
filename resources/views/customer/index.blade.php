@@ -64,8 +64,39 @@
                     </div>
 
                     @foreach($category->menuItems as $item)
-                        <form action="{{ route('customer.cart.add', $table->code) }}" method="POST" x-data="{ qty: 1, adding: false }">
-                            @csrf
+                        <form x-data="{ 
+                                qty: 1, 
+                                adding: false,
+                                note: '',
+                                async addToCart() {
+                                    if (this.adding) return;
+                                    this.adding = true;
+                                    try {
+                                        const response = await fetch('{{ route('customer.cart.add', $table->code) }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                'Accept': 'application/json'
+                                            },
+                                            body: JSON.stringify({
+                                                menu_item_id: {{ $item->id }},
+                                                qty: this.qty,
+                                                note: this.note
+                                            })
+                                        });
+                                        if (response.ok) {
+                                            window.location.reload();
+                                        } else {
+                                            this.adding = false;
+                                            alert('Failed to add item. Please try again.');
+                                        }
+                                    } catch (error) {
+                                        this.adding = false;
+                                        alert('Network error. Please check your connection.');
+                                    }
+                                }
+                            }" @submit.prevent="addToCart()">
                             <input type="hidden" name="menu_item_id" value="{{ $item->id }}">
                             <input type="hidden" name="qty" :value="qty">
 
@@ -137,7 +168,6 @@
                                         <div class="flex-1"></div>
                                         @if($item->is_available ?? true)
                                             <button type="submit"
-                                                    @click="adding = true"
                                                     :disabled="adding"
                                                     class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-full transition-all duration-200 shadow-sm hover:shadow disabled:opacity-50 flex items-center gap-1.5">
                                                 <svg x-show="!adding" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,7 +189,7 @@
                                          x-transition:enter-end="opacity-100 transform translate-y-0"
                                          class="mt-2">
                                         <input type="text"
-                                               name="note"
+                                               x-model="note"
                                                placeholder="Special instructions (e.g. No onions, extra spicy)"
                                                class="w-full text-sm border-slate-200 rounded-lg focus:border-amber-500 focus:ring-amber-500 bg-white placeholder:text-slate-400">
                                     </div>

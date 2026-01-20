@@ -48,19 +48,25 @@ class CustomerController extends Controller
         // Simple cart structure: itemId -> details
         // If item exists, update qty (or append if different note? keeping simple: separate lines usually better but let's just add)
         // MVP: Unique by ID. If note changes, maybe just overwrite note.
-        
+
         // Better MVP: Generate a unique ID for the cart line to allow same item with different notes
-        $cartLineId = $itemId . '-' . Str::random(4);
-        
+        $cartLineId = $itemId.'-'.Str::random(4);
+
+        $menuItem = MenuItem::find($itemId);
+
         $cart[$cartLineId] = [
             'menu_item_id' => $itemId,
             'qty' => $request->qty,
             'note' => $request->note,
-            'name' => MenuItem::find($itemId)->name,
-            'price' => MenuItem::find($itemId)->price,
+            'name' => $menuItem->name,
+            'price' => $menuItem->price,
         ];
 
         session()->put('cart', $cart);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Added to cart']);
+        }
 
         return back()->with('success', 'Added to cart');
     }
@@ -69,7 +75,7 @@ class CustomerController extends Controller
     {
         $table = $this->getTable($tableCode);
         $cart = session()->get('cart', []);
-        $subtotal = collect($cart)->sum(fn($item) => $item['price'] * $item['qty']);
+        $subtotal = collect($cart)->sum(fn ($item) => $item['price'] * $item['qty']);
 
         return view('customer.cart', compact('table', 'cart', 'subtotal'));
     }
@@ -79,6 +85,7 @@ class CustomerController extends Controller
         $cart = session()->get('cart', []);
         unset($cart[$lineId]);
         session()->put('cart', $cart);
+
         return back();
     }
 
@@ -103,17 +110,17 @@ class CustomerController extends Controller
         try {
             DB::beginTransaction();
 
-            $subtotal = collect($cart)->sum(fn($item) => $item['price'] * $item['qty']);
+            $subtotal = collect($cart)->sum(fn ($item) => $item['price'] * $item['qty']);
             $taxRate = config('pos.tax_rate', 0);
             $serviceChargeRate = config('pos.service_charge', 0);
-            
+
             $tax = $subtotal * $taxRate;
             $serviceCharge = $subtotal * $serviceChargeRate;
             $total = $subtotal + $tax + $serviceCharge;
 
             $order = Order::create([
                 'table_id' => $table->id,
-                'order_no' => 'ORD-' . strtoupper(Str::random(6)),
+                'order_no' => 'ORD-'.strtoupper(Str::random(6)),
                 'status' => 'pending',
                 'customer_note' => $request->customer_note,
                 'subtotal' => $subtotal,
@@ -143,7 +150,8 @@ class CustomerController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Order failed: ' . $e->getMessage());
+
+            return back()->with('error', 'Order failed: '.$e->getMessage());
         }
     }
 
@@ -161,11 +169,11 @@ class CustomerController extends Controller
     public function requestBill($tableCode, Order $order)
     {
         if ($order->status === 'paid') {
-             return back();
+            return back();
         }
-        
+
         $order->update(['bill_requested_at' => now()]);
-        
+
         return back()->with('success', 'Bill requested. The waiter is coming!');
     }
 }
