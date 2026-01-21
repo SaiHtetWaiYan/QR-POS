@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BillRequested;
 use App\Models\Category;
 use App\Models\MenuItem;
 use App\Models\Order;
@@ -203,6 +204,13 @@ class CustomerController extends Controller
         }
 
         $order->update(['bill_requested_at' => now()]);
+
+        // Broadcast to POS
+        try {
+            BillRequested::dispatch($order->load('table'));
+        } catch (\Exception $e) {
+            \Log::warning('Failed to broadcast BillRequested: '.$e->getMessage());
+        }
 
         return back()->with('success', 'Bill requested. The waiter is coming!');
     }
