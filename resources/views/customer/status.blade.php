@@ -198,10 +198,51 @@
                         </div>
                     </div>
                 @else
-                    <form action="{{ route('customer.order.bill', [$table->code, $order->id]) }}" method="POST" x-data="{ requesting: false }">
-                        @csrf
-                        <button type="submit"
-                                @click="if(!confirm('Request the bill?')) { $event.preventDefault(); return; } requesting = true;"
+                    <div x-data="{
+                        requesting: false,
+                        billRequested: false,
+                        async requestBill() {
+                            if (!confirm('Request the bill?')) return;
+                            this.requesting = true;
+                            try {
+                                const response = await fetch('{{ route('customer.order.bill', [$table->code, $order->id]) }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+                                if (response.ok) {
+                                    this.billRequested = true;
+                                } else {
+                                    this.requesting = false;
+                                    alert('Failed to request bill. Please try again.');
+                                }
+                            } catch (error) {
+                                this.requesting = false;
+                                alert('Network error. Please try again.');
+                            }
+                        }
+                    }">
+                        <!-- Bill Requested State -->
+                        <div x-show="billRequested" class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg shadow-violet-500/30 animate-fade-in">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-lg">Bill Requested</p>
+                                    <p class="text-sm text-white/80">Staff has been notified</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Request Button -->
+                        <button x-show="!billRequested"
+                                @click="requestBill()"
                                 :disabled="requesting"
                                 class="w-full bg-gradient-to-r from-slate-800 to-slate-900 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-slate-900/30 hover:shadow-xl transition-all duration-200 disabled:opacity-70 flex items-center justify-center gap-2">
                             <svg x-show="!requesting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,7 +254,7 @@
                             </svg>
                             <span x-text="requesting ? 'Requesting...' : 'Request Bill'"></span>
                         </button>
-                    </form>
+                    </div>
                 @endif
             @elseif($order->status === 'paid')
                 <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white text-center shadow-lg shadow-emerald-500/30">

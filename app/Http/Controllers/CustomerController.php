@@ -197,9 +197,13 @@ class CustomerController extends Controller
         return view('customer.status', compact('table', 'order'));
     }
 
-    public function requestBill($tableCode, Order $order)
+    public function requestBill(Request $request, $tableCode, Order $order)
     {
         if ($order->status === 'paid') {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Order already paid'], 400);
+            }
+
             return back();
         }
 
@@ -210,6 +214,10 @@ class CustomerController extends Controller
             BillRequested::dispatch($order->load('table'));
         } catch (\Exception $e) {
             \Log::warning('Failed to broadcast BillRequested: '.$e->getMessage());
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Bill requested. The waiter is coming!']);
         }
 
         return back()->with('success', 'Bill requested. The waiter is coming!');
