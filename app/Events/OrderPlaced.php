@@ -34,4 +34,27 @@ class OrderPlaced implements ShouldBroadcastNow
             new PrivateChannel('pos'),
         ];
     }
+
+    /**
+     * The event's broadcast name.
+     */
+    public function broadcastAs(): string
+    {
+        return 'OrderPlaced';
+    }
+
+    /**
+     * Get the data to broadcast.
+     *
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'order_id' => $this->order->id,
+            'order_no' => $this->order->order_no,
+            'table' => $this->order->table?->name,
+            'total' => $this->order->total,
+        ];
+    }
 }

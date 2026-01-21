@@ -29,13 +29,11 @@
     <div class="py-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50" x-data="{
         init() {
             if (typeof Echo !== 'undefined') {
-                setTimeout(() => {
-                    Echo.private('pos')
-                        .listen('OrderPlaced', (e) => {
-                            console.log('Order received');
-                            window.location.reload();
-                        });
-                }, 500);
+                Echo.private('pos')
+                    .listen('.OrderPlaced', (e) => {
+                        console.log('New order received:', e);
+                        window.location.reload();
+                    });
             }
         }
     }">
