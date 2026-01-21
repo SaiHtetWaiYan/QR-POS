@@ -34,11 +34,11 @@ return [
             'path' => env('REVERB_SERVER_PATH', ''),
             'hostname' => env('REVERB_HOST'),
             'options' => [
-                'tls' => [
-                    'local_cert' => '/Users/saihtetwaiyan/Library/Application Support/Herd/config/valet/Certificates/QR-POS.test.crt',
-                    'local_pk' => '/Users/saihtetwaiyan/Library/Application Support/Herd/config/valet/Certificates/QR-POS.test.key',
+                'tls' => env('REVERB_TLS_ENABLED', false) ? [
+                    'local_cert' => env('REVERB_TLS_CERT'),
+                    'local_pk' => env('REVERB_TLS_KEY'),
                     'verify_peer' => false,
-                ],
+                ] : [],
             ],
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
             'scaling' => [

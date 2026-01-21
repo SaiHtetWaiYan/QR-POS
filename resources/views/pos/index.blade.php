@@ -29,11 +29,20 @@
     <div class="py-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50" x-data="{
         init() {
             if (typeof Echo !== 'undefined') {
+                console.log('Echo is available, connecting to pos channel...');
                 Echo.private('pos')
+                    .subscribed(() => {
+                        console.log('Successfully subscribed to pos channel');
+                    })
+                    .error((error) => {
+                        console.error('Echo subscription error:', error);
+                    })
                     .listen('.OrderPlaced', (e) => {
                         console.log('New order received:', e);
                         window.location.reload();
                     });
+            } else {
+                console.warn('Echo is not available');
             }
         }
     }">
