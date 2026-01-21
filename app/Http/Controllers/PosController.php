@@ -55,4 +55,10 @@ class PosController extends Controller
         $order->load(['orderItems', 'table']);
         return view('pos.print', compact('order'));
     }
+
+    public function orderCard(Order $order)
+    {
+        $order->load(['orderItems.menuItem', 'table']);
+        return view('pos.partials.order_card', compact('order'));
+    }
 }

@@ -28,6 +28,7 @@ Route::middleware(['auth', 'verified'])->prefix('pos')->name('pos.')->group(func
     Route::get('/orders/{order}', [PosController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [PosController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('/orders/{order}/print', [PosController::class, 'print'])->name('orders.print');
+    Route::get('/orders/{order}/card', [PosController::class, 'orderCard'])->name('orders.card');
 
     // Menu
     Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
