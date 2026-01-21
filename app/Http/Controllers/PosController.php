@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OrderStatusUpdated;
 use App\Models\Order;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -46,6 +47,13 @@ class PosController extends Controller
         }
 
         $order->update($data);
+
+        // Broadcast status update to customer
+        try {
+            OrderStatusUpdated::dispatch($order);
+        } catch (\Exception $e) {
+            \Log::warning('Failed to broadcast OrderStatusUpdated: '.$e->getMessage());
+        }
 
         return back()->with('success', 'Order updated');
     }

@@ -29,8 +29,50 @@
             </a>
         </div>
     @else
-        <div x-data="{ refreshing: false }"
-             x-init="setInterval(() => { refreshing = true; setTimeout(() => window.location.reload(), 500) }, 15000)">
+        <div x-data="{
+            currentStatus: '{{ $order->status }}',
+            statuses: ['pending', 'accepted', 'preparing', 'served', 'paid'],
+            statusConfig: {
+                'pending': { bg: 'bg-amber-500', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', text: 'Waiting for confirmation' },
+                'accepted': { bg: 'bg-blue-500', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', text: 'Order confirmed' },
+                'preparing': { bg: 'bg-orange-500', icon: 'M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z', text: 'Being prepared' },
+                'served': { bg: 'bg-emerald-500', icon: 'M5 13l4 4L19 7', text: 'Ready to enjoy' },
+                'paid': { bg: 'bg-slate-700', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', text: 'Complete' },
+                'cancelled': { bg: 'bg-red-500', icon: 'M6 18L18 6M6 6l12 12', text: 'Cancelled' }
+            },
+            showNotification: false,
+            notificationMessage: '',
+            get currentIndex() {
+                return this.statuses.indexOf(this.currentStatus);
+            },
+            get progressWidth() {
+                return this.currentIndex >= 0 ? ((this.currentIndex / (this.statuses.length - 1)) * 100) : 0;
+            },
+            get currentConfig() {
+                return this.statusConfig[this.currentStatus] || this.statusConfig['pending'];
+            },
+            init() {
+                if (typeof Echo !== 'undefined') {
+                    console.log('Listening for order status updates...');
+                    Echo.channel('order.{{ $order->id }}')
+                        .listen('.OrderStatusUpdated', (e) => {
+                            console.log('Status updated:', e);
+                            this.currentStatus = e.status;
+                            this.showToast(e.status_text);
+
+                            // Reload page if paid to show thank you message
+                            if (e.status === 'paid') {
+                                setTimeout(() => window.location.reload(), 2000);
+                            }
+                        });
+                }
+            },
+            showToast(message) {
+                this.notificationMessage = message;
+                this.showNotification = true;
+                setTimeout(() => this.showNotification = false, 4000);
+            }
+        }">
 
             <!-- Status Progress -->
             @php
@@ -43,63 +85,49 @@
                 <div class="flex items-center justify-between relative">
                     <div class="absolute top-4 left-0 right-0 h-0.5 bg-slate-200"></div>
                     <div class="absolute top-4 left-0 h-0.5 bg-emerald-500 transition-all duration-500"
-                         style="width: {{ $currentIndex >= 0 ? (($currentIndex / (count($statuses) - 1)) * 100) : 0 }}%"></div>
+                         :style="'width: ' + progressWidth + '%'"></div>
 
-                    @foreach($statuses as $index => $status)
+                    <template x-for="(status, index) in statuses" :key="status">
                         <div class="relative flex flex-col items-center z-10">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
-                                {{ $index <= $currentIndex
-                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                                    : 'bg-slate-100 text-slate-400' }}">
-                                @if($index < $currentIndex)
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
+                                 :class="index <= currentIndex ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-slate-100 text-slate-400'">
+                                <template x-if="index < currentIndex">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
-                                @elseif($index == $currentIndex)
+                                </template>
+                                <template x-if="index === currentIndex">
                                     <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                                @else
+                                </template>
+                                <template x-if="index > currentIndex">
                                     <span class="w-2 h-2 bg-slate-300 rounded-full"></span>
-                                @endif
+                                </template>
                             </div>
-                            <span class="mt-2 text-[10px] font-medium {{ $index <= $currentIndex ? 'text-slate-900' : 'text-slate-400' }}">
-                                {{ ucfirst($status) }}
-                            </span>
+                            <span class="mt-2 text-[10px] font-medium transition-colors"
+                                  :class="index <= currentIndex ? 'text-slate-900' : 'text-slate-400'"
+                                  x-text="status.charAt(0).toUpperCase() + status.slice(1)"></span>
                         </div>
-                    @endforeach
+                    </template>
                 </div>
             </div>
 
             <!-- Current Status Banner -->
-            @php
-                $statusConfig = [
-                    'pending' => ['bg' => 'bg-amber-500', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'text' => 'Waiting for confirmation'],
-                    'accepted' => ['bg' => 'bg-blue-500', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'text' => 'Order confirmed'],
-                    'preparing' => ['bg' => 'bg-orange-500', 'icon' => 'M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z', 'text' => 'Being prepared'],
-                    'served' => ['bg' => 'bg-emerald-500', 'icon' => 'M5 13l4 4L19 7', 'text' => 'Ready to enjoy'],
-                    'paid' => ['bg' => 'bg-slate-700', 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', 'text' => 'Complete'],
-                    'cancelled' => ['bg' => 'bg-red-500', 'icon' => 'M6 18L18 6M6 6l12 12', 'text' => 'Cancelled'],
-                ];
-                $config = $statusConfig[$order->status] ?? $statusConfig['pending'];
-            @endphp
-
-            <div class="{{ $config['bg'] }} rounded-2xl p-5 mb-6 shadow-lg animate-fade-in">
+            <div class="rounded-2xl p-5 mb-6 shadow-lg animate-fade-in transition-colors duration-500"
+                 :class="currentConfig.bg">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $config['icon'] }}"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="currentConfig.icon"/>
                         </svg>
                     </div>
                     <div class="text-white">
                         <p class="text-sm font-medium text-white/80">Current Status</p>
-                        <p class="text-xl font-bold">{{ $config['text'] }}</p>
+                        <p class="text-xl font-bold" x-text="currentConfig.text"></p>
                     </div>
                 </div>
-                <div class="mt-4 flex items-center gap-2 text-white/80 text-xs" x-show="!refreshing">
-                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
-                    <span>Auto-refreshing every 15s</span>
+                <div class="mt-4 flex items-center gap-2 text-white/80 text-xs">
+                    <span class="w-2 h-2 bg-white/60 rounded-full animate-pulse"></span>
+                    <span>Live updates enabled</span>
                 </div>
             </div>
 
@@ -208,6 +236,28 @@
                     </a>
                 </div>
             @endif
+
+            <!-- Status Update Toast -->
+            <div x-show="showNotification"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 transform translate-y-2"
+                 x-transition:enter-end="opacity-100 transform translate-y-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 transform translate-y-0"
+                 x-transition:leave-end="opacity-0 transform translate-y-2"
+                 class="fixed bottom-6 left-4 right-4 z-50">
+                <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-5 py-4 rounded-2xl shadow-2xl shadow-emerald-500/30 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-sm">Status Updated!</p>
+                        <p class="text-white/90 text-sm" x-text="notificationMessage"></p>
+                    </div>
+                </div>
+            </div>
         </div>
     @endif
 @endsection
