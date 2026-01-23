@@ -136,7 +136,7 @@
                 </div>
             </div>
 
-            <div x-show="currentStatus === 'cancelled'"
+            <div x-cloak x-show="currentStatus === 'cancelled'"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 transform translate-y-2"
                  x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -256,7 +256,7 @@
                         }
                     }">
                         <!-- Bill Requested State -->
-                        <div x-show="billRequested" class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg shadow-violet-500/30 animate-fade-in">
+                        <div x-cloak x-show="billRequested" class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg shadow-violet-500/30 animate-fade-in">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

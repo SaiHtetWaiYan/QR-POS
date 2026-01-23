@@ -64,7 +64,7 @@
         <!-- Menu Items -->
         <div class="space-y-6 mt-4">
             @foreach($categories as $category)
-                <div x-show="activeCategory == '{{ $category->id }}'"
+                <div x-cloak x-show="activeCategory == '{{ $category->id }}'"
                      x-transition:enter="transition ease-out duration-200"
                      x-transition:enter-start="opacity-0 transform translate-y-2"
                      x-transition:enter-end="opacity-100 transform translate-y-0"
