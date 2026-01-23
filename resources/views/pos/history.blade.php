@@ -71,13 +71,8 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-semibold text-gray-900">Orders</h3>
-                    <span class="text-xs text-gray-500">{{ $totalOrders }} total</span>
-                </div>
-
-                @if($orders->isEmpty())
+            @if($orders->isEmpty())
+                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
                     <div class="text-center py-12 text-gray-400">
                         <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                             <svg class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,40 +81,130 @@
                         </div>
                         <p class="text-sm font-medium">No orders for this day</p>
                     </div>
-                @else
-                    <div class="space-y-3">
-                        @foreach($orders as $order)
-                            <div class="border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div>
-                                    <p class="font-semibold text-gray-900">{{ $order->order_no }}</p>
-                                    <p class="text-xs text-gray-500">
-                                        {{ $order->table->name ?? 'Table' }} • {{ $order->created_at->format('h:i A') }}
-                                    </p>
+                </div>
+            @else
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full items-start">
+                    <div class="flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4 px-1">
+                            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 ring-4 ring-amber-100"></span>
+                                Pending
+                            </h3>
+                            @if($pending->count() > 0)
+                                <span class="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full">{{ $pending->count() }}</span>
+                            @endif
+                        </div>
+                        <div class="bg-gradient-to-b from-amber-50/50 to-white rounded-2xl p-4 min-h-[400px] border border-amber-100/50 space-y-4">
+                            @foreach($pending as $order)
+                                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div>
+                                            <p class="font-semibold text-gray-900">{{ $order->order_no }}</p>
+                                            <p class="text-xs text-gray-500">{{ $order->table->name ?? 'Table' }}</p>
+                                        </div>
+                                        <span class="text-xs text-gray-400">{{ $order->created_at->format('h:i A') }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">Pending</span>
+                                        <span class="font-semibold text-gray-900">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="{{ route('pos.orders.show', $order->id) }}"
+                                           class="text-xs text-indigo-600 hover:text-indigo-700 font-semibold">
+                                            View
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full
-                                        {{ $order->status === 'pending' ? 'bg-amber-100 text-amber-700' : '' }}
-                                        {{ $order->status === 'accepted' ? 'bg-blue-100 text-blue-700' : '' }}
-                                        {{ $order->status === 'preparing' ? 'bg-orange-100 text-orange-700' : '' }}
-                                        {{ $order->status === 'served' ? 'bg-indigo-100 text-indigo-700' : '' }}
-                                        {{ $order->status === 'paid' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                        {{ $order->status === 'cancelled' ? 'bg-red-100 text-red-700' : '' }}
-                                    ">
-                                        {{ ucfirst($order->status) }}
-                                    </span>
-                                    <span class="font-semibold text-gray-900">
-                                        {{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}
-                                    </span>
-                                    <a href="{{ route('pos.orders.show', $order->id) }}"
-                                       class="text-xs text-indigo-600 hover:text-indigo-700 font-semibold">
-                                        View
-                                    </a>
-                                </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                            @if($pending->isEmpty())
+                                <div class="text-center text-xs text-gray-400 py-6">No pending orders</div>
+                            @endif
+                        </div>
                     </div>
-                @endif
-            </div>
+
+                    <div class="flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4 px-1">
+                            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-blue-100"></span>
+                                Kitchen
+                            </h3>
+                            @if($active->count() > 0)
+                                <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">{{ $active->count() }}</span>
+                            @endif
+                        </div>
+                        <div class="bg-gradient-to-b from-blue-50/50 to-white rounded-2xl p-4 min-h-[400px] border border-blue-100/50 space-y-4">
+                            @foreach($active as $order)
+                                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div>
+                                            <p class="font-semibold text-gray-900">{{ $order->order_no }}</p>
+                                            <p class="text-xs text-gray-500">{{ $order->table->name ?? 'Table' }}</p>
+                                        </div>
+                                        <span class="text-xs text-gray-400">{{ $order->created_at->format('h:i A') }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                                            {{ $order->status === 'accepted' ? 'bg-blue-100 text-blue-700' : '' }}
+                                            {{ $order->status === 'preparing' ? 'bg-orange-100 text-orange-700' : '' }}
+                                            {{ $order->status === 'served' ? 'bg-indigo-100 text-indigo-700' : '' }}
+                                        ">
+                                            {{ ucfirst($order->status) }}
+                                        </span>
+                                        <span class="font-semibold text-gray-900">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="{{ route('pos.orders.show', $order->id) }}"
+                                           class="text-xs text-indigo-600 hover:text-indigo-700 font-semibold">
+                                            View
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                            @if($active->isEmpty())
+                                <div class="text-center text-xs text-gray-400 py-6">No kitchen orders</div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4 px-1">
+                            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100"></span>
+                                Complete
+                            </h3>
+                            @if($completed->count() > 0)
+                                <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full">{{ $completed->count() }}</span>
+                            @endif
+                        </div>
+                        <div class="bg-gradient-to-b from-emerald-50/50 to-white rounded-2xl p-4 min-h-[400px] border border-emerald-100/50 space-y-4">
+                            @foreach($completed as $order)
+                                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div>
+                                            <p class="font-semibold text-gray-900">{{ $order->order_no }}</p>
+                                            <p class="text-xs text-gray-500">{{ $order->table->name ?? 'Table' }}</p>
+                                        </div>
+                                        <span class="text-xs text-gray-400">{{ $order->created_at->format('h:i A') }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700">Paid</span>
+                                        <span class="font-semibold text-gray-900">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a href="{{ route('pos.orders.show', $order->id) }}"
+                                           class="text-xs text-indigo-600 hover:text-indigo-700 font-semibold">
+                                            View
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                            @if($completed->isEmpty())
+                                <div class="text-center text-xs text-gray-400 py-6">No completed orders</div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

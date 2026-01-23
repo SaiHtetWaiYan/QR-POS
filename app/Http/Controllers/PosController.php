@@ -43,6 +43,14 @@ class PosController extends Controller
 
         $orders = Order::with(['table', 'orderItems'])
             ->whereDate('created_at', $date)
+            ->where('status', '!=', 'cancelled')
+            ->orderByRaw("CASE status 
+                WHEN 'pending' THEN 1 
+                WHEN 'accepted' THEN 2 
+                WHEN 'preparing' THEN 3 
+                WHEN 'served' THEN 4 
+                WHEN 'paid' THEN 5 
+                ELSE 6 END")
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -51,10 +59,14 @@ class PosController extends Controller
             ->orderBy('date', 'desc')
             ->pluck('date');
 
+        $pending = $orders->where('status', 'pending');
+        $active = $orders->whereIn('status', ['accepted', 'preparing', 'served']);
+        $completed = $orders->where('status', 'paid');
+
         $totalOrders = $orders->count();
         $totalRevenue = $orders->sum('total');
 
-        return view('pos.history', compact('orders', 'date', 'availableDates', 'totalOrders', 'totalRevenue'));
+        return view('pos.history', compact('orders', 'pending', 'active', 'completed', 'date', 'availableDates', 'totalOrders', 'totalRevenue'));
     }
 
     public function show(Order $order)
