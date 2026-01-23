@@ -91,69 +91,71 @@
                         <p class="text-sm font-medium">No discount codes yet</p>
                     </div>
                 @else
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm">
-                            <thead>
-                                <tr class="text-left text-xs uppercase tracking-wide text-gray-400">
-                                    <th class="py-2">Code</th>
-                                    <th class="py-2">Type</th>
-                                    <th class="py-2">Value</th>
-                                    <th class="py-2">Start</th>
-                                    <th class="py-2">End</th>
-                                    <th class="py-2">Uses</th>
-                                    <th class="py-2">Status</th>
-                                    <th class="py-2 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                @foreach($codes as $code)
-                                    <tr>
-                                        <td class="py-3 font-semibold text-gray-900">{{ $code->code }}</td>
-                                        <td class="py-3 text-gray-600">{{ ucfirst($code->type) }}</td>
-                                        <td class="py-3 text-gray-600">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach($codes as $code)
+                            <div class="border border-gray-100 rounded-2xl p-4 shadow-sm bg-white">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Code</p>
+                                        <p class="text-lg font-semibold text-gray-900">{{ $code->code }}</p>
+                                    </div>
+                                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full {{ $code->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600' }}">
+                                        {{ $code->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </div>
+                                <div class="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-500">
+                                    <div class="rounded-xl bg-slate-50 p-2">
+                                        <p class="text-[10px] uppercase tracking-wide text-gray-400">Type</p>
+                                        <p class="font-semibold text-gray-700">{{ ucfirst($code->type) }}</p>
+                                    </div>
+                                    <div class="rounded-xl bg-slate-50 p-2">
+                                        <p class="text-[10px] uppercase tracking-wide text-gray-400">Value</p>
+                                        <p class="font-semibold text-gray-700">
                                             @if($code->type === 'percent')
                                                 {{ number_format($code->value, 2) }}%
                                             @else
                                                 {{ config('pos.currency_symbol') }}{{ number_format($code->value, 2) }}
                                             @endif
-                                        </td>
-                                        <td class="py-3 text-gray-500">{{ $code->starts_at?->format('Y-m-d H:i') ?? '-' }}</td>
-                                        <td class="py-3 text-gray-500">{{ $code->ends_at?->format('Y-m-d H:i') ?? '-' }}</td>
-                                        <td class="py-3 text-gray-500">
+                                        </p>
+                                    </div>
+                                    <div class="rounded-xl bg-slate-50 p-2">
+                                        <p class="text-[10px] uppercase tracking-wide text-gray-400">Start</p>
+                                        <p class="font-semibold text-gray-700">{{ $code->starts_at?->format('Y-m-d H:i') ?? '-' }}</p>
+                                    </div>
+                                    <div class="rounded-xl bg-slate-50 p-2">
+                                        <p class="text-[10px] uppercase tracking-wide text-gray-400">End</p>
+                                        <p class="font-semibold text-gray-700">{{ $code->ends_at?->format('Y-m-d H:i') ?? '-' }}</p>
+                                    </div>
+                                    <div class="rounded-xl bg-slate-50 p-2 col-span-2">
+                                        <p class="text-[10px] uppercase tracking-wide text-gray-400">Uses</p>
+                                        <p class="font-semibold text-gray-700">
                                             {{ $code->uses_count }}
                                             @if($code->max_uses)
                                                 / {{ $code->max_uses }}
                                             @endif
-                                        </td>
-                                        <td class="py-3">
-                                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full {{ $code->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600' }}">
-                                                {{ $code->is_active ? 'Active' : 'Inactive' }}
-                                            </span>
-                                        </td>
-                                        <td class="py-3 text-right">
-                                            <div class="inline-flex items-center gap-2">
-                                                <form action="{{ route('pos.discounts.toggle', $code->id) }}" method="POST">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit"
-                                                            class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
-                                                        {{ $code->is_active ? 'Disable' : 'Enable' }}
-                                                    </button>
-                                                </form>
-                                                <form action="{{ route('pos.discounts.destroy', $code->id) }}" method="POST" onsubmit="return confirm('Delete this code?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                            class="text-xs font-semibold text-red-600 hover:text-red-700">
-                                                        Delete
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex items-center gap-3">
+                                    <form action="{{ route('pos.discounts.toggle', $code->id) }}" method="POST" class="flex-1">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit"
+                                                class="w-full text-xs font-semibold text-indigo-600 hover:text-indigo-700 border border-indigo-100 hover:border-indigo-200 rounded-xl py-2">
+                                            {{ $code->is_active ? 'Disable' : 'Enable' }}
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('pos.discounts.destroy', $code->id) }}" method="POST" onsubmit="return confirm('Delete this code?')" class="flex-1">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="w-full text-xs font-semibold text-red-600 hover:text-red-700 border border-red-100 hover:border-red-200 rounded-xl py-2">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @endif
             </div>
