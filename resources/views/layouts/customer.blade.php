@@ -23,6 +23,23 @@
         .animate-fade-in { animation: fadeIn 0.3s ease-out; }
         .cart-pulse::before { content: ''; position: absolute; inset: -4px; border-radius: 50%; background: inherit; animation: pulse-ring 1.5s ease-out infinite; opacity: 0.5; z-index: -1; }
     </style>
+    @php
+        $tableCode = request()->route('table');
+        $sessionKey = 'customer_session_started_at_' . $tableCode;
+        $sessionStartedAt = session($sessionKey);
+        $lifetimeSeconds = config('pos.customer_session_lifetime', 30) * 60;
+        $remainingSeconds = $sessionStartedAt ? max(0, $lifetimeSeconds - (time() - $sessionStartedAt)) : $lifetimeSeconds;
+    @endphp
+    <script>
+        (function() {
+            var remaining = {{ $remainingSeconds }};
+            if (remaining > 0) {
+                setTimeout(function() {
+                    window.location.reload();
+                }, remaining * 1000);
+            }
+        })();
+    </script>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased"
       x-data="{ showToast: false, toastMessage: '', toastTimeout: null, cartCount: {{ collect(session('cart', []))->sum('qty') }} }"
