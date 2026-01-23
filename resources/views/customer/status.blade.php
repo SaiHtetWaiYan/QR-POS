@@ -4,7 +4,7 @@
     @if($order && $order->status === 'paid')
         Order Complete
     @elseif($order && $order->status === 'cancelled')
-        Order Cancelled
+        Order Status
     @else
         Order Status
     @endif
@@ -21,11 +21,11 @@
         <div class="text-center py-16">
             <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
             </div>
-            <h2 class="text-xl font-semibold text-slate-900 mb-2">No active order</h2>
-            <p class="text-slate-500 mb-8 text-sm">Start ordering from our menu to see your order status here.</p>
+            <h2 class="text-xl font-semibold text-slate-900 mb-2">Your order is empty</h2>
+            <p class="text-slate-500 mb-8 text-sm">Discover our delicious menu and add items to get started.</p>
             <a href="{{ route('customer.index', $table->code) }}"
                class="inline-flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-full font-semibold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,14 +142,14 @@
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 transform translate-y-2"
                  x-transition:enter-end="opacity-100 transform translate-y-0"
-                 class="text-center py-10">
+                 class="text-center py-16">
                 <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                 </div>
-                <h2 class="text-xl font-semibold text-slate-900 mb-2">Order Cancelled</h2>
-                <p class="text-slate-500 mb-6 text-sm">Please ask staff if you need help.</p>
+                <h2 class="text-xl font-semibold text-slate-900 mb-2">Your order is empty</h2>
+                <p class="text-slate-500 mb-8 text-sm">Discover our delicious menu and add items to get started.</p>
                 <a href="{{ route('customer.index', $table->code) }}"
                    class="inline-flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-full font-semibold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
