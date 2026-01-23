@@ -216,13 +216,65 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-semibold text-gray-900">Orders</h3>
-                    <span class="text-xs text-gray-500">{{ $totalOrders }} total</span>
+            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm"
+                 x-data="{
+                    query: '',
+                    visible: 10,
+                    orders: @json($orders->map(fn ($order) => [
+                        'id' => $order->id,
+                        'order_no' => $order->order_no,
+                        'table' => $order->table->name ?? 'Table',
+                        'time' => $order->created_at->format('h:i A'),
+                        'status' => $order->status,
+                        'total' => $order->total,
+                        'url' => route('pos.orders.show', $order->id),
+                    ])),
+                    get filtered() {
+                        if (!this.query) return this.orders;
+                        const q = this.query.toLowerCase();
+                        return this.orders.filter(order =>
+                            order.order_no.toLowerCase().includes(q) ||
+                            order.table.toLowerCase().includes(q)
+                        );
+                    },
+                    get visibleOrders() {
+                        return this.filtered.slice(0, this.visible);
+                    },
+                    statusClass(status) {
+                        return {
+                            pending: 'bg-amber-100 text-amber-700',
+                            accepted: 'bg-blue-100 text-blue-700',
+                            preparing: 'bg-orange-100 text-orange-700',
+                            served: 'bg-indigo-100 text-indigo-700',
+                            paid: 'bg-emerald-100 text-emerald-700',
+                            cancelled: 'bg-red-100 text-red-700',
+                        }[status] || 'bg-gray-100 text-gray-700';
+                    },
+                    formatMoney(value) {
+                        return '{{ config('pos.currency_symbol') }}' + Number(value).toFixed(2);
+                    }
+                 }">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Orders</h3>
+                        <span class="text-xs text-gray-500" x-text="`${filtered.length} of ${orders.length} total`"></span>
+                    </div>
+                    <div class="w-full sm:w-72">
+                        <div class="relative">
+                            <input type="text"
+                                   x-model="query"
+                                   placeholder="Search order number..."
+                                   class="w-full rounded-xl border-gray-200 pl-10 pr-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.6-4.15a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
-                @if($orders->isEmpty())
+                <template x-if="orders.length === 0">
                     <div class="text-center py-12 text-gray-400">
                         <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                             <svg class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,39 +283,49 @@
                         </div>
                         <p class="text-sm font-medium">No orders for this day</p>
                     </div>
-                @else
-                    <div class="space-y-3">
-                        @foreach($orders as $order)
-                            <div class="border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div>
-                                    <p class="font-semibold text-gray-900">{{ $order->order_no }}</p>
-                                    <p class="text-xs text-gray-500">
-                                        {{ $order->table->name ?? 'Table' }} • {{ $order->created_at->format('h:i A') }}
-                                    </p>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full
-                                        {{ $order->status === 'pending' ? 'bg-amber-100 text-amber-700' : '' }}
-                                        {{ $order->status === 'accepted' ? 'bg-blue-100 text-blue-700' : '' }}
-                                        {{ $order->status === 'preparing' ? 'bg-orange-100 text-orange-700' : '' }}
-                                        {{ $order->status === 'served' ? 'bg-indigo-100 text-indigo-700' : '' }}
-                                        {{ $order->status === 'paid' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                        {{ $order->status === 'cancelled' ? 'bg-red-100 text-red-700' : '' }}
-                                    ">
-                                        {{ ucfirst($order->status) }}
-                                    </span>
-                                    <span class="font-semibold text-gray-900">
-                                        {{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}
-                                    </span>
-                                    <a href="{{ route('pos.orders.show', $order->id) }}"
-                                       class="text-xs text-indigo-600 hover:text-indigo-700 font-semibold">
-                                        View
-                                    </a>
-                                </div>
-                            </div>
-                        @endforeach
+                </template>
+
+                <template x-if="orders.length > 0 && filtered.length === 0">
+                    <div class="text-center py-12 text-gray-400">
+                        <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium">No matching orders</p>
                     </div>
-                @endif
+                </template>
+
+                <div class="space-y-3" x-show="filtered.length > 0">
+                    <template x-for="order in visibleOrders" :key="order.id">
+                        <div class="border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <p class="font-semibold text-gray-900" x-text="order.order_no"></p>
+                                <p class="text-xs text-gray-500">
+                                    <span x-text="order.table"></span> • <span x-text="order.time"></span>
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
+                                      :class="statusClass(order.status)"
+                                      x-text="order.status.charAt(0).toUpperCase() + order.status.slice(1)"></span>
+                                <span class="font-semibold text-gray-900" x-text="formatMoney(order.total)"></span>
+                                <a :href="order.url"
+                                   class="text-xs text-indigo-600 hover:text-indigo-700 font-semibold">
+                                    View
+                                </a>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="mt-4 flex justify-center" x-show="filtered.length > visible">
+                    <button type="button"
+                            @click="visible += 10"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all">
+                        Load more
+                    </button>
+                </div>
             </div>
         </div>
     </div>
