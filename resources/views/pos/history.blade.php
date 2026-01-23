@@ -52,13 +52,14 @@
                             return cells;
                         },
                         isToday(date) {
+                            if (!date) return false;
                             const now = new Date();
                             return date.getFullYear() === now.getFullYear()
                                 && date.getMonth() === now.getMonth()
                                 && date.getDate() === now.getDate();
                         },
                         isSelected(date) {
-                            if (!this.selected) return false;
+                            if (!date || !this.selected) return false;
                             const selected = new Date(this.selected + 'T00:00:00');
                             return date.getFullYear() === selected.getFullYear()
                                 && date.getMonth() === selected.getMonth()
