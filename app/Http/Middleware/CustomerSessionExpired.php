@@ -22,7 +22,7 @@ class CustomerSessionExpired
         $sessionStartedAt = session($sessionKey);
 
         if ($sessionStartedAt) {
-            $secondsElapsed = now()->diffInSeconds($sessionStartedAt);
+            $secondsElapsed = time() - $sessionStartedAt;
             $lifetimeInSeconds = $sessionLifetime * 60;
 
             if ($secondsElapsed >= $lifetimeInSeconds) {
@@ -43,8 +43,8 @@ class CustomerSessionExpired
                 ], 419);
             }
         } else {
-            // First visit - set the session start time
-            session([$sessionKey => now()]);
+            // First visit - store Unix timestamp
+            session([$sessionKey => time()]);
         }
 
         return $next($request);
