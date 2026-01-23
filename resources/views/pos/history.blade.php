@@ -258,23 +258,31 @@
                         return '{{ config('pos.currency_symbol') }}' + Number(value).toFixed(2);
                     }
                  }">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                     <div>
                         <h3 class="font-semibold text-gray-900">Orders</h3>
                         <span class="text-xs text-gray-500" x-text="`${filtered.length} of ${orders.length} total`"></span>
                     </div>
-                    <div class="w-full sm:w-72">
-                        <div class="relative">
-                            <input type="text"
-                                   x-model="query"
-                                   placeholder="Search order number..."
-                                   class="w-full rounded-xl border-gray-200 pl-10 pr-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                    <div class="relative w-full sm:w-80">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.6-4.15a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
                             </span>
                         </div>
+                        <input type="text"
+                               x-model="query"
+                               placeholder="Search by order # or table..."
+                               class="w-full rounded-2xl border-gray-200 bg-gray-50 pl-14 pr-4 py-3 text-sm font-medium placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:bg-white transition-colors">
+                        <button x-show="query"
+                                @click="query = ''"
+                                type="button"
+                                class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
