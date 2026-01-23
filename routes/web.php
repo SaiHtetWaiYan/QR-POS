@@ -12,7 +12,7 @@ Route::get('/', function () {
 });
 
 // Customer Routes
-Route::prefix('t/{table}')->name('customer.')->group(function () {
+Route::prefix('t/{table}')->name('customer.')->middleware(\App\Http\Middleware\CustomerSessionExpired::class)->group(function () {
     Route::get('/', [CustomerController::class, 'index'])->name('index');
     Route::post('/cart', [CustomerController::class, 'addToCart'])->name('cart.add');
     Route::get('/cart', [CustomerController::class, 'viewCart'])->name('cart.view');
