@@ -76,7 +76,7 @@
             showToast(message) {
                 this.notificationMessage = message;
                 this.showNotification = true;
-                setTimeout(() => this.showNotification = false, 4000);
+                setTimeout(() => this.showNotification = false, 6000);
             }
         }">
 
@@ -359,7 +359,10 @@
                  x-transition:leave-start="opacity-100 transform translate-y-0"
                  x-transition:leave-end="opacity-0 transform translate-y-2"
                  class="fixed bottom-6 left-4 right-4 z-50">
-                <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-5 py-4 rounded-2xl shadow-2xl shadow-emerald-500/30 flex items-center gap-3">
+                <div :class="currentStatus === 'cancelled'
+                        ? 'bg-gradient-to-r from-red-500 to-rose-600 shadow-2xl shadow-red-500/30'
+                        : 'bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-2xl shadow-emerald-500/30'"
+                     class="text-white px-5 py-4 rounded-2xl flex items-center gap-3">
                     <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
