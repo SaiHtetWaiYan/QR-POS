@@ -22,9 +22,10 @@ class CustomerSessionExpired
         $sessionStartedAt = session($sessionKey);
 
         if ($sessionStartedAt) {
-            $minutesElapsed = now()->diffInMinutes($sessionStartedAt);
+            $secondsElapsed = now()->diffInSeconds($sessionStartedAt);
+            $lifetimeInSeconds = $sessionLifetime * 60;
 
-            if ($minutesElapsed >= $sessionLifetime) {
+            if ($secondsElapsed >= $lifetimeInSeconds) {
                 // Clear customer-related session data
                 session()->forget($sessionKey);
                 session()->forget('cart');
