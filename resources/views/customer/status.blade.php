@@ -286,7 +286,7 @@
                         </button>
 
                         <!-- Request Bill Confirmation Dialog -->
-                        <div x-show="showConfirm"
+                        <div x-cloak x-show="showConfirm"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0"
                              x-transition:enter-end="opacity-100"
@@ -349,7 +349,7 @@
             @endif
 
             <!-- Status Update Toast -->
-            <div x-show="showNotification"
+            <div x-cloak x-show="showNotification"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 transform translate-y-2"
                  x-transition:enter-end="opacity-100 transform translate-y-0"
