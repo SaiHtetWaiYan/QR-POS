@@ -23,20 +23,45 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-6">
                 <form method="GET" action="{{ route('pos.history') }}" class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-                    <div class="flex-1">
+                    <div class="flex-1" x-data="{
+                        selected: '{{ $date }}',
+                        get formatted() {
+                            if (!this.selected) return 'Select date';
+                            const date = new Date(this.selected + 'T00:00:00');
+                            return date.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
+                        },
+                        openPicker() {
+                            if (this.$refs.input.showPicker) {
+                                this.$refs.input.showPicker();
+                            } else {
+                                this.$refs.input.click();
+                            }
+                        },
+                        sync(e) {
+                            this.selected = e.target.value;
+                        }
+                    }">
                         <label for="history_date" class="block text-sm font-medium text-gray-700 mb-2">Select Date</label>
-                        <div class="relative max-w-xs">
-                            <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-11 9h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <input type="date"
-                                   id="history_date"
-                                   name="date"
-                                   value="{{ $date }}"
-                                   class="w-full rounded-2xl border-gray-200 bg-white pl-10 pr-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        </div>
+                        <button type="button"
+                                @click="openPicker()"
+                                class="w-full max-w-xs flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all">
+                            <span class="flex items-center gap-2">
+                                <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-11 9h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </span>
+                                <span x-text="formatted"></span>
+                            </span>
+                            <span class="text-gray-400 text-xs">Change</span>
+                        </button>
+                        <input type="date"
+                               id="history_date"
+                               name="date"
+                               value="{{ $date }}"
+                               x-ref="input"
+                               @change="sync($event)"
+                               class="sr-only">
                         <p class="text-xs text-gray-400 mt-2">Pick a date to review completed orders.</p>
                     </div>
                     <button type="submit"

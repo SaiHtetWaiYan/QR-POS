@@ -144,7 +144,7 @@
     </div>
 
     <!-- Paid Confirmation Dialog -->
-    <div x-show="showPaidConfirm"
+    <div x-cloak x-show="showPaidConfirm"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
