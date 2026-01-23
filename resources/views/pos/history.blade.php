@@ -263,15 +263,10 @@
                         <h3 class="font-semibold text-gray-900">Orders</h3>
                         <span class="text-xs text-gray-500" x-text="`${filtered.length} of ${orders.length}`"></span>
                     </div>
-                    <div class="relative">
-                        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.6-4.15a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                        <input type="text"
-                               x-model="query"
-                               placeholder="Search..."
-                               class="w-44 rounded-full border-0 bg-gray-100 pl-9 pr-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
-                    </div>
+                    <input type="text"
+                           x-model="query"
+                           placeholder="Search..."
+                           class="w-40 rounded-xl border border-gray-200 px-3 py-2 text-xs text-gray-700 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                 </div>
 
                 <template x-if="orders.length === 0">
