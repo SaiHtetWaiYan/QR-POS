@@ -150,7 +150,13 @@
 
             <!-- Actions -->
             @if($order->status !== 'paid' && $order->status !== 'cancelled')
-                <div class="flex flex-wrap justify-end gap-3">
+                <div class="flex flex-wrap justify-end gap-3"
+                     x-data="{
+                        showCancelConfirm: false,
+                        showPaidConfirm: false,
+                        submitCancel() { this.$refs.cancelForm.submit(); },
+                        submitPaid() { this.$refs.paidForm.submit(); }
+                     }">
                     <a href="{{ route('pos.orders.print', $order->id) }}" target="_blank"
                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,11 +165,11 @@
                         Print Receipt
                     </a>
 
-                    <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST">
+                    <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="cancelForm">
                         @csrf @method('PATCH')
                         <input type="hidden" name="status" value="cancelled">
                         <button type="submit"
-                                onclick="return confirm('Cancel this order?')"
+                                @click.prevent="showCancelConfirm = true"
                                 class="inline-flex items-center gap-2 px-5 py-2.5 bg-red-50 border border-red-200 rounded-xl font-medium text-sm text-red-700 hover:bg-red-100 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -173,11 +179,11 @@
                     </form>
 
                     @if($order->status === 'served')
-                        <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST">
+                        <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="paidForm">
                             @csrf @method('PATCH')
                             <input type="hidden" name="status" value="paid">
                             <button type="submit"
-                                    onclick="return confirm('Confirm payment received?')"
+                                    @click.prevent="showPaidConfirm = true"
                                     class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-green-500 rounded-xl font-semibold text-sm text-white shadow-lg shadow-emerald-500/20 hover:shadow-xl transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -186,6 +192,84 @@
                             </button>
                         </form>
                     @endif
+
+                    <!-- Cancel Confirmation Dialog -->
+                    <div x-show="showCancelConfirm"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                         aria-modal="true"
+                         role="dialog">
+                        <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showCancelConfirm = false"></div>
+                        <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 p-6">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-base font-semibold text-gray-900">Cancel this order?</p>
+                                    <p class="text-sm text-gray-500">This action cannot be undone.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <button type="button"
+                                        @click="showCancelConfirm = false"
+                                        class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+                                    Keep Order
+                                </button>
+                                <button type="button"
+                                        @click="submitCancel()"
+                                        class="flex-1 py-2.5 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors">
+                                    Cancel Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paid Confirmation Dialog -->
+                    <div x-show="showPaidConfirm"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                         aria-modal="true"
+                         role="dialog">
+                        <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showPaidConfirm = false"></div>
+                        <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 p-6">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-base font-semibold text-gray-900">Confirm payment received?</p>
+                                    <p class="text-sm text-gray-500">This will mark the order as paid.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <button type="button"
+                                        @click="showPaidConfirm = false"
+                                        class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+                                    Not Yet
+                                </button>
+                                <button type="button"
+                                        @click="submitPaid()"
+                                        class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors">
+                                    Mark Paid
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @endif
 

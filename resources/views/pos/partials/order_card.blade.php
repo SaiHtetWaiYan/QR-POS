@@ -1,4 +1,8 @@
-<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-200 group">
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-200 group"
+     x-data="{
+        showPaidConfirm: false,
+        submitPaid() { this.$refs.paidForm.submit(); }
+     }">
     <!-- Header -->
     <div class="flex justify-between items-start mb-3">
         <div class="flex items-start gap-3">
@@ -124,10 +128,11 @@
                 </svg>
                 Print
             </a>
-            <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" onsubmit="return confirm('Confirm payment received?')">
+            <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="paidForm">
                 @csrf @method('PATCH')
                 <input type="hidden" name="status" value="paid">
                 <button type="submit"
+                        @click.prevent="showPaidConfirm = true"
                         class="w-full flex justify-center items-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white rounded-xl font-semibold text-xs shadow-lg shadow-emerald-600/20 transition-all hover:shadow-xl">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -136,5 +141,44 @@
                 </button>
             </form>
         @endif
+    </div>
+
+    <!-- Paid Confirmation Dialog -->
+    <div x-show="showPaidConfirm"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center px-4"
+         aria-modal="true"
+         role="dialog">
+        <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showPaidConfirm = false"></div>
+        <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-base font-semibold text-gray-900">Confirm payment received?</p>
+                    <p class="text-sm text-gray-500">This will mark the order as paid.</p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button type="button"
+                        @click="showPaidConfirm = false"
+                        class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+                    Not Yet
+                </button>
+                <button type="button"
+                        @click="submitPaid()"
+                        class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors">
+                    Mark Paid
+                </button>
+            </div>
+        </div>
     </div>
 </div>

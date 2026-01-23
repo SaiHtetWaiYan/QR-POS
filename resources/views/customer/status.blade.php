@@ -201,8 +201,12 @@
                     <div x-data="{
                         requesting: false,
                         billRequested: false,
+                        showConfirm: false,
+                        openConfirm() {
+                            this.showConfirm = true;
+                        },
                         async requestBill() {
-                            if (!confirm('Request the bill?')) return;
+                            this.showConfirm = false;
                             this.requesting = true;
                             try {
                                 const response = await fetch('{{ route('customer.order.bill', [$table->code, $order->id]) }}', {
@@ -242,7 +246,7 @@
 
                         <!-- Request Button -->
                         <button x-show="!billRequested"
-                                @click="requestBill()"
+                                @click="openConfirm()"
                                 :disabled="requesting"
                                 class="w-full bg-gradient-to-r from-slate-800 to-slate-900 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-slate-900/30 hover:shadow-xl transition-all duration-200 disabled:opacity-70 flex items-center justify-center gap-2">
                             <svg x-show="!requesting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,6 +281,45 @@
                     </a>
                 </div>
             @endif
+
+            <!-- Request Bill Confirmation Dialog -->
+            <div x-show="showConfirm"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                 aria-modal="true"
+                 role="dialog">
+                <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="showConfirm = false"></div>
+                <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-slate-100 p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-base font-semibold text-slate-900">Request the bill?</p>
+                            <p class="text-sm text-slate-500">We will notify staff to bring it to your table.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button"
+                                @click="showConfirm = false"
+                                class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="button"
+                                @click="requestBill()"
+                                class="flex-1 py-2.5 rounded-xl bg-amber-500 text-white font-semibold hover:bg-amber-600 transition-colors">
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <!-- Status Update Toast -->
             <div x-show="showNotification"
