@@ -81,7 +81,7 @@
                 if ($currentIndex === false) $currentIndex = -1;
             @endphp
 
-            <div class="mb-6">
+            <div x-show="currentStatus !== 'cancelled'" class="mb-6">
                 <div class="flex items-center justify-between relative">
                     <div class="absolute top-4 left-0 right-0 h-0.5 bg-slate-200"></div>
                     <div class="absolute top-4 left-0 h-0.5 bg-emerald-500 transition-all duration-500"
@@ -112,7 +112,8 @@
             </div>
 
             <!-- Current Status Banner -->
-            <div class="rounded-2xl p-5 mb-6 shadow-lg animate-fade-in transition-colors duration-500"
+            <div x-show="currentStatus !== 'cancelled'"
+                 class="rounded-2xl p-5 mb-6 shadow-lg animate-fade-in transition-colors duration-500"
                  :class="currentConfig.bg">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
@@ -142,7 +143,14 @@
                         </svg>
                     </div>
                     <p class="font-bold text-xl mb-1">Order Cancelled</p>
-                    <p class="text-red-100 text-sm">Please ask staff if you need help.</p>
+                    <p class="text-red-100 text-sm mb-4">Please ask staff if you need help.</p>
+                    <a href="{{ route('customer.index', $table->code) }}"
+                       class="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                        Browse Menu
+                    </a>
                 </div>
             <!-- Order Items -->
             <div x-show="currentStatus !== 'cancelled'"
