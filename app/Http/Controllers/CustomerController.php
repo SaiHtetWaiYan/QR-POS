@@ -91,6 +91,13 @@ class CustomerController extends Controller
         unset($cart[$lineId]);
         session()->put('cart', $cart);
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'cart_count' => count($cart),
+            ]);
+        }
+
         return back();
     }
 

@@ -29,7 +29,7 @@
     @else
         <div class="space-y-3 mb-6">
             @foreach($cart as $lineId => $item)
-                <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm animate-fade-in" x-data="{ removing: false }">
+                <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm animate-fade-in">
                     <div class="flex justify-between items-start gap-3">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-start justify-between">
@@ -49,11 +49,44 @@
                                     <span class="bg-slate-100 px-2.5 py-1 rounded-full font-medium text-xs">{{ $item['qty'] }}x</span>
                                     <span>{{ config('pos.currency_symbol') }}{{ number_format($item['price'], 2) }} each</span>
                                 </div>
-                                <form action="{{ route('customer.cart.remove', [$table->code, $lineId]) }}" method="POST">
+                                <form x-data="{
+                                        removing: false,
+                                        async removeItem() {
+                                            if (this.removing) return;
+                                            this.removing = true;
+                                            try {
+                                                const response = await fetch('{{ route('customer.cart.remove', [$table->code, $lineId]) }}', {
+                                                    method: 'DELETE',
+                                                    headers: {
+                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                        'Accept': 'application/json'
+                                                    }
+                                                });
+                                                let data = {};
+                                                try {
+                                                    data = await response.json();
+                                                } catch (error) {
+                                                    data = {};
+                                                }
+                                                if (response.ok && data.success) {
+                                                    if (typeof data.cart_count === 'number') {
+                                                        window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count } }));
+                                                    }
+                                                    window.location.reload();
+                                                } else {
+                                                    this.removing = false;
+                                                    alert(data.message || 'Failed to remove item. Please try again.');
+                                                }
+                                            } catch (error) {
+                                                this.removing = false;
+                                                alert('Network error. Please check your connection.');
+                                            }
+                                        }
+                                    }"
+                                      @submit.prevent="removeItem()">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
-                                            @click="removing = true"
                                             :disabled="removing"
                                             class="text-xs text-red-500 hover:text-red-600 font-medium flex items-center gap-1 transition-colors disabled:opacity-50">
                                         <svg x-show="!removing" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
