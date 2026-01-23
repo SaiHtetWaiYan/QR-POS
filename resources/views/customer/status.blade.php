@@ -59,10 +59,8 @@
             },
             init() {
                 if (typeof Echo !== 'undefined') {
-                    console.log('Listening for order status updates...');
                     Echo.channel('order.{{ $order->id }}')
                         .listen('.OrderStatusUpdated', (e) => {
-                            console.log('Status updated:', e);
                             this.currentStatus = e.status;
                             this.showToast(e.status_text);
 

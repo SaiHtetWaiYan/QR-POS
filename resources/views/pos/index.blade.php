@@ -42,24 +42,13 @@
         billAlertData: null,
         init() {
             if (typeof Echo !== 'undefined') {
-                console.log('Echo is available, connecting to pos channel...');
                 Echo.private('pos')
-                    .subscribed(() => {
-                        console.log('Successfully subscribed to pos channel');
-                    })
-                    .error((error) => {
-                        console.error('Echo subscription error:', error);
-                    })
                     .listen('.OrderPlaced', (e) => {
-                        console.log('New order received:', e);
                         this.handleNewOrder(e);
                     })
                     .listen('.BillRequested', (e) => {
-                        console.log('Bill requested:', e);
                         this.handleBillRequest(e);
                     });
-            } else {
-                console.warn('Echo is not available');
             }
         },
         handleBillRequest(data) {
