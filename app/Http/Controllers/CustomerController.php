@@ -66,7 +66,11 @@ class CustomerController extends Controller
         session()->put('cart', $cart);
 
         if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'message' => 'Added to cart']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Added to cart',
+                'cart_count' => count($cart),
+            ]);
         }
 
         return back()->with('success', 'Added to cart');

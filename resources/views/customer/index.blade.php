@@ -34,13 +34,24 @@
 
     <div x-data="{
         activeCategory: '{{ $categories->first()->id ?? '' }}',
-        showNoteFor: null
+        categoryIds: @json($categories->pluck('id')->values()),
+        showNoteFor: null,
+        init() {
+            const saved = localStorage.getItem('customer_active_category');
+            if (saved && this.categoryIds.includes(saved)) {
+                this.activeCategory = saved;
+            }
+        },
+        setActiveCategory(id) {
+            this.activeCategory = id;
+            localStorage.setItem('customer_active_category', id);
+        }
     }">
         <!-- Category Tabs -->
         <div class="flex overflow-x-auto gap-2 pb-4 mb-2 no-scrollbar -mx-4 px-4">
             @foreach($categories as $category)
                 <button
-                    @click="activeCategory = '{{ $category->id }}'"
+                    @click="setActiveCategory('{{ $category->id }}')"
                     :class="activeCategory == '{{ $category->id }}'
                         ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
@@ -85,11 +96,20 @@
                                                 note: this.note
                                             })
                                         });
-                                        if (response.ok) {
-                                            window.location.reload();
+                                        let data = {};
+                                        try {
+                                            data = await response.json();
+                                        } catch (error) {
+                                            data = {};
+                                        }
+                                        if (response.ok && data.success) {
+                                            if (typeof data.cart_count === 'number') {
+                                                window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count } }));
+                                            }
+                                            this.adding = false;
                                         } else {
                                             this.adding = false;
-                                            alert('Failed to add item. Please try again.');
+                                            alert(data.message || 'Failed to add item. Please try again.');
                                         }
                                     } catch (error) {
                                         this.adding = false;
