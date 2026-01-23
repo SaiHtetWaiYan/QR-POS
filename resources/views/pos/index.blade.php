@@ -130,7 +130,7 @@
     }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
             <!-- Stats Overview -->
-            <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="grid grid-cols-2 gap-4 mb-6">
                 <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
@@ -157,23 +157,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-2xl font-bold text-gray-900">{{ $completedCount }}</p>
-                            <p class="text-xs text-gray-500">Complete</p>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Kanban Board -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full items-start">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full items-start">
 
                 <!-- Pending Column -->
                 <div class="flex flex-col h-full">
@@ -243,40 +230,6 @@
                     </div>
                 </div>
 
-                <!-- Completed Column -->
-                <div class="flex flex-col h-full">
-                    <div class="flex items-center justify-between mb-4 px-1">
-                        <h3 class="font-semibold text-gray-800 flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100"></span>
-                            Ready / Paid
-                        </h3>
-                        @if($completedCount > 0)
-                            <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full">{{ $completedCount }}</span>
-                        @endif
-                    </div>
-                    <div class="bg-gradient-to-b from-emerald-50/50 to-white rounded-2xl p-4 min-h-[500px] border border-emerald-100/50 space-y-4">
-                        @foreach($completed as $order)
-                            @include('pos.partials.order_card', ['order' => $order])
-                        @endforeach
-                        @if($completed->isEmpty())
-                            <div class="flex flex-col items-center justify-center h-48 text-gray-400">
-                                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-3">
-                                    <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                                <p class="text-sm font-medium text-gray-500">No completed orders</p>
-                                <p class="text-xs text-gray-400 mt-1">Served orders appear here</p>
-                            </div>
-                        @endif
-                        @if($completedCount > 20)
-                            <a href="{{ route('pos.history') }}"
-                               class="block text-center text-xs text-indigo-600 hover:text-indigo-700 font-semibold pt-2">
-                                View all completed orders
-                            </a>
-                        @endif
-                    </div>
-                </div>
             </div>
         </div>
 
