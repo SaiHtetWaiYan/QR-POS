@@ -271,6 +271,9 @@
                 submitting: false,
                 showError: false,
                 errorMessage: '',
+                showSuccess: false,
+                successMessage: '',
+                redirectTo: '',
                 customerNote: '',
                 async placeOrder() {
                     if (this.submitting) return;
@@ -289,7 +292,10 @@
                         });
                         const data = await response.json();
                         if (response.ok && data.success) {
-                            window.location.href = data.redirect;
+                            this.submitting = false;
+                            this.successMessage = data.message || 'Order updated';
+                            this.redirectTo = data.redirect || '';
+                            this.showSuccess = true;
                         } else {
                             this.submitting = false;
                             this.errorMessage = data.message || 'Failed to place order. Please try again.';
@@ -351,6 +357,40 @@
                         <button type="button"
                                 @click="showError = false"
                                 class="flex-1 py-2.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Dialog -->
+            <div x-cloak x-show="showSuccess"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                 aria-modal="true"
+                 role="dialog">
+                <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="showSuccess = false"></div>
+                <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-slate-100 p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-base font-semibold text-slate-900">Success</p>
+                            <p class="text-sm text-slate-500" x-text="successMessage"></p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button"
+                                @click="showSuccess = false; if (redirectTo) { window.location.href = redirectTo; }"
+                                class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors">
                             OK
                         </button>
                     </div>

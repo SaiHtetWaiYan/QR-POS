@@ -169,22 +169,10 @@ class CustomerController extends Controller
             return back()->with('error', 'Cart is empty');
         }
 
-        // Prevent multiple active orders
+        // If an active order exists, append items to it
         $existingOrder = Order::where('table_id', $table->id)
             ->whereIn('status', ['pending', 'accepted', 'preparing', 'served'])
             ->first();
-
-        if ($existingOrder) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You already have an active order. Please ask waiter to add items.',
-                    'redirect' => route('customer.status', $tableCode),
-                ], 400);
-            }
-
-            return redirect()->route('customer.status', $tableCode)->with('error', 'You already have an active order. Please ask waiter to add items.');
-        }
 
         try {
             DB::beginTransaction();
@@ -197,27 +185,55 @@ class CustomerController extends Controller
             $serviceCharge = $subtotal * $serviceChargeRate;
             $total = $subtotal + $tax + $serviceCharge;
 
-            $order = Order::create([
-                'table_id' => $table->id,
-                'order_no' => 'ORD-'.strtoupper(Str::random(6)),
-                'status' => 'pending',
-                'customer_note' => $request->customer_note,
-                'subtotal' => $subtotal,
-                'tax' => $tax,
-                'service_charge' => $serviceCharge,
-                'total' => $total,
-            ]);
+            if ($existingOrder) {
+                $order = $existingOrder;
 
-            foreach ($cart as $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'menu_item_id' => $item['menu_item_id'],
-                    'name_snapshot' => $item['name'],
-                    'price_snapshot' => $item['price'],
-                    'qty' => $item['qty'],
-                    'note' => $item['note'],
-                    'line_total' => $item['price'] * $item['qty'],
+                foreach ($cart as $item) {
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'menu_item_id' => $item['menu_item_id'],
+                        'name_snapshot' => $item['name'],
+                        'price_snapshot' => $item['price'],
+                        'qty' => $item['qty'],
+                        'note' => $item['note'],
+                        'line_total' => $item['price'] * $item['qty'],
+                    ]);
+                }
+
+                $newSubtotal = $order->subtotal + $subtotal;
+                $newTax = $newSubtotal * $taxRate;
+                $newServiceCharge = $newSubtotal * $serviceChargeRate;
+                $newTotal = $newSubtotal + $newTax + $newServiceCharge;
+
+                $order->update([
+                    'subtotal' => $newSubtotal,
+                    'tax' => $newTax,
+                    'service_charge' => $newServiceCharge,
+                    'total' => $newTotal,
                 ]);
+            } else {
+                $order = Order::create([
+                    'table_id' => $table->id,
+                    'order_no' => 'ORD-'.strtoupper(Str::random(6)),
+                    'status' => 'pending',
+                    'customer_note' => $request->customer_note,
+                    'subtotal' => $subtotal,
+                    'tax' => $tax,
+                    'service_charge' => $serviceCharge,
+                    'total' => $total,
+                ]);
+
+                foreach ($cart as $item) {
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'menu_item_id' => $item['menu_item_id'],
+                        'name_snapshot' => $item['name'],
+                        'price_snapshot' => $item['price'],
+                        'qty' => $item['qty'],
+                        'note' => $item['note'],
+                        'line_total' => $item['price'] * $item['qty'],
+                    ]);
+                }
             }
 
             DB::commit();
@@ -234,7 +250,7 @@ class CustomerController extends Controller
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Order placed successfully',
+                    'message' => $existingOrder ? 'Items added to your order' : 'Order placed successfully',
                     'redirect' => route('customer.status', $tableCode),
                 ]);
             }
