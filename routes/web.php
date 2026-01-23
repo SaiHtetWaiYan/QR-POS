@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DiscountCodeController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProfileController;
@@ -28,9 +29,12 @@ Route::middleware(['auth', 'verified'])->prefix('pos')->name('pos.')->group(func
     Route::get('/', [PosController::class, 'index'])->name('index');
     Route::get('/history', [PosController::class, 'history'])->name('history');
     Route::get('/reports', [PosController::class, 'reports'])->name('reports');
+    Route::get('/discounts', [DiscountCodeController::class, 'index'])->name('discounts.index');
+    Route::post('/discounts', [DiscountCodeController::class, 'store'])->name('discounts.store');
+    Route::patch('/discounts/{discount}/toggle', [DiscountCodeController::class, 'toggle'])->name('discounts.toggle');
+    Route::delete('/discounts/{discount}', [DiscountCodeController::class, 'destroy'])->name('discounts.destroy');
     Route::get('/orders/{order}', [PosController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [PosController::class, 'updateStatus'])->name('orders.updateStatus');
-    Route::patch('/orders/{order}/discount', [PosController::class, 'updateDiscount'])->name('orders.updateDiscount');
     Route::get('/orders/{order}/print', [PosController::class, 'print'])->name('orders.print');
     Route::get('/orders/{order}/card', [PosController::class, 'orderCard'])->name('orders.card');
 

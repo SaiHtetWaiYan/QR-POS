@@ -101,41 +101,6 @@ class PosController extends Controller
         return back()->with('success', 'Order updated');
     }
 
-    public function updateDiscount(Request $request, Order $order)
-    {
-        $request->validate([
-            'discount_type' => 'nullable|in:percent,fixed',
-            'discount_value' => 'nullable|numeric|min:0',
-        ]);
-
-        $discountType = $request->discount_type;
-        $discountValue = $request->discount_value;
-
-        if (!$discountType || !$discountValue) {
-            $discountType = null;
-            $discountValue = null;
-            $discountAmount = 0;
-        } else {
-            if ($discountType === 'percent') {
-                $discountValue = min($discountValue, 100);
-                $discountAmount = $order->subtotal * ($discountValue / 100);
-            } else {
-                $discountAmount = min($discountValue, $order->subtotal);
-            }
-        }
-
-        $total = max(0, $order->subtotal + $order->tax + $order->service_charge - $discountAmount);
-
-        $order->update([
-            'discount_type' => $discountType,
-            'discount_value' => $discountValue,
-            'discount_amount' => $discountAmount,
-            'total' => $total,
-        ]);
-
-        return back()->with('success', 'Discount updated');
-    }
-
     public function reports()
     {
         $today = now()->toDateString();

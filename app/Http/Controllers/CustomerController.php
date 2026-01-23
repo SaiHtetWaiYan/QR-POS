@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\BillRequested;
 use App\Models\Category;
+use App\Models\DiscountCode;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -26,13 +27,16 @@ class CustomerController extends Controller
             $query->where('is_available', true);
         }])->orderBy('sort_order')->get();
 
-        $topItem = OrderItem::selectRaw('name_snapshot, SUM(qty) as total_qty')
+        $topItems = MenuItem::query()
+            ->select('menu_items.*')
+            ->join('order_items', 'order_items.menu_item_id', '=', 'menu_items.id')
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->whereDate('orders.created_at', now()->toDateString())
             ->where('orders.status', '!=', 'cancelled')
-            ->groupBy('name_snapshot')
-            ->orderByDesc('total_qty')
-            ->first();
+            ->groupBy('menu_items.id')
+            ->orderByRaw('SUM(order_items.qty) DESC')
+            ->limit(3)
+            ->get();
 
         // Check for active order in session or DB
         $activeOrder = Order::where('table_id', $table->id)
@@ -40,7 +44,7 @@ class CustomerController extends Controller
             ->latest()
             ->first();
 
-        return view('customer.index', compact('table', 'categories', 'activeOrder', 'topItem'));
+        return view('customer.index', compact('table', 'categories', 'activeOrder', 'topItems'));
     }
 
     public function addToCart(Request $request, $tableCode)
@@ -182,6 +186,34 @@ class CustomerController extends Controller
             ->whereIn('status', ['pending', 'accepted', 'preparing', 'served'])
             ->first();
 
+        $discountInput = strtoupper(trim((string) $request->input('discount_code', '')));
+        $discountCode = null;
+        if ($discountInput !== '') {
+            $discountCode = DiscountCode::where('code', $discountInput)->first();
+            $now = now();
+            if (
+                !$discountCode ||
+                !$discountCode->is_active ||
+                ($discountCode->starts_at && $discountCode->starts_at->gt($now)) ||
+                ($discountCode->ends_at && $discountCode->ends_at->lt($now)) ||
+                ($discountCode->max_uses !== null && $discountCode->uses_count >= $discountCode->max_uses)
+            ) {
+                $message = 'Invalid or expired discount code.';
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => $message], 400);
+                }
+                return back()->with('error', $message);
+            }
+        }
+
+        if ($existingOrder && $discountInput !== '' && $existingOrder->discount_code_id) {
+            $message = 'A discount code is already applied to this order.';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $message], 400);
+            }
+            return back()->with('error', $message);
+        }
+
         try {
             DB::beginTransaction();
 
@@ -212,6 +244,13 @@ class CustomerController extends Controller
                 $newTax = $newSubtotal * $taxRate;
                 $newServiceCharge = $newSubtotal * $serviceChargeRate;
                 $discountAmount = 0;
+                if ($discountCode && !$order->discount_code_id) {
+                    $order->discount_code_id = $discountCode->id;
+                    $order->discount_type = $discountCode->type;
+                    $order->discount_value = $discountCode->value;
+                    $discountCode->increment('uses_count');
+                }
+
                 if ($order->discount_type === 'percent' && $order->discount_value) {
                     $discountAmount = $newSubtotal * ($order->discount_value / 100);
                 } elseif ($order->discount_type === 'fixed' && $order->discount_value) {
@@ -220,6 +259,9 @@ class CustomerController extends Controller
                 $newTotal = max(0, $newSubtotal + $newTax + $newServiceCharge - $discountAmount);
 
                 $order->update([
+                    'discount_code_id' => $order->discount_code_id,
+                    'discount_type' => $order->discount_type,
+                    'discount_value' => $order->discount_value,
                     'subtotal' => $newSubtotal,
                     'tax' => $newTax,
                     'service_charge' => $newServiceCharge,
@@ -227,6 +269,16 @@ class CustomerController extends Controller
                     'total' => $newTotal,
                 ]);
             } else {
+                $discountType = $discountCode?->type;
+                $discountValue = $discountCode?->value;
+                $discountAmount = 0;
+                if ($discountType === 'percent' && $discountValue) {
+                    $discountAmount = $subtotal * ($discountValue / 100);
+                } elseif ($discountType === 'fixed' && $discountValue) {
+                    $discountAmount = min($discountValue, $subtotal);
+                }
+                $total = max(0, $total - $discountAmount);
+
                 $order = Order::create([
                     'table_id' => $table->id,
                     'order_no' => 'ORD-'.strtoupper(Str::random(6)),
@@ -235,8 +287,16 @@ class CustomerController extends Controller
                     'subtotal' => $subtotal,
                     'tax' => $tax,
                     'service_charge' => $serviceCharge,
+                    'discount_code_id' => $discountCode?->id,
+                    'discount_type' => $discountType,
+                    'discount_value' => $discountValue,
+                    'discount_amount' => $discountAmount,
                     'total' => $total,
                 ]);
+
+                if ($discountCode) {
+                    $discountCode->increment('uses_count');
+                }
 
                 foreach ($cart as $item) {
                     OrderItem::create([

@@ -275,6 +275,7 @@
                 successMessage: '',
                 redirectTo: '',
                 customerNote: '',
+                discountCode: '',
                 async placeOrder() {
                     if (this.submitting) return;
                     this.submitting = true;
@@ -284,12 +285,13 @@
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                customer_note: this.customerNote
-                            })
-                        });
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            customer_note: this.customerNote,
+                            discount_code: this.discountCode
+                        })
+                    });
                         const data = await response.json();
                         if (response.ok && data.success) {
                             this.submitting = false;
@@ -315,6 +317,15 @@
                           rows="2"
                           class="w-full border-slate-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 resize-none text-sm placeholder:text-slate-400"
                           placeholder="Any allergies or special requests for the kitchen?"></textarea>
+            </div>
+            <div class="mb-5">
+                <label for="discount_code" class="block text-sm font-medium text-slate-700 mb-2">Discount Code</label>
+                <input x-model="discountCode"
+                       id="discount_code"
+                       type="text"
+                       class="w-full border-slate-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 text-sm placeholder:text-slate-400 uppercase"
+                       placeholder="ENTER CODE">
+                <p class="text-xs text-slate-400 mt-2">Optional. Code is applied to the whole order.</p>
             </div>
             <button type="submit"
                     :disabled="submitting"

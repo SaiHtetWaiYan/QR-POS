@@ -17,6 +17,7 @@ class Order extends Model
         'subtotal',
         'tax',
         'service_charge',
+        'discount_code_id',
         'discount_type',
         'discount_value',
         'discount_amount',
@@ -40,5 +41,10 @@ class Order extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function discountCode()
+    {
+        return $this->belongsTo(DiscountCode::class);
     }
 }

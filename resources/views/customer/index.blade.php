@@ -32,14 +32,129 @@
         </a>
     @endif
 
-    @if($topItem)
-        <div class="mb-5 bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-xs uppercase tracking-wide text-slate-400 font-semibold">Most ordered today</p>
-                <p class="text-base font-semibold text-slate-900">{{ $topItem->name_snapshot }}</p>
+    @if($topItems->isNotEmpty())
+        <div class="mb-5">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-slate-400 font-semibold">Most ordered today</p>
+                    <p class="text-base font-semibold text-slate-900">Popular picks</p>
+                </div>
             </div>
-            <div class="text-sm font-semibold text-emerald-600">
-                {{ $topItem->total_qty }} ordered
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                @foreach($topItems as $topItem)
+                    <form x-data="{
+                            qty: 1,
+                            adding: false,
+                            async addToCart() {
+                                if (this.adding) return;
+                                this.adding = true;
+                                try {
+                                    const response = await fetch('{{ route('customer.cart.add', $table->code) }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Accept': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            menu_item_id: {{ $topItem->id }},
+                                            qty: this.qty,
+                                            note: ''
+                                        })
+                                    });
+                                    let data = {};
+                                    try {
+                                        data = await response.json();
+                                    } catch (error) {
+                                        data = {};
+                                    }
+                                    if (response.ok && data.success) {
+                                        if (typeof data.cart_count === 'number') {
+                                            window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count } }));
+                                        }
+                                        if (data.message) {
+                                            const itemName = data.item_name ? `: ${data.item_name}` : '';
+                                            const message = `${data.message}${itemName}`;
+                                            window.dispatchEvent(new CustomEvent('toast', { detail: { message } }));
+                                        }
+                                        this.adding = false;
+                                    } else {
+                                        this.adding = false;
+                                        alert(data.message || 'Failed to add item. Please try again.');
+                                    }
+                                } catch (error) {
+                                    this.adding = false;
+                                    alert('Network error. Please check your connection.');
+                                }
+                            }
+                        }" @submit.prevent="addToCart()">
+                        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden h-full flex flex-col">
+                            @if($topItem->image_path)
+                                <div class="relative w-full h-28">
+                                    <img src="{{ asset('storage/' . $topItem->image_path) }}"
+                                         alt="{{ $topItem->name }}"
+                                         class="w-full h-full object-cover">
+                                </div>
+                            @else
+                                <div class="w-full h-28 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                            @endif
+                            <div class="p-3 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900">{{ $topItem->name }}</p>
+                                    @if($topItem->description)
+                                        <p class="text-xs text-slate-500 mt-1 line-clamp-2">{{ $topItem->description }}</p>
+                                    @endif
+                                </div>
+                                <div class="mt-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-slate-900 text-sm">{{ config('pos.currency_symbol') }}{{ number_format($topItem->price, 2) }}</span>
+                                        @if($topItem->is_available ?? true)
+                                            <div class="flex items-center gap-1.5">
+                                                <button type="button"
+                                                        @click="qty > 1 ? qty-- : null"
+                                                        class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200 transition-colors">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                                    </svg>
+                                                </button>
+                                                <span class="w-5 text-center text-xs font-semibold tabular-nums" x-text="qty"></span>
+                                                <button type="button"
+                                                        @click="qty++"
+                                                        class="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs hover:bg-slate-800 transition-colors">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    @if($topItem->is_available ?? true)
+                                        <button type="submit"
+                                                :disabled="adding"
+                                                class="mt-3 w-full px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-full transition-all duration-200 shadow-sm hover:shadow disabled:opacity-50 flex items-center justify-center gap-1.5">
+                                            <svg x-show="!adding" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            <svg x-show="adding" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
+                                            <span x-text="adding ? 'Adding...' : 'Add'"></span>
+                                        </button>
+                                    @else
+                                        <div class="mt-3 text-center text-xs font-semibold text-slate-500 bg-slate-100 rounded-full py-2">
+                                            Unavailable
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                @endforeach
             </div>
         </div>
     @endif
