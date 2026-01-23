@@ -50,26 +50,45 @@ class CustomerController extends Controller
         // If item exists, update qty (or append if different note? keeping simple: separate lines usually better but let's just add)
         // MVP: Unique by ID. If note changes, maybe just overwrite note.
 
-        // Better MVP: Generate a unique ID for the cart line to allow same item with different notes
-        $cartLineId = $itemId.'-'.Str::random(4);
-
         $menuItem = MenuItem::find($itemId);
 
-        $cart[$cartLineId] = [
-            'menu_item_id' => $itemId,
-            'qty' => $request->qty,
-            'note' => $request->note,
-            'name' => $menuItem->name,
-            'price' => $menuItem->price,
-        ];
+        $existingLineId = null;
+        $lineQty = $request->qty;
+        $action = 'added';
+        foreach ($cart as $lineId => $line) {
+            if ($line['menu_item_id'] === $itemId && ($line['note'] ?? null) === ($request->note ?? null)) {
+                $existingLineId = $lineId;
+                break;
+            }
+        }
+
+        if ($existingLineId) {
+            $cart[$existingLineId]['qty'] += $request->qty;
+            $lineQty = $cart[$existingLineId]['qty'];
+            $action = 'updated';
+        } else {
+            // Unique line ID for different notes or items
+            $cartLineId = $itemId.'-'.Str::random(4);
+            $cart[$cartLineId] = [
+                'menu_item_id' => $itemId,
+                'qty' => $request->qty,
+                'note' => $request->note,
+                'name' => $menuItem->name,
+                'price' => $menuItem->price,
+            ];
+        }
 
         session()->put('cart', $cart);
+        $cartCount = collect($cart)->sum(fn ($item) => $item['qty']);
 
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Added to cart',
-                'cart_count' => count($cart),
+                'message' => $action === 'updated' ? 'Quantity updated' : 'Item added',
+                'cart_count' => $cartCount,
+                'action' => $action,
+                'line_qty' => $lineQty,
+                'item_name' => $menuItem->name,
             ]);
         }
 
@@ -92,9 +111,10 @@ class CustomerController extends Controller
         session()->put('cart', $cart);
 
         if (request()->expectsJson()) {
+            $cartCount = collect($cart)->sum(fn ($item) => $item['qty']);
             return response()->json([
                 'success' => true,
-                'cart_count' => count($cart),
+                'cart_count' => $cartCount,
             ]);
         }
 
@@ -122,9 +142,11 @@ class CustomerController extends Controller
         $serviceCharge = $subtotal * $serviceChargeRate;
         $total = $subtotal + $tax + $serviceCharge;
 
+        $cartCount = collect($cart)->sum(fn ($item) => $item['qty']);
+
         return response()->json([
             'success' => true,
-            'cart_count' => count($cart),
+            'cart_count' => $cartCount,
             'qty' => $cart[$lineId]['qty'],
             'line_total' => $cart[$lineId]['price'] * $cart[$lineId]['qty'],
             'subtotal' => $subtotal,

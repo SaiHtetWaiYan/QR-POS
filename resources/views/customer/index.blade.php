@@ -106,6 +106,11 @@
                                             if (typeof data.cart_count === 'number') {
                                                 window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count } }));
                                             }
+                                            if (data.message) {
+                                                const itemName = data.item_name ? `: ${data.item_name}` : '';
+                                                const message = `${data.message}${itemName}`;
+                                                window.dispatchEvent(new CustomEvent('toast', { detail: { message } }));
+                                            }
                                             this.adding = false;
                                         } else {
                                             this.adding = false;

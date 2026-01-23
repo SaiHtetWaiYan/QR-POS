@@ -24,8 +24,9 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased"
-      x-data="{ showToast: false, toastMessage: '', cartCount: {{ count(session('cart', [])) }} }"
-      x-on:cart-updated.window="cartCount = $event.detail.count">
+      x-data="{ showToast: false, toastMessage: '', toastTimeout: null, cartCount: {{ collect(session('cart', []))->sum('qty') }} }"
+      x-on:cart-updated.window="cartCount = $event.detail.count"
+      x-on:toast.window="toastMessage = $event.detail.message; showToast = true; clearTimeout(toastTimeout); toastTimeout = setTimeout(() => showToast = false, 2500)">
     <div class="min-h-screen flex flex-col max-w-lg mx-auto bg-white shadow-2xl shadow-slate-200/50">
         <!-- Header -->
         <header class="bg-gradient-to-r from-slate-800 to-slate-900 sticky top-0 z-20 safe-area-top">
@@ -89,6 +90,25 @@
 
             @yield('content')
         </main>
+
+        <!-- Toast -->
+        <div x-show="showToast"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 transform translate-y-2"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 transform translate-y-0"
+             x-transition:leave-end="opacity-0 transform translate-y-2"
+             class="fixed bottom-24 left-4 right-4 z-40">
+            <div class="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <p class="text-sm font-semibold" x-text="toastMessage"></p>
+            </div>
+        </div>
 
         <!-- Footer -->
         <footer class="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/80 backdrop-blur-lg border-t border-slate-100 safe-area-bottom z-10">
