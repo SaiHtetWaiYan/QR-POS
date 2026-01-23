@@ -27,11 +27,19 @@ class PosController extends Controller
             ->get();
             
         // Separate by status for Kanban or Lists
-        $pending = $orders->where('status', 'pending');
-        $active = $orders->whereIn('status', ['accepted', 'preparing', 'served']);
-        $completed = $orders->where('status', 'paid'); // or recently paid
+        $pendingAll = $orders->where('status', 'pending');
+        $activeAll = $orders->whereIn('status', ['accepted', 'preparing', 'served']);
+        $completedAll = $orders->where('status', 'paid'); // or recently paid
 
-        return view('pos.index', compact('orders', 'pending', 'active', 'completed'));
+        $pending = $pendingAll->take(20);
+        $active = $activeAll->take(20);
+        $completed = $completedAll->take(20);
+
+        $pendingCount = $pendingAll->count();
+        $activeCount = $activeAll->count();
+        $completedCount = $completedAll->count();
+
+        return view('pos.index', compact('orders', 'pending', 'active', 'completed', 'pendingCount', 'activeCount', 'completedCount'));
     }
 
     public function history(Request $request)

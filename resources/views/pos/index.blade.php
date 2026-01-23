@@ -34,7 +34,7 @@
     </x-slot>
 
     <div class="py-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50" x-data="{
-        pendingCount: {{ $pending->count() }},
+        pendingCount: {{ $pendingCount }},
         showNotification: false,
         notificationMessage: '',
         notificationType: 'order',
@@ -163,7 +163,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-2xl font-bold text-gray-900">{{ $active->count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $activeCount }}</p>
                             <p class="text-xs text-gray-500">In Kitchen</p>
                         </div>
                     </div>
@@ -176,7 +176,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-2xl font-bold text-gray-900">{{ $completed->count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $completedCount }}</p>
                             <p class="text-xs text-gray-500">Complete</p>
                         </div>
                     </div>
@@ -210,6 +210,12 @@
                                 <p class="text-xs text-gray-400 mt-1">New orders will appear here</p>
                             </div>
                         @endif
+                        @if($pendingCount > 20)
+                            <a href="{{ route('pos.history') }}"
+                               class="block text-center text-xs text-indigo-600 hover:text-indigo-700 font-semibold pt-2">
+                                View all pending orders
+                            </a>
+                        @endif
                     </div>
                 </div>
 
@@ -220,8 +226,8 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-blue-100"></span>
                             Kitchen
                         </h3>
-                        @if($active->count() > 0)
-                            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">{{ $active->count() }}</span>
+                        @if($activeCount > 0)
+                            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">{{ $activeCount }}</span>
                         @endif
                     </div>
                     <div class="bg-gradient-to-b from-blue-50/50 to-white rounded-2xl p-4 min-h-[500px] border border-blue-100/50 space-y-4">
@@ -239,6 +245,12 @@
                                 <p class="text-xs text-gray-400 mt-1">Accept orders to start cooking</p>
                             </div>
                         @endif
+                        @if($activeCount > 20)
+                            <a href="{{ route('pos.history') }}"
+                               class="block text-center text-xs text-indigo-600 hover:text-indigo-700 font-semibold pt-2">
+                                View all kitchen orders
+                            </a>
+                        @endif
                     </div>
                 </div>
 
@@ -249,8 +261,8 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100"></span>
                             Ready / Paid
                         </h3>
-                        @if($completed->count() > 0)
-                            <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full">{{ $completed->count() }}</span>
+                        @if($completedCount > 0)
+                            <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full">{{ $completedCount }}</span>
                         @endif
                     </div>
                     <div class="bg-gradient-to-b from-emerald-50/50 to-white rounded-2xl p-4 min-h-[500px] border border-emerald-100/50 space-y-4">
@@ -267,6 +279,12 @@
                                 <p class="text-sm font-medium text-gray-500">No completed orders</p>
                                 <p class="text-xs text-gray-400 mt-1">Served orders appear here</p>
                             </div>
+                        @endif
+                        @if($completedCount > 20)
+                            <a href="{{ route('pos.history') }}"
+                               class="block text-center text-xs text-indigo-600 hover:text-indigo-700 font-semibold pt-2">
+                                View all completed orders
+                            </a>
                         @endif
                     </div>
                 </div>
