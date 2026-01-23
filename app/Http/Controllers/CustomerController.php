@@ -124,6 +124,7 @@ class CustomerController extends Controller
 
         if (request()->expectsJson()) {
             $cartCount = collect($cart)->sum(fn ($item) => $item['qty']);
+
             return response()->json([
                 'success' => true,
                 'cart_count' => $cartCount,
@@ -140,7 +141,7 @@ class CustomerController extends Controller
         ]);
 
         $cart = session()->get('cart', []);
-        if (!isset($cart[$lineId])) {
+        if (! isset($cart[$lineId])) {
             return response()->json(['success' => false, 'message' => 'Item not found'], 404);
         }
 
@@ -190,18 +191,37 @@ class CustomerController extends Controller
         $discountCode = null;
         if ($discountInput !== '') {
             $discountCode = DiscountCode::where('code', $discountInput)->first();
-            $now = now();
-            if (
-                !$discountCode ||
-                !$discountCode->is_active ||
-                ($discountCode->starts_at && $discountCode->starts_at->gt($now)) ||
-                ($discountCode->ends_at && $discountCode->ends_at->lt($now)) ||
-                ($discountCode->max_uses !== null && $discountCode->uses_count >= $discountCode->max_uses)
-            ) {
-                $message = 'Invalid or expired discount code.';
+            $campaign = $discountCode?->couponCampaign;
+
+            if (! $discountCode) {
+                $message = 'Discount code not found.';
                 if ($request->expectsJson()) {
                     return response()->json(['success' => false, 'message' => $message], 400);
                 }
+
+                return back()->with('error', $message);
+            }
+
+            if (! $discountCode->isUsable()) {
+                $message = match ($discountCode->status) {
+                    'used' => 'This discount code has already been used.',
+                    'expired' => 'This discount code has expired.',
+                    'disabled' => 'This discount code is no longer available.',
+                    default => 'Invalid or expired discount code.',
+                };
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => $message], 400);
+                }
+
+                return back()->with('error', $message);
+            }
+
+            if ($campaign && ! $campaign->is_active) {
+                $message = 'This discount campaign is no longer active.';
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => $message], 400);
+                }
+
                 return back()->with('error', $message);
             }
         }
@@ -211,6 +231,7 @@ class CustomerController extends Controller
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => $message], 400);
             }
+
             return back()->with('error', $message);
         }
 
@@ -244,11 +265,11 @@ class CustomerController extends Controller
                 $newTax = $newSubtotal * $taxRate;
                 $newServiceCharge = $newSubtotal * $serviceChargeRate;
                 $discountAmount = 0;
-                if ($discountCode && !$order->discount_code_id) {
+                if ($discountCode && ! $order->discount_code_id) {
                     $order->discount_code_id = $discountCode->id;
                     $order->discount_type = $discountCode->type;
                     $order->discount_value = $discountCode->value;
-                    $discountCode->increment('uses_count');
+                    $discountCode->markAsUsed();
                 }
 
                 if ($order->discount_type === 'percent' && $order->discount_value) {
@@ -295,7 +316,7 @@ class CustomerController extends Controller
                 ]);
 
                 if ($discountCode) {
-                    $discountCode->increment('uses_count');
+                    $discountCode->markAsUsed();
                 }
 
                 foreach ($cart as $item) {

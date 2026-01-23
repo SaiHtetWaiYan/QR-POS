@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CouponCampaignController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DiscountCodeController;
 use App\Http\Controllers\MenuController;
@@ -33,6 +34,13 @@ Route::middleware(['auth', 'verified'])->prefix('pos')->name('pos.')->group(func
     Route::post('/discounts', [DiscountCodeController::class, 'store'])->name('discounts.store');
     Route::patch('/discounts/{discount}/toggle', [DiscountCodeController::class, 'toggle'])->name('discounts.toggle');
     Route::delete('/discounts/{discount}', [DiscountCodeController::class, 'destroy'])->name('discounts.destroy');
+    Route::get('/coupons', [CouponCampaignController::class, 'index'])->name('coupons.index');
+    Route::post('/coupons', [CouponCampaignController::class, 'store'])->name('coupons.store');
+    Route::get('/coupons/{campaign}/edit', [CouponCampaignController::class, 'edit'])->name('coupons.edit');
+    Route::put('/coupons/{campaign}', [CouponCampaignController::class, 'update'])->name('coupons.update');
+    Route::patch('/coupons/{campaign}/toggle', [CouponCampaignController::class, 'toggle'])->name('coupons.toggle');
+    Route::post('/coupons/{campaign}/generate', [CouponCampaignController::class, 'generate'])->name('coupons.generate');
+    Route::delete('/coupons/{campaign}', [CouponCampaignController::class, 'destroy'])->name('coupons.destroy');
     Route::get('/orders/{order}', [PosController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [PosController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('/orders/{order}/print', [PosController::class, 'print'])->name('orders.print');

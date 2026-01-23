@@ -9,7 +9,9 @@ class DiscountCodeController extends Controller
 {
     public function index()
     {
-        $codes = DiscountCode::orderBy('created_at', 'desc')->get();
+        $codes = DiscountCode::whereNull('coupon_campaign_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('pos.discounts', compact('codes'));
     }
@@ -40,7 +42,7 @@ class DiscountCodeController extends Controller
 
     public function toggle(DiscountCode $discount)
     {
-        $discount->update(['is_active' => !$discount->is_active]);
+        $discount->update(['is_active' => ! $discount->is_active]);
 
         return back()->with('success', 'Discount status updated');
     }
