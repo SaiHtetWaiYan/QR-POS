@@ -32,7 +32,7 @@
                 <!-- Message -->
                 <h2 class="text-2xl font-bold text-slate-900 mb-3">Your Session Has Expired</h2>
                 <p class="text-slate-600 mb-8 max-w-xs mx-auto">
-                    For your security, sessions expire after 30 minutes of inactivity. Please scan the QR code on your table to continue ordering.
+                    For your security, sessions expire after 1 hour of inactivity. Please scan the QR code on your table to continue ordering.
                 </p>
 
                 <!-- QR Code Icon -->
