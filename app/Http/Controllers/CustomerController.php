@@ -101,6 +101,39 @@ class CustomerController extends Controller
         return back();
     }
 
+    public function updateCartItem(Request $request, $tableCode, $lineId)
+    {
+        $request->validate([
+            'qty' => 'required|integer|min:1',
+        ]);
+
+        $cart = session()->get('cart', []);
+        if (!isset($cart[$lineId])) {
+            return response()->json(['success' => false, 'message' => 'Item not found'], 404);
+        }
+
+        $cart[$lineId]['qty'] = $request->qty;
+        session()->put('cart', $cart);
+
+        $subtotal = collect($cart)->sum(fn ($item) => $item['price'] * $item['qty']);
+        $taxRate = config('pos.tax_rate', 0);
+        $serviceChargeRate = config('pos.service_charge', 0);
+        $tax = $subtotal * $taxRate;
+        $serviceCharge = $subtotal * $serviceChargeRate;
+        $total = $subtotal + $tax + $serviceCharge;
+
+        return response()->json([
+            'success' => true,
+            'cart_count' => count($cart),
+            'qty' => $cart[$lineId]['qty'],
+            'line_total' => $cart[$lineId]['price'] * $cart[$lineId]['qty'],
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'service' => $serviceCharge,
+            'total' => $total,
+        ]);
+    }
+
     public function placeOrder(Request $request, $tableCode)
     {
         $table = $this->getTable($tableCode);

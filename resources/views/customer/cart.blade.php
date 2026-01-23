@@ -41,12 +41,148 @@
             @foreach($cart as $lineId => $item)
                 <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm animate-fade-in"
                      data-cart-item
-                     data-line-total="{{ $item['price'] * $item['qty'] }}">
+                     data-line-total="{{ $item['price'] * $item['qty'] }}"
+                     x-data="{
+                        qty: {{ $item['qty'] }},
+                        price: {{ $item['price'] }},
+                        lineTotal: {{ $item['price'] * $item['qty'] }},
+                        updating: false,
+                        removing: false,
+                        currency: '{{ config('pos.currency_symbol') }}',
+                        formatMoney(value) {
+                            return `${this.currency}${Number(value).toFixed(2)}`;
+                        },
+                        updateTotals(data) {
+                            const state = document.getElementById('cart-state');
+                            if (!state) return;
+                            const subtotalEl = document.getElementById('cart-subtotal');
+                            const taxEl = document.getElementById('cart-tax');
+                            const serviceEl = document.getElementById('cart-service');
+                            const totalEl = document.getElementById('cart-total');
+                            if (subtotalEl) subtotalEl.textContent = this.formatMoney(data.subtotal);
+                            if (taxEl) taxEl.textContent = this.formatMoney(data.tax);
+                            if (serviceEl) serviceEl.textContent = this.formatMoney(data.service);
+                            if (totalEl) totalEl.textContent = this.formatMoney(data.total);
+                            state.dataset.subtotal = String(data.subtotal);
+                        },
+                        async updateQty(newQty) {
+                            if (this.updating || this.removing || newQty < 1) return;
+                            this.updating = true;
+                            try {
+                                const response = await fetch('{{ route('customer.cart.update', [$table->code, $lineId]) }}', {
+                                    method: 'PATCH',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify({ qty: newQty })
+                                });
+                                let data = {};
+                                try {
+                                    data = await response.json();
+                                } catch (error) {
+                                    data = {};
+                                }
+                                if (response.ok && data.success) {
+                                    this.qty = data.qty;
+                                    this.lineTotal = data.line_total;
+                                    this.updateTotals(data);
+                                    const itemEl = this.$el.closest('[data-cart-item]');
+                                    if (itemEl) itemEl.dataset.lineTotal = String(data.line_total);
+                                } else {
+                                    alert(data.message || 'Failed to update item. Please try again.');
+                                }
+                            } catch (error) {
+                                alert('Network error. Please check your connection.');
+                            } finally {
+                                this.updating = false;
+                            }
+                        },
+                        async removeItem() {
+                            if (this.removing || this.updating) return;
+                            this.removing = true;
+                            try {
+                                const response = await fetch('{{ route('customer.cart.remove', [$table->code, $lineId]) }}', {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Accept': 'application/json'
+                                    }
+                                });
+                                let data = {};
+                                try {
+                                    data = await response.json();
+                                } catch (error) {
+                                    data = {};
+                                }
+                                if (response.ok && data.success) {
+                                    if (typeof data.cart_count === 'number') {
+                                        window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count } }));
+                                    }
+                                    const itemEl = this.$el.closest('[data-cart-item]');
+                                    const lineTotal = Number(itemEl?.dataset.lineTotal || 0);
+                                    if (itemEl) {
+                                        itemEl.remove();
+                                    }
+
+                                    const state = document.getElementById('cart-state');
+                                    if (state) {
+                                        const taxRate = Number(state.dataset.taxRate || 0);
+                                        const serviceRate = Number(state.dataset.serviceRate || 0);
+                                        const currency = state.dataset.currency || '';
+                                        const formatMoney = (value) => `${currency}${Number(value).toFixed(2)}`;
+                                        const count = Math.max(0, Number(state.dataset.count || 0) - 1);
+                                        const subtotal = Math.max(0, Number(state.dataset.subtotal || 0) - lineTotal);
+                                        state.dataset.count = String(count);
+                                        state.dataset.subtotal = String(subtotal);
+
+                                        const tax = subtotal * taxRate;
+                                        const service = subtotal * serviceRate;
+                                        const total = subtotal + tax + service;
+
+                                        const subtotalEl = document.getElementById('cart-subtotal');
+                                        const taxEl = document.getElementById('cart-tax');
+                                        const serviceEl = document.getElementById('cart-service');
+                                        const totalEl = document.getElementById('cart-total');
+                                        if (subtotalEl) subtotalEl.textContent = formatMoney(subtotal);
+                                        if (taxEl) taxEl.textContent = formatMoney(tax);
+                                        if (serviceEl) serviceEl.textContent = formatMoney(service);
+                                        if (totalEl) totalEl.textContent = formatMoney(total);
+
+                                        const countEl = document.getElementById('cart-item-count');
+                                        const labelEl = document.getElementById('cart-item-label');
+                                        if (countEl) countEl.textContent = String(count);
+                                        if (labelEl) labelEl.textContent = count === 1 ? 'item' : 'items';
+
+                                        if (count === 0) {
+                                            const emptyState = document.getElementById('cart-empty-state');
+                                            const cartBody = document.getElementById('cart-body');
+                                            if (cartBody) {
+                                                cartBody.classList.add('opacity-0');
+                                                setTimeout(() => cartBody.classList.add('hidden'), 200);
+                                            }
+                                            if (emptyState) {
+                                                emptyState.classList.remove('hidden');
+                                                requestAnimationFrame(() => emptyState.classList.remove('opacity-0'));
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    this.removing = false;
+                                    alert(data.message || 'Failed to remove item. Please try again.');
+                                }
+                            } catch (error) {
+                                this.removing = false;
+                                alert('Network error. Please check your connection.');
+                            }
+                        }
+                     }">
                     <div class="flex justify-between items-start gap-3">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-start justify-between">
                                 <h3 class="font-semibold text-slate-900">{{ $item['name'] }}</h3>
-                                <span class="shrink-0 font-bold text-slate-900 ml-2">{{ config('pos.currency_symbol') }}{{ number_format($item['price'] * $item['qty'], 2) }}</span>
+                                <span class="shrink-0 font-bold text-slate-900 ml-2" x-text="formatMoney(lineTotal)"></span>
                             </div>
                             @if($item['note'])
                                 <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
@@ -58,95 +194,34 @@
                             @endif
                             <div class="flex items-center justify-between mt-3">
                                 <div class="flex items-center gap-2 text-sm text-slate-500">
-                                    <span class="bg-slate-100 px-2.5 py-1 rounded-full font-medium text-xs">{{ $item['qty'] }}x</span>
-                                    <span>{{ config('pos.currency_symbol') }}{{ number_format($item['price'], 2) }} each</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <button type="button"
+                                                @click="updateQty(qty - 1)"
+                                                :disabled="updating || qty <= 1"
+                                                class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-medium text-sm hover:bg-slate-200 transition-colors disabled:opacity-50">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                            </svg>
+                                        </button>
+                                        <span class="w-6 text-center text-sm font-semibold tabular-nums" x-text="qty"></span>
+                                        <button type="button"
+                                                @click="updateQty(qty + 1)"
+                                                :disabled="updating"
+                                                class="w-7 h-7 rounded-full bg-slate-900 text-white flex items-center justify-center font-medium text-sm hover:bg-slate-800 transition-colors disabled:opacity-50">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <span x-text="`${currency}${Number(price).toFixed(2)} each`"></span>
                                 </div>
-                                <form x-data="{
-                                        removing: false,
-                                        async removeItem() {
-                                            if (this.removing) return;
-                                            this.removing = true;
-                                            try {
-                                                const response = await fetch('{{ route('customer.cart.remove', [$table->code, $lineId]) }}', {
-                                                    method: 'DELETE',
-                                                    headers: {
-                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                                        'Accept': 'application/json'
-                                                    }
-                                                });
-                                                let data = {};
-                                                try {
-                                                    data = await response.json();
-                                                } catch (error) {
-                                                    data = {};
-                                                }
-                                                if (response.ok && data.success) {
-                                                    if (typeof data.cart_count === 'number') {
-                                                        window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count } }));
-                                                    }
-                                                    const itemEl = $el.closest('[data-cart-item]');
-                                                    const lineTotal = Number(itemEl?.dataset.lineTotal || 0);
-                                                    if (itemEl) {
-                                                        itemEl.remove();
-                                                    }
-
-                                                    const state = document.getElementById('cart-state');
-                                                    if (state) {
-                                                        const taxRate = Number(state.dataset.taxRate || 0);
-                                                        const serviceRate = Number(state.dataset.serviceRate || 0);
-                                                        const currency = state.dataset.currency || '';
-                                                        const formatMoney = (value) => `${currency}${Number(value).toFixed(2)}`;
-                                                        const count = Math.max(0, Number(state.dataset.count || 0) - 1);
-                                                        const subtotal = Math.max(0, Number(state.dataset.subtotal || 0) - lineTotal);
-                                                        state.dataset.count = String(count);
-                                                        state.dataset.subtotal = String(subtotal);
-
-                                                        const tax = subtotal * taxRate;
-                                                        const service = subtotal * serviceRate;
-                                                        const total = subtotal + tax + service;
-
-                                                        const subtotalEl = document.getElementById('cart-subtotal');
-                                                        const taxEl = document.getElementById('cart-tax');
-                                                        const serviceEl = document.getElementById('cart-service');
-                                                        const totalEl = document.getElementById('cart-total');
-                                                        if (subtotalEl) subtotalEl.textContent = formatMoney(subtotal);
-                                                        if (taxEl) taxEl.textContent = formatMoney(tax);
-                                                        if (serviceEl) serviceEl.textContent = formatMoney(service);
-                                                        if (totalEl) totalEl.textContent = formatMoney(total);
-
-                                                        const countEl = document.getElementById('cart-item-count');
-                                                        const labelEl = document.getElementById('cart-item-label');
-                                                        if (countEl) countEl.textContent = String(count);
-                                                        if (labelEl) labelEl.textContent = count === 1 ? 'item' : 'items';
-
-                                                        if (count === 0) {
-                                                            const emptyState = document.getElementById('cart-empty-state');
-                                                            const cartBody = document.getElementById('cart-body');
-                                                            if (cartBody) {
-                                                                cartBody.classList.add('opacity-0');
-                                                                setTimeout(() => cartBody.classList.add('hidden'), 200);
-                                                            }
-                                                            if (emptyState) {
-                                                                emptyState.classList.remove('hidden');
-                                                                requestAnimationFrame(() => emptyState.classList.remove('opacity-0'));
-                                                            }
-                                                        }
-                                                    }
-                                                } else {
-                                                    this.removing = false;
-                                                    alert(data.message || 'Failed to remove item. Please try again.');
-                                                }
-                                            } catch (error) {
-                                                this.removing = false;
-                                                alert('Network error. Please check your connection.');
-                                            }
-                                        }
-                                    }"
+                                <form action="{{ route('customer.cart.remove', [$table->code, $lineId]) }}"
+                                      method="POST"
                                       @submit.prevent="removeItem()">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
-                                            :disabled="removing"
+                                            :disabled="removing || updating"
                                             class="text-xs text-red-500 hover:text-red-600 font-medium flex items-center gap-1 transition-colors disabled:opacity-50">
                                         <svg x-show="!removing" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>

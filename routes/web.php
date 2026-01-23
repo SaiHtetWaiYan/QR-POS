@@ -16,6 +16,7 @@ Route::prefix('t/{table}')->name('customer.')->group(function () {
     Route::get('/', [CustomerController::class, 'index'])->name('index');
     Route::post('/cart', [CustomerController::class, 'addToCart'])->name('cart.add');
     Route::get('/cart', [CustomerController::class, 'viewCart'])->name('cart.view');
+    Route::patch('/cart/{lineId}', [CustomerController::class, 'updateCartItem'])->name('cart.update');
     Route::delete('/cart/{lineId}', [CustomerController::class, 'removeItem'])->name('cart.remove');
     Route::post('/order', [CustomerController::class, 'placeOrder'])->name('order.place');
     Route::get('/status', [CustomerController::class, 'status'])->name('status');
