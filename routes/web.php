@@ -27,8 +27,10 @@ Route::prefix('t/{table}')->name('customer.')->middleware(\App\Http\Middleware\C
 Route::middleware(['auth', 'verified'])->prefix('pos')->name('pos.')->group(function () {
     Route::get('/', [PosController::class, 'index'])->name('index');
     Route::get('/history', [PosController::class, 'history'])->name('history');
+    Route::get('/reports', [PosController::class, 'reports'])->name('reports');
     Route::get('/orders/{order}', [PosController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [PosController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::patch('/orders/{order}/discount', [PosController::class, 'updateDiscount'])->name('orders.updateDiscount');
     Route::get('/orders/{order}/print', [PosController::class, 'print'])->name('orders.print');
     Route::get('/orders/{order}/card', [PosController::class, 'orderCard'])->name('orders.card');
 

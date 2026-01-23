@@ -64,6 +64,12 @@
             <td>Service</td>
             <td class="price">{{ number_format($order->service_charge, 2) }}</td>
         </tr>
+        @if($order->discount_amount > 0)
+            <tr>
+                <td>Discount</td>
+                <td class="price">-{{ number_format($order->discount_amount, 2) }}</td>
+            </tr>
+        @endif
         <tr class="font-bold" style="font-size: 14px;">
             <td style="padding-top: 5px;">TOTAL</td>
             <td class="price" style="padding-top: 5px;">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</td>

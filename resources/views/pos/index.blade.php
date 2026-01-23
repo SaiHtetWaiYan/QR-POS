@@ -8,6 +8,13 @@
                 <p class="text-sm text-slate-500 mt-1">Manage incoming orders in real-time</p>
             </div>
             <div class="flex gap-3">
+                <a href="{{ route('pos.reports') }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6m4 6V7m4 10V9m-9 8h10a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    Reports
+                </a>
                 <a href="{{ route('pos.history') }}"
                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,6 +165,18 @@
                     </div>
                 </div>
             </div>
+
+            @if($topItem)
+                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-6 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Most ordered today</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ $topItem->name_snapshot }}</p>
+                    </div>
+                    <div class="text-sm font-semibold text-emerald-600">
+                        {{ $topItem->total_qty }} ordered
+                    </div>
+                </div>
+            @endif
 
             <!-- Kanban Board -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full items-start">

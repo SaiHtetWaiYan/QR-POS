@@ -141,12 +141,55 @@
                         <span class="text-gray-500">Service Charge ({{ config('pos.service_charge') * 100 }}%)</span>
                         <span class="text-gray-600">{{ config('pos.currency_symbol') }}{{ number_format($order->service_charge, 2) }}</span>
                     </div>
+                    @if($order->discount_amount > 0)
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">
+                                Discount
+                                @if($order->discount_type === 'percent')
+                                    ({{ number_format($order->discount_value, 2) }}%)
+                                @elseif($order->discount_type === 'fixed')
+                                    ({{ config('pos.currency_symbol') }}{{ number_format($order->discount_value, 2) }})
+                                @endif
+                            </span>
+                            <span class="text-red-600">-{{ config('pos.currency_symbol') }}{{ number_format($order->discount_amount, 2) }}</span>
+                        </div>
+                    @endif
                     <div class="flex justify-between pt-3 border-t border-gray-200 mt-2">
                         <span class="font-bold text-gray-900">Total</span>
                         <span class="font-bold text-xl text-gray-900">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</span>
                     </div>
                 </div>
             </div>
+
+            @if($order->status !== 'cancelled')
+                <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm mb-6">
+                    <h3 class="font-semibold text-gray-900 mb-4">Apply Discount</h3>
+                    <form action="{{ route('pos.orders.updateDiscount', $order->id) }}" method="POST" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                        @csrf
+                        @method('PATCH')
+                        <div>
+                            <label for="discount_type" class="block text-xs font-semibold text-gray-500 mb-2">Type</label>
+                            <select id="discount_type" name="discount_type"
+                                    class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                <option value="">None</option>
+                                <option value="percent" @selected($order->discount_type === 'percent')>Percent</option>
+                                <option value="fixed" @selected($order->discount_type === 'fixed')>Fixed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="discount_value" class="block text-xs font-semibold text-gray-500 mb-2">Value</label>
+                            <input type="number" step="0.01" min="0" name="discount_value" id="discount_value"
+                                   value="{{ $order->discount_value }}"
+                                   class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                   placeholder="0.00">
+                        </div>
+                        <button type="submit"
+                                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 border border-transparent rounded-xl font-medium text-sm text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-500 transition-all">
+                            Apply
+                        </button>
+                    </form>
+                </div>
+            @endif
 
             <!-- Actions -->
             @if($order->status !== 'paid' && $order->status !== 'cancelled')

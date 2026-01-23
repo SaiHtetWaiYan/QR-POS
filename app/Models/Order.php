@@ -17,6 +17,9 @@ class Order extends Model
         'subtotal',
         'tax',
         'service_charge',
+        'discount_type',
+        'discount_value',
+        'discount_amount',
         'total',
         'bill_requested_at',
         'paid_at',
@@ -25,6 +28,8 @@ class Order extends Model
     protected $casts = [
         'bill_requested_at' => 'datetime',
         'paid_at' => 'datetime',
+        'discount_value' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
     ];
 
     public function table()

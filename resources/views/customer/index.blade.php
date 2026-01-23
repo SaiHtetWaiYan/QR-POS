@@ -32,6 +32,18 @@
         </a>
     @endif
 
+    @if($topItem)
+        <div class="mb-5 bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs uppercase tracking-wide text-slate-400 font-semibold">Most ordered today</p>
+                <p class="text-base font-semibold text-slate-900">{{ $topItem->name_snapshot }}</p>
+            </div>
+            <div class="text-sm font-semibold text-emerald-600">
+                {{ $topItem->total_qty }} ordered
+            </div>
+        </div>
+    @endif
+
     <div x-data="{
         activeCategory: '{{ $categories->first()->id ?? '' }}',
         categoryIds: @json($categories->pluck('id')->values()),

@@ -26,13 +26,21 @@ class CustomerController extends Controller
             $query->where('is_available', true);
         }])->orderBy('sort_order')->get();
 
+        $topItem = OrderItem::selectRaw('name_snapshot, SUM(qty) as total_qty')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereDate('orders.created_at', now()->toDateString())
+            ->where('orders.status', '!=', 'cancelled')
+            ->groupBy('name_snapshot')
+            ->orderByDesc('total_qty')
+            ->first();
+
         // Check for active order in session or DB
         $activeOrder = Order::where('table_id', $table->id)
             ->whereIn('status', ['pending', 'accepted', 'preparing', 'served'])
             ->latest()
             ->first();
 
-        return view('customer.index', compact('table', 'categories', 'activeOrder'));
+        return view('customer.index', compact('table', 'categories', 'activeOrder', 'topItem'));
     }
 
     public function addToCart(Request $request, $tableCode)
@@ -203,12 +211,19 @@ class CustomerController extends Controller
                 $newSubtotal = $order->subtotal + $subtotal;
                 $newTax = $newSubtotal * $taxRate;
                 $newServiceCharge = $newSubtotal * $serviceChargeRate;
-                $newTotal = $newSubtotal + $newTax + $newServiceCharge;
+                $discountAmount = 0;
+                if ($order->discount_type === 'percent' && $order->discount_value) {
+                    $discountAmount = $newSubtotal * ($order->discount_value / 100);
+                } elseif ($order->discount_type === 'fixed' && $order->discount_value) {
+                    $discountAmount = min($order->discount_value, $newSubtotal);
+                }
+                $newTotal = max(0, $newSubtotal + $newTax + $newServiceCharge - $discountAmount);
 
                 $order->update([
                     'subtotal' => $newSubtotal,
                     'tax' => $newTax,
                     'service_charge' => $newServiceCharge,
+                    'discount_amount' => $discountAmount,
                     'total' => $newTotal,
                 ]);
             } else {

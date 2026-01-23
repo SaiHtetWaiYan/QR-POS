@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\OrderStatusUpdated;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -39,7 +40,15 @@ class PosController extends Controller
         $activeCount = $activeAll->count();
         $completedCount = $completedAll->count();
 
-        return view('pos.index', compact('orders', 'pending', 'active', 'completed', 'pendingCount', 'activeCount', 'completedCount'));
+        $topItem = OrderItem::selectRaw('name_snapshot, SUM(qty) as total_qty')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereDate('orders.created_at', $today)
+            ->where('orders.status', '!=', 'cancelled')
+            ->groupBy('name_snapshot')
+            ->orderByDesc('total_qty')
+            ->first();
+
+        return view('pos.index', compact('orders', 'pending', 'active', 'completed', 'pendingCount', 'activeCount', 'completedCount', 'topItem'));
     }
 
     public function history(Request $request)
@@ -90,6 +99,84 @@ class PosController extends Controller
         }
 
         return back()->with('success', 'Order updated');
+    }
+
+    public function updateDiscount(Request $request, Order $order)
+    {
+        $request->validate([
+            'discount_type' => 'nullable|in:percent,fixed',
+            'discount_value' => 'nullable|numeric|min:0',
+        ]);
+
+        $discountType = $request->discount_type;
+        $discountValue = $request->discount_value;
+
+        if (!$discountType || !$discountValue) {
+            $discountType = null;
+            $discountValue = null;
+            $discountAmount = 0;
+        } else {
+            if ($discountType === 'percent') {
+                $discountValue = min($discountValue, 100);
+                $discountAmount = $order->subtotal * ($discountValue / 100);
+            } else {
+                $discountAmount = min($discountValue, $order->subtotal);
+            }
+        }
+
+        $total = max(0, $order->subtotal + $order->tax + $order->service_charge - $discountAmount);
+
+        $order->update([
+            'discount_type' => $discountType,
+            'discount_value' => $discountValue,
+            'discount_amount' => $discountAmount,
+            'total' => $total,
+        ]);
+
+        return back()->with('success', 'Discount updated');
+    }
+
+    public function reports()
+    {
+        $today = now()->toDateString();
+        $monthStart = now()->startOfMonth()->toDateString();
+        $monthEnd = now()->endOfMonth()->toDateString();
+
+        $dailyOrders = Order::whereDate('created_at', $today)
+            ->where('status', '!=', 'cancelled');
+        $monthlyOrders = Order::whereBetween('created_at', [$monthStart.' 00:00:00', $monthEnd.' 23:59:59'])
+            ->where('status', '!=', 'cancelled');
+
+        $dailyCount = $dailyOrders->count();
+        $monthlyCount = $monthlyOrders->count();
+        $dailyRevenue = $dailyOrders->sum('total');
+        $monthlyRevenue = $monthlyOrders->sum('total');
+
+        $dailyTopItem = OrderItem::selectRaw('name_snapshot, SUM(qty) as total_qty')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereDate('orders.created_at', $today)
+            ->where('orders.status', '!=', 'cancelled')
+            ->groupBy('name_snapshot')
+            ->orderByDesc('total_qty')
+            ->first();
+
+        $monthlyTopItem = OrderItem::selectRaw('name_snapshot, SUM(qty) as total_qty')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereBetween('orders.created_at', [$monthStart.' 00:00:00', $monthEnd.' 23:59:59'])
+            ->where('orders.status', '!=', 'cancelled')
+            ->groupBy('name_snapshot')
+            ->orderByDesc('total_qty')
+            ->first();
+
+        return view('pos.reports', compact(
+            'dailyCount',
+            'monthlyCount',
+            'dailyRevenue',
+            'monthlyRevenue',
+            'dailyTopItem',
+            'monthlyTopItem',
+            'today'
+        ));
     }
 
     public function print(Order $order)

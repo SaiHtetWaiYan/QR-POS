@@ -196,10 +196,23 @@
                             <span class="text-slate-500">Tax ({{ config('pos.tax_rate') * 100 }}%)</span>
                             <span class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($order->tax, 2) }}</span>
                         </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Service ({{ config('pos.service_charge') * 100 }}%)</span>
+                        <span class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($order->service_charge, 2) }}</span>
+                    </div>
+                    @if($order->discount_amount > 0)
                         <div class="flex justify-between text-sm">
-                            <span class="text-slate-500">Service ({{ config('pos.service_charge') * 100 }}%)</span>
-                            <span class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($order->service_charge, 2) }}</span>
+                            <span class="text-slate-500">
+                                Discount
+                                @if($order->discount_type === 'percent')
+                                    ({{ number_format($order->discount_value, 2) }}%)
+                                @elseif($order->discount_type === 'fixed')
+                                    ({{ config('pos.currency_symbol') }}{{ number_format($order->discount_value, 2) }})
+                                @endif
+                            </span>
+                            <span class="text-red-600">-{{ config('pos.currency_symbol') }}{{ number_format($order->discount_amount, 2) }}</span>
                         </div>
+                    @endif
                         <div class="flex justify-between items-center pt-3 border-t border-slate-200 mt-2">
                             <span class="font-semibold text-slate-900">Total</span>
                             <span class="text-xl font-bold text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</span>
