@@ -63,6 +63,8 @@ class CouponCampaignController extends Controller
                 'total_amount' => $data['total_amount'],
                 'coupon_value' => $data['coupon_value'],
                 'total_codes' => $totalCoupons,
+                'type' => 'fixed',
+                'value' => $data['coupon_value'],
                 'ends_at' => $data['ends_at'],
                 'is_active' => true,
             ]);
