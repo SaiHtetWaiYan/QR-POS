@@ -6,12 +6,15 @@ use App\Events\OrderStatusUpdated;
 use App\Models\Order;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class PosController extends Controller
 {
     public function index()
     {
+        $today = now()->toDateString();
         $orders = Order::with(['table', 'orderItems'])
+            ->whereDate('created_at', $today)
             ->where('status', '!=', 'cancelled') // Keep paid for a bit or filter in view?
             ->orderByRaw("CASE status 
                 WHEN 'pending' THEN 1 
@@ -29,6 +32,29 @@ class PosController extends Controller
         $completed = $orders->where('status', 'paid'); // or recently paid
 
         return view('pos.index', compact('orders', 'pending', 'active', 'completed'));
+    }
+
+    public function history(Request $request)
+    {
+        $dateParam = $request->query('date');
+        $date = $dateParam && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateParam)
+            ? Carbon::parse($dateParam)->toDateString()
+            : now()->toDateString();
+
+        $orders = Order::with(['table', 'orderItems'])
+            ->whereDate('created_at', $date)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $availableDates = Order::selectRaw('DATE(created_at) as date')
+            ->distinct()
+            ->orderBy('date', 'desc')
+            ->pluck('date');
+
+        $totalOrders = $orders->count();
+        $totalRevenue = $orders->sum('total');
+
+        return view('pos.history', compact('orders', 'date', 'availableDates', 'totalOrders', 'totalRevenue'));
     }
 
     public function show(Order $order)

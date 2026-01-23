@@ -26,6 +26,7 @@ Route::prefix('t/{table}')->name('customer.')->group(function () {
 // POS / Admin Routes
 Route::middleware(['auth', 'verified'])->prefix('pos')->name('pos.')->group(function () {
     Route::get('/', [PosController::class, 'index'])->name('index');
+    Route::get('/history', [PosController::class, 'history'])->name('history');
     Route::get('/orders/{order}', [PosController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [PosController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('/orders/{order}/print', [PosController::class, 'print'])->name('orders.print');
