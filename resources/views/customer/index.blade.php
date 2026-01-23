@@ -208,7 +208,7 @@
                                             <span class="px-4 py-1.5 bg-slate-200 text-slate-500 text-xs font-semibold rounded-full">Unavailable</span>
                                         @endif
                                     </div>
-                                    <div x-show="showNoteFor === {{ $item->id }}"
+                                    <div x-cloak x-show="showNoteFor === {{ $item->id }}"
                                          x-transition:enter="transition ease-out duration-150"
                                          x-transition:enter-start="opacity-0 transform -translate-y-2"
                                          x-transition:enter-end="opacity-100 transform translate-y-0"
