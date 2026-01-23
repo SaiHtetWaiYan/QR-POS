@@ -1,11 +1,17 @@
 @extends('layouts.customer')
 
 @section('header')
-    Order Status
+    @if($order && $order->status === 'paid')
+        Order Complete
+    @elseif($order && $order->status === 'cancelled')
+        Order Cancelled
+    @else
+        Order Status
+    @endif
 @endsection
 
 @section('subheader')
-    @if($order)
+    @if($order && !in_array($order->status, ['paid', 'cancelled'], true))
         Order #{{ $order->order_no }}
     @endif
 @endsection
