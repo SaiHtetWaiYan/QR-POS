@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <a href="{{ route('pos.index') }}"
+                <a href="{{ route('pos.history') }}"
                    class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors">
                     <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -141,17 +141,17 @@
                         <span class="text-gray-500">Service Charge ({{ config('pos.service_charge') * 100 }}%)</span>
                         <span class="text-gray-600">{{ config('pos.currency_symbol') }}{{ number_format($order->service_charge, 2) }}</span>
                     </div>
-                    @if($order->discount_amount > 0)
+                    @if($order->coupon_amount > 0)
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">
-                                Discount
-                                @if($order->discount_type === 'percent')
-                                    ({{ number_format($order->discount_value, 2) }}%)
-                                @elseif($order->discount_type === 'fixed')
-                                    ({{ config('pos.currency_symbol') }}{{ number_format($order->discount_value, 2) }})
+                                Coupon
+                                @if($order->coupon_type === 'percent')
+                                    ({{ number_format($order->coupon_value, 2) }}%)
+                                @elseif($order->coupon_type === 'fixed')
+                                    ({{ config('pos.currency_symbol') }}{{ number_format($order->coupon_value, 2) }})
                                 @endif
                             </span>
-                            <span class="text-red-600">-{{ config('pos.currency_symbol') }}{{ number_format($order->discount_amount, 2) }}</span>
+                            <span class="text-red-600">-{{ config('pos.currency_symbol') }}{{ number_format($order->coupon_amount, 2) }}</span>
                         </div>
                     @endif
                     <div class="flex justify-between pt-3 border-t border-gray-200 mt-2">

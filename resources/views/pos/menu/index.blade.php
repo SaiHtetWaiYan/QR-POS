@@ -1,19 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h2 class="font-bold text-2xl text-gray-900 leading-tight">
-                    {{ __('Menu Management') }}
-                </h2>
-                <p class="text-sm text-gray-500 mt-1">Manage your menu categories and items</p>
-            </div>
-            <a href="{{ route('pos.menu.items.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 rounded-xl font-medium text-sm text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-500 transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Add Menu Item
-            </a>
+        <div>
+            <h2 class="font-bold text-2xl text-gray-900 leading-tight">
+                {{ __('Menu Management') }}
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">Manage your menu categories and items</p>
         </div>
     </x-slot>
 
@@ -24,6 +15,15 @@
         deleteName: ''
     }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+                <a href="{{ route('pos.menu.items.create') }}"
+                   class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-2xl font-medium text-sm text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-500 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Add Menu Item
+                </a>
+            </div>
 
             <!-- Add Category -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

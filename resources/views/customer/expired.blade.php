@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <title>Session Expired - {{ config('app.name', 'QR POS') }}</title>
+    <title>Session Expired - {{ config('pos.shop_name', config('app.name', 'QR POS')) }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

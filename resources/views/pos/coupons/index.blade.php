@@ -1,22 +1,22 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="font-bold text-2xl text-gray-900 leading-tight">Coupon Campaigns</h2>
-                <p class="text-sm text-gray-500 mt-1">Manage coupon campaigns and their generated coupons.</p>
-            </div>
-            <a href="{{ route('pos.coupons.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 rounded-xl text-white text-sm font-semibold shadow-sm hover:bg-indigo-500 transition">
-                <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                </svg>
-                New Campaign
-            </a>
+        <div>
+            <h2 class="font-bold text-2xl text-gray-900 leading-tight">Coupon Campaigns</h2>
+            <p class="text-sm text-gray-500 mt-1">Manage coupon campaigns and their generated coupons.</p>
         </div>
     </x-slot>
 
     <div class="py-6" x-data="{ deleteCampaignId: null, deleteCampaignName: '', showDeleteModal: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 mb-6">
+                <a href="{{ route('pos.coupons.create') }}"
+                   class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-2xl text-white text-sm font-semibold shadow-sm shadow-indigo-600/20 hover:bg-indigo-500 transition">
+                    <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                    </svg>
+                    New Campaign
+                </a>
+            </div>
             @if(session('success'))
                 <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl">
                     {{ session('success') }}

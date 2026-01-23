@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\CouponCampaignController;
+use App\Http\Controllers\CouponCodeController;
 use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\DiscountCodeController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TableController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,7 @@ Route::prefix('t/{table}')->name('customer.')->middleware(\App\Http\Middleware\C
     Route::get('/cart', [CustomerController::class, 'viewCart'])->name('cart.view');
     Route::patch('/cart/{lineId}', [CustomerController::class, 'updateCartItem'])->name('cart.update');
     Route::delete('/cart/{lineId}', [CustomerController::class, 'removeItem'])->name('cart.remove');
+    Route::post('/coupon/check', [CustomerController::class, 'checkCoupon'])->name('coupon.check');
     Route::post('/order', [CustomerController::class, 'placeOrder'])->name('order.place');
     Route::get('/status', [CustomerController::class, 'status'])->name('status');
     Route::post('/order/{order}/bill', [CustomerController::class, 'requestBill'])->name('order.bill');
@@ -30,10 +32,7 @@ Route::middleware(['auth', 'verified'])->prefix('pos')->name('pos.')->group(func
     Route::get('/', [PosController::class, 'index'])->name('index');
     Route::get('/history', [PosController::class, 'history'])->name('history');
     Route::get('/reports', [PosController::class, 'reports'])->name('reports');
-    Route::get('/discounts', [DiscountCodeController::class, 'index'])->name('discounts.index');
-    Route::post('/discounts', [DiscountCodeController::class, 'store'])->name('discounts.store');
-    Route::patch('/discounts/{discount}/toggle', [DiscountCodeController::class, 'toggle'])->name('discounts.toggle');
-    Route::delete('/discounts/{discount}', [DiscountCodeController::class, 'destroy'])->name('discounts.destroy');
+    Route::get('/reports/export/{range}', [PosController::class, 'exportReports'])->name('reports.export');
     Route::get('/coupons', [CouponCampaignController::class, 'index'])->name('coupons.index');
     Route::get('/coupons/create', [CouponCampaignController::class, 'create'])->name('coupons.create');
     Route::post('/coupons', [CouponCampaignController::class, 'store'])->name('coupons.store');
@@ -43,13 +42,15 @@ Route::middleware(['auth', 'verified'])->prefix('pos')->name('pos.')->group(func
     Route::patch('/coupons/{campaign}/toggle', [CouponCampaignController::class, 'toggle'])->name('coupons.toggle');
     Route::post('/coupons/{campaign}/generate', [CouponCampaignController::class, 'generate'])->name('coupons.generate');
     Route::delete('/coupons/{campaign}', [CouponCampaignController::class, 'destroy'])->name('coupons.destroy');
-    Route::patch('/discount-codes/{discountCode}/disable', [DiscountCodeController::class, 'disable'])->name('discount-codes.disable');
-    Route::patch('/discount-codes/{discountCode}/enable', [DiscountCodeController::class, 'enable'])->name('discount-codes.enable');
-    Route::delete('/discount-codes/{discountCode}', [DiscountCodeController::class, 'destroyCode'])->name('discount-codes.destroy');
+    Route::patch('/coupon-codes/{couponCode}/disable', [CouponCodeController::class, 'disable'])->name('coupon-codes.disable');
+    Route::patch('/coupon-codes/{couponCode}/enable', [CouponCodeController::class, 'enable'])->name('coupon-codes.enable');
+    Route::delete('/coupon-codes/{couponCode}', [CouponCodeController::class, 'destroyCode'])->name('coupon-codes.destroy');
     Route::get('/orders/{order}', [PosController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [PosController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('/orders/{order}/print', [PosController::class, 'print'])->name('orders.print');
     Route::get('/orders/{order}/card', [PosController::class, 'orderCard'])->name('orders.card');
+    Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
+    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
 
     // Menu
     Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');

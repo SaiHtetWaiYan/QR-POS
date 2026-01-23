@@ -9,16 +9,10 @@
                         <div class="w-9 h-9 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
                             <x-application-logo class="block h-5 w-5 text-white" />
                         </div>
-                        <span class="text-gray-900 font-semibold text-lg tracking-tight hidden sm:block">{{ config('app.name', 'QR POS') }}</span>
+                        <span class="text-gray-900 font-semibold text-lg tracking-tight hidden sm:block">{{ config('pos.shop_name', config('app.name', 'QR POS')) }}</span>
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('pos.index')" :active="request()->routeIs('pos.index')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                </div>
             </div>
 
             <!-- Settings Dropdown -->
@@ -69,12 +63,6 @@
 
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('pos.index')" :active="request()->routeIs('pos.index')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-        </div>
-
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">

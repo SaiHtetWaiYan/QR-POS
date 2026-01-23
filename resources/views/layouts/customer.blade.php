@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <title>{{ config('app.name', 'QR POS') }}</title>
+    <title>{{ config('pos.shop_name', config('app.name', 'QR POS')) }}</title>
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -47,10 +47,10 @@
       x-on:toast.window="toastMessage = $event.detail.message; showToast = true; clearTimeout(toastTimeout); toastTimeout = setTimeout(() => showToast = false, 2500)">
     <div class="min-h-screen flex flex-col max-w-lg mx-auto bg-white shadow-2xl shadow-slate-200/50">
         <!-- Header -->
-        <header class="bg-gradient-to-r from-slate-800 to-slate-900 sticky top-0 z-20 safe-area-top">
+        <header class="bg-slate-100/90 backdrop-blur-lg border-b border-slate-200 sticky top-0 z-20 safe-area-top">
             <div class="px-5 py-4 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('customer.index', request()->route('table')) }}" class="text-white/70 hover:text-white transition-colors">
+                    <a href="{{ route('customer.index', request()->route('table')) }}" class="text-slate-500 hover:text-slate-700 transition-colors">
                         @if(!request()->routeIs('customer.index'))
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -62,9 +62,12 @@
                         @endif
                     </a>
                     <div>
-                        <h1 class="text-white font-semibold text-lg tracking-tight">@yield('header')</h1>
+                        <p class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                            {{ config('pos.shop_name', config('app.name', 'QR POS')) }}
+                        </p>
+                        <h1 class="text-slate-900 font-semibold text-lg tracking-tight mt-1">@yield('header')</h1>
                         @hasSection('subheader')
-                            <p class="text-slate-400 text-xs">@yield('subheader')</p>
+                            <p class="text-slate-500 text-xs">@yield('subheader')</p>
                         @endif
                     </div>
                 </div>

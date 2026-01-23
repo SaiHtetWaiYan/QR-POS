@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CouponCampaign;
-use App\Models\DiscountCode;
+use App\Models\CouponCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -106,7 +106,7 @@ class CouponCampaignController extends Controller
     public function toggle(CouponCampaign $campaign)
     {
         $campaign->update(['is_active' => ! $campaign->is_active]);
-        $campaign->discountCodes()->update(['is_active' => $campaign->is_active]);
+        $campaign->coupons()->update(['is_active' => $campaign->is_active]);
 
         return back()->with('success', 'Campaign status updated');
     }
@@ -124,7 +124,7 @@ class CouponCampaignController extends Controller
 
     public function destroy(CouponCampaign $campaign)
     {
-        $campaign->discountCodes()->delete();
+        $campaign->coupons()->delete();
         $campaign->delete();
 
         return back()->with('success', 'Campaign deleted');
@@ -160,7 +160,7 @@ class CouponCampaignController extends Controller
                 continue;
             }
 
-            if (! DiscountCode::where('code', $code)->exists()) {
+            if (! CouponCode::where('code', $code)->exists()) {
                 $codes[$code] = true;
             }
         }
@@ -188,6 +188,6 @@ class CouponCampaignController extends Controller
             ];
         }
 
-        DiscountCode::insert($payload);
+        CouponCode::insert($payload);
     }
 }

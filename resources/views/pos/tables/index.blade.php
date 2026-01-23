@@ -1,24 +1,24 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h2 class="font-bold text-2xl text-gray-900 leading-tight">
-                    {{ __('Table Management') }}
-                </h2>
-                <p class="text-sm text-gray-500 mt-1">Manage your restaurant tables and QR codes</p>
-            </div>
-            <a href="{{ route('pos.tables.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 rounded-xl font-medium text-sm text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-500 transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Add Table
-            </a>
+        <div>
+            <h2 class="font-bold text-2xl text-gray-900 leading-tight">
+                {{ __('Table Management') }}
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">Manage your restaurant tables and QR codes</p>
         </div>
     </x-slot>
 
     <div class="py-8" x-data="{ deleteModal: false, deleteTableId: null, deleteTableName: '' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 mb-6">
+                <a href="{{ route('pos.tables.create') }}"
+                   class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-2xl font-medium text-sm text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-500 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Add Table
+                </a>
+            </div>
             @if($tables->isEmpty())
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
                     <div class="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">

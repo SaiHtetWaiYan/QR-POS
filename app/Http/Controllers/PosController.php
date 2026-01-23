@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\OrderStatusUpdated;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Category;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -26,7 +26,7 @@ class PosController extends Controller
                 ELSE 6 END")
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
         // Separate by status for Kanban or Lists
         $pendingAll = $orders->where('status', 'pending');
         $activeAll = $orders->whereIn('status', ['accepted', 'preparing', 'served']);
@@ -40,15 +40,16 @@ class PosController extends Controller
         $activeCount = $activeAll->count();
         $completedCount = $completedAll->count();
 
-        $topItem = OrderItem::selectRaw('name_snapshot, SUM(qty) as total_qty')
+        $topItems = OrderItem::selectRaw('order_items.menu_item_id, order_items.name_snapshot, SUM(order_items.qty) as total_qty, menu_items.image_path')
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->whereDate('orders.created_at', $today)
+            ->leftJoin('menu_items', 'menu_items.id', '=', 'order_items.menu_item_id')
             ->where('orders.status', '!=', 'cancelled')
-            ->groupBy('name_snapshot')
+            ->groupBy('order_items.menu_item_id', 'order_items.name_snapshot', 'menu_items.image_path')
             ->orderByDesc('total_qty')
-            ->first();
+            ->limit(3)
+            ->get();
 
-        return view('pos.index', compact('orders', 'pending', 'active', 'completed', 'pendingCount', 'activeCount', 'completedCount', 'topItem'));
+        return view('pos.index', compact('orders', 'pending', 'active', 'completed', 'pendingCount', 'activeCount', 'completedCount', 'topItems'));
     }
 
     public function history(Request $request)
@@ -77,13 +78,14 @@ class PosController extends Controller
     public function show(Order $order)
     {
         $order->load(['orderItems', 'table']);
+
         return view('pos.show', compact('order'));
     }
 
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate(['status' => 'required|in:pending,accepted,preparing,served,paid,cancelled']);
-        
+
         $data = ['status' => $request->status];
         if ($request->status === 'paid') {
             $data['paid_at'] = now();
@@ -117,42 +119,100 @@ class PosController extends Controller
         $dailyRevenue = $dailyOrders->sum('total');
         $monthlyRevenue = $monthlyOrders->sum('total');
 
-        $dailyTopItem = OrderItem::selectRaw('name_snapshot, SUM(qty) as total_qty')
-            ->join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->whereDate('orders.created_at', $today)
-            ->where('orders.status', '!=', 'cancelled')
-            ->groupBy('name_snapshot')
-            ->orderByDesc('total_qty')
-            ->first();
+        $trendStart = now()->subDays(13)->startOfDay();
+        $trendEnd = now()->endOfDay();
+        $trendRows = Order::selectRaw('DATE(created_at) as date, COUNT(*) as orders_count, SUM(total) as revenue')
+            ->whereBetween('created_at', [$trendStart, $trendEnd])
+            ->where('status', '!=', 'cancelled')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
 
-        $monthlyTopItem = OrderItem::selectRaw('name_snapshot, SUM(qty) as total_qty')
-            ->join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->whereBetween('orders.created_at', [$monthStart.' 00:00:00', $monthEnd.' 23:59:59'])
-            ->where('orders.status', '!=', 'cancelled')
-            ->groupBy('name_snapshot')
-            ->orderByDesc('total_qty')
-            ->first();
+        $trend = [];
+        $trendMaxOrders = 1;
+        $trendMaxRevenue = 1;
+        foreach (CarbonPeriod::create($trendStart->toDateString(), $trendEnd->toDateString()) as $date) {
+            $dateKey = $date->toDateString();
+            $row = $trendRows->get($dateKey);
+            $ordersCount = (int) ($row->orders_count ?? 0);
+            $revenue = (float) ($row->revenue ?? 0);
+            $trendMaxOrders = max($trendMaxOrders, $ordersCount);
+            $trendMaxRevenue = max($trendMaxRevenue, $revenue);
+            $trend[] = [
+                'date' => $dateKey,
+                'label' => $date->format('M j'),
+                'orders' => $ordersCount,
+                'revenue' => $revenue,
+            ];
+        }
 
         return view('pos.reports', compact(
             'dailyCount',
             'monthlyCount',
             'dailyRevenue',
             'monthlyRevenue',
-            'dailyTopItem',
-            'monthlyTopItem',
-            'today'
+            'today',
+            'trend',
+            'trendMaxOrders',
+            'trendMaxRevenue'
         ));
+    }
+
+    public function exportReports(string $range)
+    {
+        $range = strtolower($range);
+        if ($range === 'last14') {
+            $start = now()->subDays(13)->startOfDay();
+            $end = now()->endOfDay();
+            $label = 'last-14-days';
+        } elseif ($range === 'month') {
+            $start = now()->startOfMonth()->startOfDay();
+            $end = now()->endOfMonth()->endOfDay();
+            $label = now()->format('Y-m');
+        } else {
+            abort(404);
+        }
+
+        $rows = Order::selectRaw('DATE(created_at) as date, COUNT(*) as orders_count, SUM(total) as revenue')
+            ->whereBetween('created_at', [$start, $end])
+            ->where('status', '!=', 'cancelled')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $filename = 'pos-report-'.$label.'.csv';
+
+        return response()->streamDownload(function () use ($start, $end, $rows) {
+            $handle = fopen('php://output', 'wb');
+            fputcsv($handle, ['date', 'orders', 'revenue']);
+
+            foreach (CarbonPeriod::create($start->toDateString(), $end->toDateString()) as $date) {
+                $dateKey = $date->toDateString();
+                $row = $rows->get($dateKey);
+                $ordersCount = (int) ($row->orders_count ?? 0);
+                $revenue = number_format((float) ($row->revenue ?? 0), 2, '.', '');
+                fputcsv($handle, [$dateKey, $ordersCount, $revenue]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+        ]);
     }
 
     public function print(Order $order)
     {
         $order->load(['orderItems', 'table']);
+
         return view('pos.print', compact('order'));
     }
 
     public function orderCard(Order $order)
     {
         $order->load(['orderItems.menuItem', 'table']);
+
         return view('pos.partials.order_card', compact('order'));
     }
 }

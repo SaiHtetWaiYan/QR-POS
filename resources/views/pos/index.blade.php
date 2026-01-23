@@ -7,50 +7,6 @@
                 </h2>
                 <p class="text-sm text-slate-500 mt-1">Manage incoming orders in real-time</p>
             </div>
-            <div class="flex gap-3">
-                <a href="{{ route('pos.discounts.index') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2v2m-4-4a2 2 0 00-2 2v2m6 4a2 2 0 01-2 2h-2m4-4a2 2 0 00-2-2h-2M7 9a2 2 0 012-2h2m-4 4a2 2 0 002 2h2m-4 4a2 2 0 012-2h2"/>
-                    </svg>
-                    Discounts
-                </a>
-                <a href="{{ route('pos.coupons.index') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8L9 19l-4-4-4 4V7a2 2 0 012-2h10z"/>
-                    </svg>
-                    Coupons
-                </a>
-                <a href="{{ route('pos.reports') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6m4 6V7m4 10V9m-9 8h10a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                    </svg>
-                    Reports
-                </a>
-                <a href="{{ route('pos.history') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-11 9h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
-                    History
-                </a>
-                <a href="{{ route('pos.menu.index') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                    </svg>
-                    Menu
-                </a>
-                <a href="{{ route('pos.tables.index') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 border border-transparent rounded-xl font-medium text-sm text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                    </svg>
-                    Tables
-                </a>
-            </div>
         </div>
     </x-slot>
 
@@ -180,14 +136,34 @@
                 </div>
             </div>
 
-            @if($topItem)
-                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-6 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Most ordered today</p>
-                        <p class="text-lg font-semibold text-gray-900">{{ $topItem->name_snapshot }}</p>
+            @if($topItems->isNotEmpty())
+                <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Most ordered items</p>
+                            <p class="text-sm text-gray-500">All time</p>
+                        </div>
                     </div>
-                    <div class="text-sm font-semibold text-emerald-600">
-                        {{ $topItem->total_qty }} ordered
+                    <div class="flex gap-4">
+                        @foreach($topItems as $item)
+                            <div class="flex flex-1 min-w-0 items-center gap-4 rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+                                @if($item->image_path)
+                                    <img src="{{ asset('storage/'.$item->image_path) }}"
+                                         alt="{{ $item->name_snapshot }}"
+                                         class="h-14 w-14 rounded-xl object-cover border border-white shadow-sm">
+                                @else
+                                    <div class="h-14 w-14 rounded-xl bg-white border border-gray-200 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                @endif
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-gray-900 truncate">{{ $item->name_snapshot }}</p>
+                                    <p class="text-xs text-emerald-600 font-semibold mt-1">{{ $item->total_qty }} ordered</p>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             @endif

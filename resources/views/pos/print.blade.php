@@ -2,13 +2,17 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Receipt #{{ $order->order_no }}</title>
+    <title></title>
     <style>
+        @page {
+            size: 210mm 99mm;
+            margin: 6mm;
+        }
         body {
             font-family: 'Courier New', Courier, monospace;
-            width: 80mm;
+            width: 210mm;
             margin: 0;
-            padding: 5mm;
+            padding: 6mm;
             font-size: 12px;
             color: #000;
         }
@@ -24,9 +28,9 @@
 </head>
 <body onload="window.print()">
     <div class="text-center mb-2">
-        <h2 class="font-bold" style="margin:0;">{{ config('app.name') }}</h2>
-        <p style="margin:0;">123 Restaurant Street</p>
-        <p style="margin:0;">Tel: 555-0123</p>
+        <h2 class="font-bold" style="margin:0;">{{ config('pos.shop_name', config('app.name', 'QR POS')) }}</h2>
+        <p style="margin:0;">{{ config('pos.shop_address', '') }}</p>
+        <p style="margin:0;">{{ config('pos.shop_phone', '') }}</p>
     </div>
 
     <div class="border-b">
@@ -64,10 +68,10 @@
             <td>Service</td>
             <td class="price">{{ number_format($order->service_charge, 2) }}</td>
         </tr>
-        @if($order->discount_amount > 0)
+        @if($order->coupon_amount > 0)
             <tr>
-                <td>Discount</td>
-                <td class="price">-{{ number_format($order->discount_amount, 2) }}</td>
+                <td>Coupon</td>
+                <td class="price">-{{ number_format($order->coupon_amount, 2) }}</td>
             </tr>
         @endif
         <tr class="font-bold" style="font-size: 14px;">
@@ -78,7 +82,6 @@
 
     <div class="text-center" style="margin-top: 20px;">
         <p>Thank you for dining with us!</p>
-        <p>Wifi: Guest / Pass123</p>
     </div>
 </body>
 </html>

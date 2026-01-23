@@ -187,7 +187,7 @@
                             class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50">
                         Cancel
                     </button>
-                    <form :action="`{{ url('pos/discount-codes') }}/${disableCouponId}/disable`" method="POST">
+                    <form :action="`{{ url('pos/coupon-codes') }}/${disableCouponId}/disable`" method="POST">
                         @csrf
                         @method('PATCH')
                         <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-gray-600 rounded-xl hover:bg-gray-500">
@@ -213,7 +213,7 @@
                             class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50">
                         Cancel
                     </button>
-                    <form :action="`{{ url('pos/discount-codes') }}/${enableCouponId}/enable`" method="POST">
+                    <form :action="`{{ url('pos/coupon-codes') }}/${enableCouponId}/enable`" method="POST">
                         @csrf
                         @method('PATCH')
                         <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-500">
@@ -239,7 +239,7 @@
                             class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50">
                         Cancel
                     </button>
-                    <form :action="`{{ url('pos/discount-codes') }}/${deleteCouponId}`" method="POST">
+                    <form :action="`{{ url('pos/coupon-codes') }}/${deleteCouponId}`" method="POST">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-500">

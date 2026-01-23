@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'QR POS') }}</title>
+        <title>{{ config('pos.shop_name', config('app.name', 'QR POS')) }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -50,7 +50,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                         </svg>
                     </div>
-                    <span class="mt-4 text-2xl font-bold text-gray-900 tracking-tight">{{ config('app.name', 'QR POS') }}</span>
+                    <span class="mt-4 text-2xl font-bold text-gray-900 tracking-tight">{{ config('pos.shop_name', config('app.name', 'QR POS')) }}</span>
                     <span class="text-sm text-gray-500 mt-1">Restaurant Management System</span>
                 </a>
             </div>
@@ -60,7 +60,7 @@
             </div>
 
             <div class="mt-8 text-center text-sm text-gray-400 relative z-10">
-                &copy; {{ date('Y') }} {{ config('app.name', 'QR POS') }}. All rights reserved.
+                &copy; {{ date('Y') }} {{ config('pos.shop_name', config('app.name', 'QR POS')) }}. All rights reserved.
             </div>
         </div>
     </body>

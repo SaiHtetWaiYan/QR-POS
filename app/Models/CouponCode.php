@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DiscountCode extends Model
+class CouponCode extends Model
 {
     use HasFactory;
 
@@ -80,7 +80,7 @@ class DiscountCode extends Model
         ]);
     }
 
-    public function calculateDiscount(float $subtotal): float
+    public function calculateCoupon(float $subtotal): float
     {
         if ($this->type === 'percent') {
             return round($subtotal * ($this->value / 100), 2);

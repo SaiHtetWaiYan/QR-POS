@@ -275,7 +275,46 @@
                 successMessage: '',
                 redirectTo: '',
                 customerNote: '',
-                discountCode: '',
+                couponCode: '',
+                couponChecking: false,
+                couponValid: null,
+                couponMessage: '',
+                couponMeta: null,
+                couponCheckTimeout: null,
+                async checkCoupon() {
+                    if (this.couponCheckTimeout) {
+                        clearTimeout(this.couponCheckTimeout);
+                    }
+                    const code = this.couponCode.trim();
+                    if (!code) {
+                        this.couponValid = null;
+                        this.couponMessage = '';
+                        this.couponMeta = null;
+                        return;
+                    }
+                    this.couponChecking = true;
+                    try {
+                        const response = await fetch('{{ route('customer.coupon.check', $table->code) }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ coupon_code: code })
+                        });
+                        const data = await response.json();
+                        this.couponValid = Boolean(data.valid);
+                        this.couponMessage = data.message || '';
+                        this.couponMeta = data.valid ? { type: data.type, value: data.value } : null;
+                    } catch (error) {
+                        this.couponValid = false;
+                        this.couponMessage = 'Unable to validate coupon right now.';
+                        this.couponMeta = null;
+                    } finally {
+                        this.couponChecking = false;
+                    }
+                },
                 async placeOrder() {
                     if (this.submitting) return;
                     this.submitting = true;
@@ -289,7 +328,7 @@
                         },
                         body: JSON.stringify({
                             customer_note: this.customerNote,
-                            discount_code: this.discountCode
+                            coupon_code: this.couponCode
                         })
                     });
                         const data = await response.json();
@@ -319,13 +358,24 @@
                           placeholder="Any allergies or special requests for the kitchen?"></textarea>
             </div>
             <div class="mb-5">
-                <label for="discount_code" class="block text-sm font-medium text-slate-700 mb-2">Discount Code</label>
-                <input x-model="discountCode"
-                       id="discount_code"
+                <label for="coupon_code" class="block text-sm font-medium text-slate-700 mb-2">Coupon Code</label>
+                <input x-model="couponCode"
+                       @input="couponCheckTimeout = setTimeout(() => checkCoupon(), 500)"
+                       @blur="checkCoupon()"
+                       id="coupon_code"
                        type="text"
                        class="w-full border-slate-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 text-sm placeholder:text-slate-400 uppercase"
-                       placeholder="ENTER CODE">
-                <p class="text-xs text-slate-400 mt-2">Optional. Code is applied to the whole order.</p>
+                       placeholder="ENTER COUPON">
+                <div class="mt-2 flex items-center gap-2 text-xs">
+                    <span x-show="couponChecking" class="text-slate-400">Checking...</span>
+                    <span x-show="!couponChecking && couponMessage"
+                          :class="couponValid ? 'text-emerald-600' : 'text-red-600'"
+                          x-text="couponMessage"></span>
+                    <span x-show="!couponChecking && couponMeta"
+                          class="text-slate-400"
+                          x-text="couponMeta ? `${couponMeta.type === 'percent' ? couponMeta.value + '%' : '{{ config('pos.currency_symbol') }}' + Number(couponMeta.value).toFixed(2)}` : ''"></span>
+                </div>
+                <p class="text-xs text-slate-400 mt-2">Optional. Coupon applies to the whole order.</p>
             </div>
             <button type="submit"
                     :disabled="submitting"

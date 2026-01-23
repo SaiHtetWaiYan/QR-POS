@@ -33,14 +33,9 @@ class CouponCampaign extends Model
         'coupon_value' => 'decimal:2',
     ];
 
-    public function discountCodes()
-    {
-        return $this->hasMany(DiscountCode::class);
-    }
-
     public function coupons()
     {
-        return $this->hasMany(DiscountCode::class);
+        return $this->hasMany(CouponCode::class);
     }
 
     public function isExpired(): bool
@@ -56,7 +51,7 @@ class CouponCampaign extends Model
 
         $totalCoupons = (int) floor($this->total_amount / $this->coupon_value);
         $codes = [];
-        $existingCodes = DiscountCode::pluck('code')->toArray();
+        $existingCodes = CouponCode::pluck('code')->toArray();
         $characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
         for ($i = 0; $i < $totalCoupons; $i++) {
@@ -84,28 +79,28 @@ class CouponCampaign extends Model
         }
 
         if (count($codes) > 0) {
-            DiscountCode::insert($codes);
+            CouponCode::insert($codes);
             $this->update(['total_codes' => count($codes)]);
         }
     }
 
     public function getUsedCouponsCountAttribute(): int
     {
-        return $this->discountCodes()->where('status', 'used')->count();
+        return $this->coupons()->where('status', 'used')->count();
     }
 
     public function getUnusedCouponsCountAttribute(): int
     {
-        return $this->discountCodes()->where('status', 'unused')->count();
+        return $this->coupons()->where('status', 'unused')->count();
     }
 
     public function getExpiredCouponsCountAttribute(): int
     {
-        return $this->discountCodes()->where('status', 'expired')->count();
+        return $this->coupons()->where('status', 'expired')->count();
     }
 
     public function getDisabledCouponsCountAttribute(): int
     {
-        return $this->discountCodes()->where('status', 'disabled')->count();
+        return $this->coupons()->where('status', 'disabled')->count();
     }
 }

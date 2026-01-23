@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\BillRequested;
 use App\Models\Category;
-use App\Models\DiscountCode;
+use App\Models\CouponCode;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -187,14 +187,14 @@ class CustomerController extends Controller
             ->whereIn('status', ['pending', 'accepted', 'preparing', 'served'])
             ->first();
 
-        $discountInput = strtoupper(trim((string) $request->input('discount_code', '')));
-        $discountCode = null;
-        if ($discountInput !== '') {
-            $discountCode = DiscountCode::where('code', $discountInput)->first();
-            $campaign = $discountCode?->couponCampaign;
+        $couponInput = strtoupper(trim((string) $request->input('coupon_code', '')));
+        $couponCode = null;
+        if ($couponInput !== '') {
+            $couponCode = CouponCode::where('code', $couponInput)->first();
+            $campaign = $couponCode?->couponCampaign;
 
-            if (! $discountCode) {
-                $message = 'Discount code not found.';
+            if (! $couponCode) {
+                $message = 'Coupon code not found.';
                 if ($request->expectsJson()) {
                     return response()->json(['success' => false, 'message' => $message], 400);
                 }
@@ -202,12 +202,12 @@ class CustomerController extends Controller
                 return back()->with('error', $message);
             }
 
-            if (! $discountCode->isUsable()) {
-                $message = match ($discountCode->status) {
-                    'used' => 'This discount code has already been used.',
-                    'expired' => 'This discount code has expired.',
-                    'disabled' => 'This discount code is no longer available.',
-                    default => 'Invalid or expired discount code.',
+            if (! $couponCode->isUsable()) {
+                $message = match ($couponCode->status) {
+                    'used' => 'This coupon code has already been used.',
+                    'expired' => 'This coupon code has expired.',
+                    'disabled' => 'This coupon code is no longer available.',
+                    default => 'Invalid or expired coupon code.',
                 };
                 if ($request->expectsJson()) {
                     return response()->json(['success' => false, 'message' => $message], 400);
@@ -217,7 +217,7 @@ class CustomerController extends Controller
             }
 
             if ($campaign && ! $campaign->is_active) {
-                $message = 'This discount campaign is no longer active.';
+                $message = 'This coupon campaign is no longer active.';
                 if ($request->expectsJson()) {
                     return response()->json(['success' => false, 'message' => $message], 400);
                 }
@@ -226,8 +226,8 @@ class CustomerController extends Controller
             }
         }
 
-        if ($existingOrder && $discountInput !== '' && $existingOrder->discount_code_id) {
-            $message = 'A discount code is already applied to this order.';
+        if ($existingOrder && $couponInput !== '' && $existingOrder->coupon_code_id) {
+            $message = 'A coupon code is already applied to this order.';
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => $message], 400);
             }
@@ -264,41 +264,41 @@ class CustomerController extends Controller
                 $newSubtotal = $order->subtotal + $subtotal;
                 $newTax = $newSubtotal * $taxRate;
                 $newServiceCharge = $newSubtotal * $serviceChargeRate;
-                $discountAmount = 0;
-                if ($discountCode && ! $order->discount_code_id) {
-                    $order->discount_code_id = $discountCode->id;
-                    $order->discount_type = $discountCode->type;
-                    $order->discount_value = $discountCode->value;
-                    $discountCode->markAsUsed();
+                $couponAmount = 0;
+                if ($couponCode && ! $order->coupon_code_id) {
+                    $order->coupon_code_id = $couponCode->id;
+                    $order->coupon_type = $couponCode->type;
+                    $order->coupon_value = $couponCode->value;
+                    $couponCode->markAsUsed();
                 }
 
-                if ($order->discount_type === 'percent' && $order->discount_value) {
-                    $discountAmount = $newSubtotal * ($order->discount_value / 100);
-                } elseif ($order->discount_type === 'fixed' && $order->discount_value) {
-                    $discountAmount = min($order->discount_value, $newSubtotal);
+                if ($order->coupon_type === 'percent' && $order->coupon_value) {
+                    $couponAmount = $newSubtotal * ($order->coupon_value / 100);
+                } elseif ($order->coupon_type === 'fixed' && $order->coupon_value) {
+                    $couponAmount = min($order->coupon_value, $newSubtotal);
                 }
-                $newTotal = max(0, $newSubtotal + $newTax + $newServiceCharge - $discountAmount);
+                $newTotal = max(0, $newSubtotal + $newTax + $newServiceCharge - $couponAmount);
 
                 $order->update([
-                    'discount_code_id' => $order->discount_code_id,
-                    'discount_type' => $order->discount_type,
-                    'discount_value' => $order->discount_value,
+                    'coupon_code_id' => $order->coupon_code_id,
+                    'coupon_type' => $order->coupon_type,
+                    'coupon_value' => $order->coupon_value,
                     'subtotal' => $newSubtotal,
                     'tax' => $newTax,
                     'service_charge' => $newServiceCharge,
-                    'discount_amount' => $discountAmount,
+                    'coupon_amount' => $couponAmount,
                     'total' => $newTotal,
                 ]);
             } else {
-                $discountType = $discountCode?->type;
-                $discountValue = $discountCode?->value;
-                $discountAmount = 0;
-                if ($discountType === 'percent' && $discountValue) {
-                    $discountAmount = $subtotal * ($discountValue / 100);
-                } elseif ($discountType === 'fixed' && $discountValue) {
-                    $discountAmount = min($discountValue, $subtotal);
+                $couponType = $couponCode?->type;
+                $couponValue = $couponCode?->value;
+                $couponAmount = 0;
+                if ($couponType === 'percent' && $couponValue) {
+                    $couponAmount = $subtotal * ($couponValue / 100);
+                } elseif ($couponType === 'fixed' && $couponValue) {
+                    $couponAmount = min($couponValue, $subtotal);
                 }
-                $total = max(0, $total - $discountAmount);
+                $total = max(0, $total - $couponAmount);
 
                 $order = Order::create([
                     'table_id' => $table->id,
@@ -308,15 +308,15 @@ class CustomerController extends Controller
                     'subtotal' => $subtotal,
                     'tax' => $tax,
                     'service_charge' => $serviceCharge,
-                    'discount_code_id' => $discountCode?->id,
-                    'discount_type' => $discountType,
-                    'discount_value' => $discountValue,
-                    'discount_amount' => $discountAmount,
+                    'coupon_code_id' => $couponCode?->id,
+                    'coupon_type' => $couponType,
+                    'coupon_value' => $couponValue,
+                    'coupon_amount' => $couponAmount,
                     'total' => $total,
                 ]);
 
-                if ($discountCode) {
-                    $discountCode->markAsUsed();
+                if ($couponCode) {
+                    $couponCode->markAsUsed();
                 }
 
                 foreach ($cart as $item) {
@@ -362,6 +362,56 @@ class CustomerController extends Controller
 
             return back()->with('error', 'Order failed: '.$e->getMessage());
         }
+    }
+
+    public function checkCoupon(Request $request, $tableCode)
+    {
+        $this->getTable($tableCode);
+
+        $couponInput = strtoupper(trim((string) $request->input('coupon_code', '')));
+        if ($couponInput === '') {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Enter a coupon code.',
+            ]);
+        }
+
+        $couponCode = CouponCode::where('code', $couponInput)->first();
+        if (! $couponCode || ! $couponCode->coupon_campaign_id) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Coupon code not found.',
+            ]);
+        }
+
+        $campaign = $couponCode->couponCampaign;
+        if ($campaign && ! $campaign->is_active) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'This coupon campaign is no longer active.',
+            ]);
+        }
+
+        if (! $couponCode->isUsable()) {
+            $message = match ($couponCode->status) {
+                'used' => 'This coupon code has already been used.',
+                'expired' => 'This coupon code has expired.',
+                'disabled' => 'This coupon code is no longer available.',
+                default => 'Invalid or expired coupon code.',
+            };
+
+            return response()->json([
+                'valid' => false,
+                'message' => $message,
+            ]);
+        }
+
+        return response()->json([
+            'valid' => true,
+            'message' => 'Coupon applied.',
+            'type' => $couponCode->type,
+            'value' => $couponCode->value,
+        ]);
     }
 
     public function status($tableCode)
