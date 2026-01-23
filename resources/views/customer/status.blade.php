@@ -131,55 +131,67 @@
                 </div>
             </div>
 
-            <!-- Order Items -->
-            <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden mb-6 shadow-sm">
-                <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
-                    <h3 class="font-semibold text-slate-900">Order Items</h3>
-                    <span class="text-xs text-slate-500">{{ $order->orderItems->sum('qty') }} items</span>
+            @if($order->status === 'cancelled')
+                <div class="bg-gradient-to-br from-red-500 to-rose-500 rounded-2xl p-6 text-white text-center shadow-lg shadow-red-500/30 mb-6">
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </div>
+                    <p class="font-bold text-xl mb-1">Order Cancelled</p>
+                    <p class="text-red-100 text-sm">Please ask staff if you need help.</p>
                 </div>
+            @else
+                <!-- Order Items -->
+                <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden mb-6 shadow-sm">
+                    <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
+                        <h3 class="font-semibold text-slate-900">Order Items</h3>
+                        <span class="text-xs text-slate-500">{{ $order->orderItems->sum('qty') }} items</span>
+                    </div>
 
-                <div class="divide-y divide-slate-100">
-                    @foreach($order->orderItems as $item)
-                        <div class="px-5 py-3 flex justify-between items-start">
-                            <div class="flex items-start gap-3">
-                                <span class="bg-slate-100 text-slate-600 text-xs font-bold px-2 py-1 rounded-full">{{ $item->qty }}x</span>
-                                <div>
-                                    <span class="font-medium text-slate-900 text-sm">{{ $item->name_snapshot }}</span>
-                                    @if($item->note)
-                                        <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-                                            </svg>
-                                            {{ $item->note }}
-                                        </p>
-                                    @endif
+                    <div class="divide-y divide-slate-100">
+                        @foreach($order->orderItems as $item)
+                            <div class="px-5 py-3 flex justify-between items-start">
+                                <div class="flex items-start gap-3">
+                                    <span class="bg-slate-100 text-slate-600 text-xs font-bold px-2 py-1 rounded-full">{{ $item->qty }}x</span>
+                                    <div>
+                                        <span class="font-medium text-slate-900 text-sm">{{ $item->name_snapshot }}</span>
+                                        @if($item->note)
+                                            <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                                                </svg>
+                                                {{ $item->note }}
+                                            </p>
+                                        @endif
+                                    </div>
                                 </div>
+                                <span class="text-sm font-medium text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($item->line_total, 2) }}</span>
                             </div>
-                            <span class="text-sm font-medium text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($item->line_total, 2) }}</span>
-                        </div>
-                    @endforeach
-                </div>
+                        @endforeach
+                    </div>
 
-                <!-- Order Totals -->
-                <div class="bg-slate-50 px-5 py-4 space-y-2">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-slate-600">Subtotal</span>
-                        <span class="text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($order->subtotal, 2) }}</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-slate-500">Tax ({{ config('pos.tax_rate') * 100 }}%)</span>
-                        <span class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($order->tax, 2) }}</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-slate-500">Service ({{ config('pos.service_charge') * 100 }}%)</span>
-                        <span class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($order->service_charge, 2) }}</span>
-                    </div>
-                    <div class="flex justify-between items-center pt-3 border-t border-slate-200 mt-2">
-                        <span class="font-semibold text-slate-900">Total</span>
-                        <span class="text-xl font-bold text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</span>
+                    <!-- Order Totals -->
+                    <div class="bg-slate-50 px-5 py-4 space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-600">Subtotal</span>
+                            <span class="text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($order->subtotal, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Tax ({{ config('pos.tax_rate') * 100 }}%)</span>
+                            <span class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($order->tax, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Service ({{ config('pos.service_charge') * 100 }}%)</span>
+                            <span class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($order->service_charge, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-3 border-t border-slate-200 mt-2">
+                            <span class="font-semibold text-slate-900">Total</span>
+                            <span class="text-xl font-bold text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
 
             <!-- Actions -->
             @if($order->status !== 'paid' && $order->status !== 'cancelled')
