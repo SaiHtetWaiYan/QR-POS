@@ -5,11 +5,19 @@
 @endsection
 
 @section('subheader')
-    {{ count($cart ?? []) }} {{ Str::plural('item', count($cart ?? [])) }}
+    <span id="cart-item-count">{{ count($cart ?? []) }}</span>
+    <span id="cart-item-label">{{ Str::plural('item', count($cart ?? [])) }}</span>
 @endsection
 
 @section('content')
-    @if(empty($cart))
+    <div id="cart-state"
+         data-count="{{ count($cart ?? []) }}"
+         data-subtotal="{{ $subtotal ?? 0 }}"
+         data-tax-rate="{{ config('pos.tax_rate', 0) }}"
+         data-service-rate="{{ config('pos.service_charge', 0) }}"
+         data-currency="{{ config('pos.currency_symbol') }}"></div>
+
+    <div id="cart-empty-state" class="{{ empty($cart) ? '' : 'hidden opacity-0' }} transition-opacity duration-200">
         <div class="text-center py-16">
             <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,10 +34,14 @@
                 Browse Menu
             </a>
         </div>
-    @else
+    </div>
+
+    <div id="cart-body" class="{{ empty($cart) ? 'hidden opacity-0' : '' }} transition-opacity duration-200">
         <div class="space-y-3 mb-6">
             @foreach($cart as $lineId => $item)
-                <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm animate-fade-in">
+                <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm animate-fade-in"
+                     data-cart-item
+                     data-line-total="{{ $item['price'] * $item['qty'] }}">
                     <div class="flex justify-between items-start gap-3">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-start justify-between">
@@ -72,7 +84,54 @@
                                                     if (typeof data.cart_count === 'number') {
                                                         window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count } }));
                                                     }
-                                                    window.location.reload();
+                                                    const itemEl = $el.closest('[data-cart-item]');
+                                                    const lineTotal = Number(itemEl?.dataset.lineTotal || 0);
+                                                    if (itemEl) {
+                                                        itemEl.remove();
+                                                    }
+
+                                                    const state = document.getElementById('cart-state');
+                                                    if (state) {
+                                                        const taxRate = Number(state.dataset.taxRate || 0);
+                                                        const serviceRate = Number(state.dataset.serviceRate || 0);
+                                                        const currency = state.dataset.currency || '';
+                                                        const formatMoney = (value) => `${currency}${Number(value).toFixed(2)}`;
+                                                        const count = Math.max(0, Number(state.dataset.count || 0) - 1);
+                                                        const subtotal = Math.max(0, Number(state.dataset.subtotal || 0) - lineTotal);
+                                                        state.dataset.count = String(count);
+                                                        state.dataset.subtotal = String(subtotal);
+
+                                                        const tax = subtotal * taxRate;
+                                                        const service = subtotal * serviceRate;
+                                                        const total = subtotal + tax + service;
+
+                                                        const subtotalEl = document.getElementById('cart-subtotal');
+                                                        const taxEl = document.getElementById('cart-tax');
+                                                        const serviceEl = document.getElementById('cart-service');
+                                                        const totalEl = document.getElementById('cart-total');
+                                                        if (subtotalEl) subtotalEl.textContent = formatMoney(subtotal);
+                                                        if (taxEl) taxEl.textContent = formatMoney(tax);
+                                                        if (serviceEl) serviceEl.textContent = formatMoney(service);
+                                                        if (totalEl) totalEl.textContent = formatMoney(total);
+
+                                                        const countEl = document.getElementById('cart-item-count');
+                                                        const labelEl = document.getElementById('cart-item-label');
+                                                        if (countEl) countEl.textContent = String(count);
+                                                        if (labelEl) labelEl.textContent = count === 1 ? 'item' : 'items';
+
+                                                        if (count === 0) {
+                                                            const emptyState = document.getElementById('cart-empty-state');
+                                                            const cartBody = document.getElementById('cart-body');
+                                                            if (cartBody) {
+                                                                cartBody.classList.add('opacity-0');
+                                                                setTimeout(() => cartBody.classList.add('hidden'), 200);
+                                                            }
+                                                            if (emptyState) {
+                                                                emptyState.classList.remove('hidden');
+                                                                requestAnimationFrame(() => emptyState.classList.remove('opacity-0'));
+                                                            }
+                                                        }
+                                                    }
                                                 } else {
                                                     this.removing = false;
                                                     alert(data.message || 'Failed to remove item. Please try again.');
@@ -113,20 +172,20 @@
             <div class="space-y-2">
                 <div class="flex justify-between text-sm">
                     <span class="text-slate-600">Subtotal</span>
-                    <span class="font-medium text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($subtotal, 2) }}</span>
+                    <span id="cart-subtotal" class="font-medium text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($subtotal, 2) }}</span>
                 </div>
                 <div class="flex justify-between text-sm">
                     <span class="text-slate-500">Tax ({{ config('pos.tax_rate', 0) * 100 }}%)</span>
-                    <span class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($subtotal * config('pos.tax_rate', 0), 2) }}</span>
+                    <span id="cart-tax" class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($subtotal * config('pos.tax_rate', 0), 2) }}</span>
                 </div>
                 <div class="flex justify-between text-sm">
                     <span class="text-slate-500">Service ({{ config('pos.service_charge', 0) * 100 }}%)</span>
-                    <span class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($subtotal * config('pos.service_charge', 0), 2) }}</span>
+                    <span id="cart-service" class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($subtotal * config('pos.service_charge', 0), 2) }}</span>
                 </div>
                 <div class="border-t border-slate-200 pt-3 mt-3">
                     <div class="flex justify-between items-center">
                         <span class="font-semibold text-slate-900">Estimated Total</span>
-                        <span class="text-xl font-bold text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($subtotal * (1 + config('pos.tax_rate', 0) + config('pos.service_charge', 0)), 2) }}</span>
+                        <span id="cart-total" class="text-xl font-bold text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($subtotal * (1 + config('pos.tax_rate', 0) + config('pos.service_charge', 0)), 2) }}</span>
                     </div>
                 </div>
             </div>
@@ -195,5 +254,5 @@
                 Add more items
             </a>
         </div>
-    @endif
+    </div>
 @endsection
