@@ -349,7 +349,7 @@
         </div>
 
         <!-- Notification Toast -->
-        <div x-show="showNotification"
+        <div x-cloak x-show="showNotification"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 transform translate-y-2"
              x-transition:enter-end="opacity-100 transform translate-y-0"

@@ -24,26 +24,73 @@
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-6">
                 <form method="GET" action="{{ route('pos.history') }}" class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
                     <div class="flex-1" x-data="{
+                        open: false,
                         selected: '{{ $date }}',
+                        viewMonth: 0,
+                        viewYear: 0,
+                        init() {
+                            const base = this.selected ? new Date(this.selected + 'T00:00:00') : new Date();
+                            this.viewMonth = base.getMonth();
+                            this.viewYear = base.getFullYear();
+                        },
                         get formatted() {
                             if (!this.selected) return 'Select date';
                             const date = new Date(this.selected + 'T00:00:00');
                             return date.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
                         },
-                        openPicker() {
-                            if (this.$refs.input.showPicker) {
-                                this.$refs.input.showPicker();
+                        get monthLabel() {
+                            return new Date(this.viewYear, this.viewMonth, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+                        },
+                        get days() {
+                            const start = new Date(this.viewYear, this.viewMonth, 1);
+                            const end = new Date(this.viewYear, this.viewMonth + 1, 0);
+                            const startDay = start.getDay();
+                            const totalDays = end.getDate();
+                            const cells = [];
+                            for (let i = 0; i < startDay; i++) cells.push(null);
+                            for (let d = 1; d <= totalDays; d++) cells.push(new Date(this.viewYear, this.viewMonth, d));
+                            return cells;
+                        },
+                        isToday(date) {
+                            const now = new Date();
+                            return date.getFullYear() === now.getFullYear()
+                                && date.getMonth() === now.getMonth()
+                                && date.getDate() === now.getDate();
+                        },
+                        isSelected(date) {
+                            if (!this.selected) return false;
+                            const selected = new Date(this.selected + 'T00:00:00');
+                            return date.getFullYear() === selected.getFullYear()
+                                && date.getMonth() === selected.getMonth()
+                                && date.getDate() === selected.getDate();
+                        },
+                        selectDate(date) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            this.selected = `${year}-${month}-${day}`;
+                            this.open = false;
+                        },
+                        prevMonth() {
+                            if (this.viewMonth === 0) {
+                                this.viewMonth = 11;
+                                this.viewYear -= 1;
                             } else {
-                                this.$refs.input.click();
+                                this.viewMonth -= 1;
                             }
                         },
-                        sync(e) {
-                            this.selected = e.target.value;
+                        nextMonth() {
+                            if (this.viewMonth === 11) {
+                                this.viewMonth = 0;
+                                this.viewYear += 1;
+                            } else {
+                                this.viewMonth += 1;
+                            }
                         }
-                    }">
+                    }" @keydown.escape.window="open = false">
                         <label for="history_date" class="block text-sm font-medium text-gray-700 mb-2">Select Date</label>
                         <button type="button"
-                                @click="openPicker()"
+                                @click="open = !open"
                                 class="w-full max-w-xs flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all">
                             <span class="flex items-center gap-2">
                                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
@@ -55,12 +102,77 @@
                             </span>
                             <span class="text-gray-400 text-xs">Change</span>
                         </button>
+                        <div x-cloak x-show="open"
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 transform -translate-y-1"
+                             x-transition:enter-end="opacity-100 transform translate-y-0"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 transform translate-y-0"
+                             x-transition:leave-end="opacity-0 transform -translate-y-1"
+                             class="relative max-w-xs">
+                            <div class="absolute mt-3 w-full rounded-2xl border border-gray-200 bg-white shadow-xl p-4 z-10">
+                                <div class="flex items-center justify-between mb-3">
+                                    <button type="button"
+                                            @click="prevMonth()"
+                                            class="w-8 h-8 rounded-lg hover:bg-gray-100 text-gray-500">
+                                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                    </button>
+                                    <div class="text-sm font-semibold text-gray-800" x-text="monthLabel"></div>
+                                    <button type="button"
+                                            @click="nextMonth()"
+                                            class="w-8 h-8 rounded-lg hover:bg-gray-100 text-gray-500">
+                                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-7 gap-1 text-[10px] text-gray-400 mb-2">
+                                    <span class="text-center">Su</span>
+                                    <span class="text-center">Mo</span>
+                                    <span class="text-center">Tu</span>
+                                    <span class="text-center">We</span>
+                                    <span class="text-center">Th</span>
+                                    <span class="text-center">Fr</span>
+                                    <span class="text-center">Sa</span>
+                                </div>
+                                <div class="grid grid-cols-7 gap-1">
+                                    <template x-for="(day, index) in days" :key="index">
+                                        <div class="h-8">
+                                            <button type="button"
+                                                    x-show="day"
+                                                    @click="selectDate(day)"
+                                                    :class="isSelected(day)
+                                                        ? 'bg-indigo-600 text-white'
+                                                        : isToday(day)
+                                                            ? 'bg-indigo-50 text-indigo-700'
+                                                            : 'text-gray-700 hover:bg-gray-100'"
+                                                    class="w-8 h-8 rounded-lg text-xs font-semibold transition-colors mx-auto">
+                                                <span x-text="day ? day.getDate() : ''"></span>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="pt-3 mt-3 border-t border-gray-100 flex items-center justify-between">
+                                    <button type="button"
+                                            @click="selectDate(new Date())"
+                                            class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+                                        Today
+                                    </button>
+                                    <button type="button"
+                                            @click="open = false"
+                                            class="text-xs font-semibold text-gray-500 hover:text-gray-600">
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                         <input type="date"
                                id="history_date"
                                name="date"
                                value="{{ $date }}"
-                               x-ref="input"
-                               @change="sync($event)"
+                               x-model="selected"
                                class="sr-only">
                         <p class="text-xs text-gray-400 mt-2">Pick a date to review completed orders.</p>
                     </div>
