@@ -190,7 +190,7 @@ class CustomerController extends Controller
     {
         $table = $this->getTable($tableCode);
         $order = Order::with('orderItems')->where('table_id', $table->id)
-            ->whereIn('status', ['pending', 'accepted', 'preparing', 'served', 'paid']) // Show paid too briefly or separate
+            ->whereIn('status', ['pending', 'accepted', 'preparing', 'served'])
             ->latest()
             ->first();
 
