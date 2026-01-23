@@ -53,4 +53,29 @@ class DiscountCodeController extends Controller
 
         return back()->with('success', 'Discount code deleted');
     }
+
+    public function disable(DiscountCode $discountCode)
+    {
+        if ($discountCode->status === 'unused') {
+            $discountCode->update(['status' => 'disabled', 'is_active' => false]);
+        }
+
+        return back()->with('success', 'Coupon disabled.');
+    }
+
+    public function enable(DiscountCode $discountCode)
+    {
+        if ($discountCode->status === 'disabled') {
+            $discountCode->update(['status' => 'unused', 'is_active' => true]);
+        }
+
+        return back()->with('success', 'Coupon enabled.');
+    }
+
+    public function destroyCode(DiscountCode $discountCode)
+    {
+        $discountCode->delete();
+
+        return back()->with('success', 'Coupon deleted.');
+    }
 }

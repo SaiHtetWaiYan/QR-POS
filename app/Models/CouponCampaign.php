@@ -4,14 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class CouponCampaign extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
+        'title',
+        'total_amount',
+        'coupon_value',
+        'total_codes',
         'type',
         'value',
         'starts_at',
@@ -19,7 +21,6 @@ class CouponCampaign extends Model
         'max_uses_per_code',
         'code_prefix',
         'code_length',
-        'total_codes',
         'is_active',
     ];
 
@@ -28,9 +29,16 @@ class CouponCampaign extends Model
         'ends_at' => 'datetime',
         'is_active' => 'boolean',
         'value' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'coupon_value' => 'decimal:2',
     ];
 
     public function discountCodes()
+    {
+        return $this->hasMany(DiscountCode::class);
+    }
+
+    public function coupons()
     {
         return $this->hasMany(DiscountCode::class);
     }
@@ -40,26 +48,33 @@ class CouponCampaign extends Model
         return $this->ends_at && $this->ends_at->isPast();
     }
 
-    public function generateCodes(int $count): void
+    public function generateCoupons(): void
     {
+        if (! $this->total_amount || ! $this->coupon_value) {
+            return;
+        }
+
+        $totalCoupons = (int) floor($this->total_amount / $this->coupon_value);
         $codes = [];
         $existingCodes = DiscountCode::pluck('code')->toArray();
+        $characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-        for ($i = 0; $i < $count; $i++) {
+        for ($i = 0; $i < $totalCoupons; $i++) {
             do {
-                $code = $this->code_prefix
-                    ? strtoupper($this->code_prefix.Str::random($this->code_length - strlen($this->code_prefix)))
-                    : strtoupper(Str::random($this->code_length));
+                $code = '';
+                for ($j = 0; $j < 8; $j++) {
+                    $code .= $characters[random_int(0, strlen($characters) - 1)];
+                }
             } while (in_array($code, $existingCodes) || in_array($code, array_column($codes, 'code')));
 
             $codes[] = [
                 'coupon_campaign_id' => $this->id,
                 'code' => $code,
-                'type' => $this->type,
-                'value' => $this->value,
+                'type' => 'fixed',
+                'value' => $this->coupon_value,
                 'starts_at' => $this->starts_at,
                 'ends_at' => $this->ends_at,
-                'max_uses' => $this->max_uses_per_code,
+                'max_uses' => 1,
                 'uses_count' => 0,
                 'is_active' => true,
                 'status' => 'unused',
@@ -68,16 +83,29 @@ class CouponCampaign extends Model
             ];
         }
 
-        DiscountCode::insert($codes);
+        if (count($codes) > 0) {
+            DiscountCode::insert($codes);
+            $this->update(['total_codes' => count($codes)]);
+        }
     }
 
-    public function getUsedCodesCountAttribute(): int
+    public function getUsedCouponsCountAttribute(): int
     {
         return $this->discountCodes()->where('status', 'used')->count();
     }
 
-    public function getUnusedCodesCountAttribute(): int
+    public function getUnusedCouponsCountAttribute(): int
     {
         return $this->discountCodes()->where('status', 'unused')->count();
+    }
+
+    public function getExpiredCouponsCountAttribute(): int
+    {
+        return $this->discountCodes()->where('status', 'expired')->count();
+    }
+
+    public function getDisabledCouponsCountAttribute(): int
+    {
+        return $this->discountCodes()->where('status', 'disabled')->count();
     }
 }

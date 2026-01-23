@@ -12,98 +12,93 @@ class CouponCampaignController extends Controller
     public function index()
     {
         $campaigns = CouponCampaign::query()
-            ->withCount('discountCodes')
-            ->withSum('discountCodes', 'uses_count')
+            ->withCount('coupons')
             ->orderBy('created_at', 'desc')
-            ->get();
-        $totals = DB::table('orders')
-            ->join('discount_codes', 'orders.discount_code_id', '=', 'discount_codes.id')
-            ->whereNotNull('discount_codes.coupon_campaign_id')
-            ->select('discount_codes.coupon_campaign_id', DB::raw('SUM(orders.discount_amount) as total_discount'))
-            ->groupBy('discount_codes.coupon_campaign_id')
-            ->pluck('total_discount', 'discount_codes.coupon_campaign_id');
-
-        $campaigns->each(function ($campaign) use ($totals) {
-            $campaign->total_discount_amount = (float) ($totals[$campaign->id] ?? 0);
-        });
+            ->paginate(15);
 
         return view('pos.coupons.index', compact('campaigns'));
+    }
+
+    public function create()
+    {
+        return view('pos.coupons.create');
+    }
+
+    public function show(Request $request, CouponCampaign $campaign)
+    {
+        $status = $request->query('status');
+
+        $query = $campaign->coupons();
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $coupons = $query->orderBy('created_at', 'desc')->paginate(20);
+
+        $statusCounts = [
+            'all' => $campaign->coupons()->count(),
+            'unused' => $campaign->coupons()->where('status', 'unused')->count(),
+            'used' => $campaign->coupons()->where('status', 'used')->count(),
+            'expired' => $campaign->coupons()->where('status', 'expired')->count(),
+            'disabled' => $campaign->coupons()->where('status', 'disabled')->count(),
+        ];
+
+        return view('pos.coupons.show', compact('campaign', 'coupons', 'statusCounts'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:120',
-            'type' => 'required|in:percent,fixed',
-            'value' => 'required|numeric|min:0',
-            'starts_at' => 'nullable|date',
-            'ends_at' => 'nullable|date|after_or_equal:starts_at',
-            'max_uses_per_code' => 'nullable|integer|min:1',
-            'code_prefix' => 'nullable|string|max:12',
-            'code_length' => 'required|integer|min:4|max:16',
-            'generate_quantity' => 'required|integer|min:1|max:1000',
-            'is_active' => 'nullable|boolean',
+            'title' => 'required|string|max:255',
+            'total_amount' => 'required|numeric|min:1',
+            'coupon_value' => 'required|numeric|min:0.01|lte:total_amount',
+            'ends_at' => 'required|date|after:today',
         ]);
 
-        $data['code_prefix'] = $this->normalizePrefix($data['code_prefix'] ?? null);
-        $data['is_active'] = $request->boolean('is_active', true);
+        $totalCoupons = (int) floor($data['total_amount'] / $data['coupon_value']);
 
-        if ($data['type'] === 'percent') {
-            $data['value'] = min($data['value'], 100);
-        }
+        DB::transaction(function () use ($data, $totalCoupons) {
+            $campaign = CouponCampaign::create([
+                'title' => $data['title'],
+                'total_amount' => $data['total_amount'],
+                'coupon_value' => $data['coupon_value'],
+                'total_codes' => $totalCoupons,
+                'ends_at' => $data['ends_at'],
+                'is_active' => true,
+            ]);
 
-        DB::transaction(function () use ($data) {
-            $quantity = (int) $data['generate_quantity'];
-            unset($data['generate_quantity']);
-
-            $campaign = CouponCampaign::create($data);
-            $this->generateCodes($campaign, $quantity);
+            $campaign->generateCoupons();
         });
 
-        return back()->with('success', 'Coupon campaign created');
+        return redirect()->route('pos.coupons.index')->with('success', 'Coupon campaign created with '.$totalCoupons.' coupons.');
     }
 
     public function edit(CouponCampaign $campaign)
     {
-        $codes = $campaign->discountCodes()->orderBy('created_at', 'desc')->paginate(50);
-
-        return view('pos.coupons.edit', compact('campaign', 'codes'));
+        return view('pos.coupons.edit', ['campaign' => $campaign]);
     }
 
     public function update(Request $request, CouponCampaign $campaign)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:120',
-            'type' => 'required|in:percent,fixed',
-            'value' => 'required|numeric|min:0',
-            'starts_at' => 'nullable|date',
-            'ends_at' => 'nullable|date|after_or_equal:starts_at',
-            'max_uses_per_code' => 'nullable|integer|min:1',
-            'code_prefix' => 'nullable|string|max:12',
-            'code_length' => 'required|integer|min:4|max:16',
-            'is_active' => 'nullable|boolean',
+            'title' => 'required|string|max:255',
+            'ends_at' => 'required|date',
+            'is_active' => 'boolean',
         ]);
 
-        $data['code_prefix'] = $this->normalizePrefix($data['code_prefix'] ?? null);
         $data['is_active'] = $request->boolean('is_active', true);
-
-        if ($data['type'] === 'percent') {
-            $data['value'] = min($data['value'], 100);
-        }
 
         DB::transaction(function () use ($campaign, $data) {
             $campaign->update($data);
-            $campaign->discountCodes()->update([
-                'type' => $campaign->type,
-                'value' => $campaign->value,
-                'starts_at' => $campaign->starts_at,
+
+            // Update expiration on unused coupons
+            $campaign->coupons()->where('status', 'unused')->update([
                 'ends_at' => $campaign->ends_at,
-                'max_uses' => $campaign->max_uses_per_code,
                 'is_active' => $campaign->is_active,
             ]);
         });
 
-        return back()->with('success', 'Campaign updated');
+        return redirect()->route('pos.coupons.show', $campaign)->with('success', 'Campaign updated.');
     }
 
     public function toggle(CouponCampaign $campaign)
