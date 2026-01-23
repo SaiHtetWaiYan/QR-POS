@@ -136,22 +136,22 @@
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 transform translate-y-2"
                  x-transition:enter-end="opacity-100 transform translate-y-0"
-                 class="bg-gradient-to-br from-red-500 to-rose-500 rounded-2xl p-6 text-white text-center shadow-lg shadow-red-500/30 mb-6">
-                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </div>
-                    <p class="font-bold text-xl mb-1">Order Cancelled</p>
-                    <p class="text-red-100 text-sm mb-4">Please ask staff if you need help.</p>
-                    <a href="{{ route('customer.index', $table->code) }}"
-                       class="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                        </svg>
-                        Browse Menu
-                    </a>
+                 class="text-center py-10">
+                <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
                 </div>
+                <h2 class="text-xl font-semibold text-slate-900 mb-2">Order Cancelled</h2>
+                <p class="text-slate-500 mb-6 text-sm">Please ask staff if you need help.</p>
+                <a href="{{ route('customer.index', $table->code) }}"
+                   class="inline-flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-full font-semibold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    Browse Menu
+                </a>
+            </div>
             <!-- Order Items -->
             <div x-show="currentStatus !== 'cancelled'"
                  class="bg-white rounded-2xl border border-slate-100 overflow-hidden mb-6 shadow-sm">
