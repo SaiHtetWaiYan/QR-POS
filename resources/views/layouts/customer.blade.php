@@ -100,8 +100,8 @@
              x-transition:leave-start="opacity-100 transform translate-y-0"
              x-transition:leave-end="opacity-0 transform translate-y-2"
              class="fixed bottom-24 left-4 right-4 z-40">
-            <div class="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center">
+            <div class="bg-emerald-600 text-white px-4 py-3 rounded-2xl shadow-lg shadow-emerald-500/30 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
