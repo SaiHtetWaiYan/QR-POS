@@ -269,6 +269,8 @@
         <!-- Place Order Form -->
         <form x-data="{ 
                 submitting: false,
+                showError: false,
+                errorMessage: '',
                 customerNote: '',
                 async placeOrder() {
                     if (this.submitting) return;
@@ -290,11 +292,13 @@
                             window.location.href = data.redirect;
                         } else {
                             this.submitting = false;
-                            alert(data.message || 'Failed to place order. Please try again.');
+                            this.errorMessage = data.message || 'Failed to place order. Please try again.';
+                            this.showError = true;
                         }
                     } catch (error) {
                         this.submitting = false;
-                        alert('Network error. Please check your connection.');
+                        this.errorMessage = 'Network error. Please check your connection.';
+                        this.showError = true;
                     }
                 }
             }" @submit.prevent="placeOrder()">
@@ -318,6 +322,40 @@
                 </svg>
                 <span x-text="submitting ? 'Placing Order...' : 'Place Order'"></span>
             </button>
+
+            <!-- Error Dialog -->
+            <div x-cloak x-show="showError"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                 aria-modal="true"
+                 role="dialog">
+                <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="showError = false"></div>
+                <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-slate-100 p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-base font-semibold text-slate-900">Notice</p>
+                            <p class="text-sm text-slate-500" x-text="errorMessage"></p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button"
+                                @click="showError = false"
+                                class="flex-1 py-2.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
         </form>
 
         <div class="text-center mt-5">
