@@ -216,19 +216,22 @@
                 </div>
             </div>
 
+            @php
+                $ordersJson = $orders->map(fn ($order) => [
+                    'id' => $order->id,
+                    'order_no' => $order->order_no,
+                    'table' => $order->table->name ?? 'Table',
+                    'time' => $order->created_at->format('h:i A'),
+                    'status' => $order->status,
+                    'total' => $order->total,
+                    'url' => route('pos.orders.show', $order->id),
+                ]);
+            @endphp
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm"
                  x-data="{
                     query: '',
                     visible: 10,
-                    orders: @json($orders->map(fn ($order) => [
-                        'id' => $order->id,
-                        'order_no' => $order->order_no,
-                        'table' => $order->table->name ?? 'Table',
-                        'time' => $order->created_at->format('h:i A'),
-                        'status' => $order->status,
-                        'total' => $order->total,
-                        'url' => route('pos.orders.show', $order->id),
-                    ])),
+                    orders: {{ Js::from($ordersJson) }},
                     get filtered() {
                         if (!this.query) return this.orders;
                         const q = this.query.toLowerCase();
