@@ -131,8 +131,11 @@
                 </div>
             </div>
 
-            @if($order->status === 'cancelled')
-                <div class="bg-gradient-to-br from-red-500 to-rose-500 rounded-2xl p-6 text-white text-center shadow-lg shadow-red-500/30 mb-6">
+            <div x-show="currentStatus === 'cancelled'"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 transform translate-y-2"
+                 x-transition:enter-end="opacity-100 transform translate-y-0"
+                 class="bg-gradient-to-br from-red-500 to-rose-500 rounded-2xl p-6 text-white text-center shadow-lg shadow-red-500/30 mb-6">
                     <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -141,9 +144,9 @@
                     <p class="font-bold text-xl mb-1">Order Cancelled</p>
                     <p class="text-red-100 text-sm">Please ask staff if you need help.</p>
                 </div>
-            @else
-                <!-- Order Items -->
-                <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden mb-6 shadow-sm">
+            <!-- Order Items -->
+            <div x-show="currentStatus !== 'cancelled'"
+                 class="bg-white rounded-2xl border border-slate-100 overflow-hidden mb-6 shadow-sm">
                     <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
                         <h3 class="font-semibold text-slate-900">Order Items</h3>
                         <span class="text-xs text-slate-500">{{ $order->orderItems->sum('qty') }} items</span>
@@ -190,11 +193,10 @@
                             <span class="text-xl font-bold text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</span>
                         </div>
                     </div>
-                </div>
-            @endif
+            </div>
 
             <!-- Actions -->
-            @if($order->status !== 'paid' && $order->status !== 'cancelled')
+            <div x-show="currentStatus !== 'paid' && currentStatus !== 'cancelled'">
                 @if($order->bill_requested_at)
                     <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg shadow-violet-500/30 animate-fade-in">
                         <div class="flex items-center gap-4">
@@ -311,7 +313,8 @@
                         </div>
                     </div>
                 @endif
-            @elseif($order->status === 'paid')
+            </div>
+            @if($order->status === 'paid')
                 <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white text-center shadow-lg shadow-emerald-500/30">
                     <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
