@@ -244,6 +244,88 @@
         </div>
     </div>
 
+    <!-- Global Mark Paid Confirmation Modal -->
+    <div x-data="{ show: false, orderId: null, updateUrl: '', csrfToken: '{{ csrf_token() }}', loading: false }"
+         @show-paid-confirm.window="show = true; orderId = $event.detail.orderId; updateUrl = $event.detail.updateUrl"
+         @close-paid-confirm.window="show = false"
+         x-cloak
+         x-show="show"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[9999] flex items-center justify-center px-4"
+         aria-modal="true"
+         role="dialog">
+        <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" @click="show = false"></div>
+        <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 p-6"
+             x-show="show"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-base font-semibold text-gray-900">{{ __('Confirm payment received?') }}</p>
+                    <p class="text-sm text-gray-500">{{ __('This will mark the order as paid.') }}</p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button type="button"
+                        @click="show = false"
+                        class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+                    {{ __('Not Yet') }}
+                </button>
+                <button type="button"
+                        @click="async () => {
+                            if (loading) return;
+                            loading = true;
+                            try {
+                                const response = await fetch(updateUrl, {
+                                    method: 'PATCH',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': csrfToken,
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify({ status: 'paid' })
+                                });
+                                if (response.ok) {
+                                    const data = await response.json();
+                                    if (data.success) {
+                                        $dispatch('order-paid', { orderId: orderId });
+                                        show = false;
+                                    }
+                                }
+                            } catch (error) {
+                                console.error('Failed to mark as paid:', error);
+                            } finally {
+                                loading = false;
+                            }
+                        }"
+                        :disabled="loading"
+                        class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50">
+                    <span x-show="!loading">{{ __('Mark Paid') }}</span>
+                    <span x-show="loading" class="flex items-center justify-center">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <style>
         @keyframes slideIn {
             from {
