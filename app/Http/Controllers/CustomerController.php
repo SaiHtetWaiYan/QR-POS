@@ -281,7 +281,6 @@ class CustomerController extends Controller
                     $order->coupon_code_id = $couponCode->id;
                     $order->coupon_type = $couponCode->type;
                     $order->coupon_value = $couponCode->value;
-                    $couponCode->markAsUsed();
                 }
 
                 if ($order->coupon_type === 'percent' && $order->coupon_value) {
@@ -301,6 +300,12 @@ class CustomerController extends Controller
                     'coupon_amount' => $couponAmount,
                     'total' => $newTotal,
                 ]);
+
+                if ($couponCode && in_array($order->status, ['accepted', 'preparing', 'served', 'paid'], true)) {
+                    if ($couponCode->status === 'unused') {
+                        $couponCode->markAsUsed();
+                    }
+                }
             } else {
                 $couponType = $couponCode?->type;
                 $couponValue = $couponCode?->value;
@@ -327,9 +332,6 @@ class CustomerController extends Controller
                     'total' => $total,
                 ]);
 
-                if ($couponCode) {
-                    $couponCode->markAsUsed();
-                }
 
                 foreach ($cart as $item) {
                     $menuItemName = $menuItemsById->get($item['menu_item_id'])?->display_name ?? $item['name'];

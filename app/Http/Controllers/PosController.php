@@ -93,6 +93,13 @@ class PosController extends Controller
 
         $order->update($data);
 
+        if ($request->status === 'accepted' && $order->coupon_code_id) {
+            $couponCode = $order->couponCode;
+            if ($couponCode && $couponCode->status === 'unused') {
+                $couponCode->markAsUsed();
+            }
+        }
+
         // Broadcast status update to customer
         try {
             OrderStatusUpdated::dispatch($order);
