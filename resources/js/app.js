@@ -309,12 +309,16 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
         const kitchenContainer = document.getElementById('kitchen-orders');
         const dashboard = document.querySelector('[x-data*="posDashboard"]');
 
-        if (dashboard && dashboard._x_dataStack && dashboard._x_dataStack[0]) {
-            const pendingCards = pendingContainer ? pendingContainer.querySelectorAll('[data-order-id]').length : 0;
-            const kitchenCards = kitchenContainer ? kitchenContainer.querySelectorAll('[data-order-id]').length : 0;
+        const pendingCards = pendingContainer ? pendingContainer.querySelectorAll('[data-order-id]').length : 0;
+        const kitchenCards = kitchenContainer ? kitchenContainer.querySelectorAll('[data-order-id]').length : 0;
 
-            dashboard._x_dataStack[0].pendingCount = pendingCards;
-            dashboard._x_dataStack[0].activeCount = kitchenCards;
+        // Use Alpine's official API to update data
+        if (dashboard) {
+            const data = Alpine.$data(dashboard);
+            if (data) {
+                data.pendingCount = pendingCards;
+                data.activeCount = kitchenCards;
+            }
         }
         this.updateEmptyStates();
     },
@@ -324,10 +328,12 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
         const kitchenContainer = document.getElementById('kitchen-orders');
         const dashboard = document.querySelector('[x-data*="posDashboard"]');
 
-        if (!dashboard || !dashboard._x_dataStack) return;
+        if (!dashboard) return;
+        const data = Alpine.$data(dashboard);
+        if (!data) return;
 
-        const pendingCount = dashboard._x_dataStack[0].pendingCount;
-        const activeCount = dashboard._x_dataStack[0].activeCount;
+        const pendingCount = data.pendingCount;
+        const activeCount = data.activeCount;
 
         const pendingEmpty = pendingContainer ? pendingContainer.querySelector('.empty-state') : null;
         if (pendingEmpty) {
