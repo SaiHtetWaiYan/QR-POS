@@ -228,7 +228,9 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
             if (!response.ok) throw new Error('Failed to update');
             const data = await response.json();
             if (data.success) {
-                this.handleStatusChange(data.status);
+                await this.handleStatusChange(data.status);
+            } else {
+                this.loading = false;
             }
         } catch (error) {
             console.error('Failed to update status:', error);
@@ -239,6 +241,7 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
     async handleStatusChange(newStatus) {
         const card = this.$el;
 
+        // For served/paid, just fade out and remove
         if (newStatus === 'served' || newStatus === 'paid') {
             card.style.transition = 'all 0.3s ease-out';
             card.style.opacity = '0';
@@ -248,31 +251,42 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
             return;
         }
 
+        // For other statuses, fetch updated card HTML
         try {
             const response = await fetch('/pos/orders/' + orderId + '/card');
             if (!response.ok) throw new Error('Failed to fetch card');
             const html = await response.text();
             const wrapper = document.createElement('div');
-            wrapper.innerHTML = html;
+            wrapper.innerHTML = html.trim();
             const newCard = wrapper.firstElementChild;
 
             if (newStatus === 'accepted') {
-                const kitchenColumn = document.querySelector('#kitchen-orders');
+                const kitchenColumn = document.getElementById('kitchen-orders');
                 if (kitchenColumn) {
+                    // Move to kitchen column
                     newCard.classList.add('animate-slide-in', 'ring-2', 'ring-blue-400', 'ring-offset-2');
                     kitchenColumn.insertBefore(newCard, kitchenColumn.firstChild);
+                    Alpine.initTree(newCard);
+                    // Fade out old card
                     card.style.transition = 'all 0.3s ease-out';
                     card.style.opacity = '0';
                     card.style.transform = 'scale(0.95)';
                     setTimeout(() => card.remove(), 300);
                     setTimeout(() => newCard.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2'), 3000);
+                } else {
+                    // No kitchen column visible, just replace in place
+                    card.replaceWith(newCard);
+                    Alpine.initTree(newCard);
                 }
             } else {
+                // For preparing or other statuses, replace in place
                 card.replaceWith(newCard);
+                Alpine.initTree(newCard);
             }
             this.updateCounts();
         } catch (error) {
             console.error('Failed to refresh card:', error);
+            this.loading = false;
             window.location.reload();
         }
     },
@@ -287,8 +301,8 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
     },
 
     submitPaid() {
-        this.updateStatus('paid');
         this.showPaidConfirm = false;
+        this.updateStatus('paid');
     }
 }));
 
