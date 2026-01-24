@@ -12,7 +12,17 @@
         deleteModal: false,
         deleteType: '',
         deleteId: null,
-        deleteName: ''
+        deleteName: '',
+        editModal: false,
+        editCategoryId: null,
+        editCategoryName: '',
+        editCategoryNameMy: '',
+        openEditCategory(category) {
+            this.editCategoryId = category.id;
+            this.editCategoryName = category.name;
+            this.editCategoryNameMy = category.nameMy;
+            this.editModal = true;
+        }
     }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
@@ -40,6 +50,10 @@
                            placeholder="{{ __('Category name (e.g., Appetizers, Main Course)') }}"
                            class="flex-1 border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                            required>
+                    <input type="text"
+                           name="name_my"
+                           placeholder="{{ __('Category name (Myanmar)') }}"
+                           class="flex-1 border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                     <button type="submit"
                             class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-900 rounded-xl font-medium text-sm text-white hover:bg-gray-800 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,20 +76,30 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-gray-900">{{ $category->name }}</h4>
+                                    <h4 class="font-bold text-gray-900">{{ $category->display_name }}</h4>
                                     <p class="text-xs text-gray-500">
                                         {{ $category->menuItems->count() }} {{ trans_choice('ui.customer.items', $category->menuItems->count()) }}
                                     </p>
                                 </div>
                             </div>
-                            <button type="button"
-                                    @click="deleteModal = true; deleteType = 'category'; deleteId = {{ $category->id }}; deleteName = '{{ $category->name }}'"
-                                    class="text-red-500 hover:text-red-600 text-sm font-medium flex items-center gap-1 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                {{ __('Delete') }}
-                            </button>
+                            <div class="flex items-center gap-3">
+                                <button type="button"
+                                        @click="openEditCategory({ id: {{ $category->id }}, name: @js($category->name), nameMy: @js($category->name_my) })"
+                                        class="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                    {{ __('Edit') }}
+                                </button>
+                                <button type="button"
+                                        @click="deleteModal = true; deleteType = 'category'; deleteId = {{ $category->id }}; deleteName = @js($category->display_name)"
+                                        class="text-red-500 hover:text-red-600 text-sm font-medium flex items-center gap-1 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    {{ __('Delete') }}
+                                </button>
+                            </div>
                         </div>
 
                         <div class="p-6">
@@ -96,7 +120,7 @@
                                             @if($item->image_path)
                                                 <img src="{{ asset('storage/' . $item->image_path) }}"
                                                      class="w-20 h-20 object-cover rounded-xl shrink-0"
-                                                     alt="{{ $item->name }}">
+                                                     alt="{{ $item->display_name }}">
                                             @else
                                                 <div class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl flex items-center justify-center shrink-0">
                                                     <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,8 +131,8 @@
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex justify-between items-start gap-2">
                                                     <div class="min-w-0">
-                                                        <h5 class="font-semibold text-gray-900 truncate">{{ $item->name }}</h5>
-                                                        <p class="text-xs text-gray-500 line-clamp-1 mt-0.5">{{ $item->description }}</p>
+                                                        <h5 class="font-semibold text-gray-900 truncate">{{ $item->display_name }}</h5>
+                                                        <p class="text-xs text-gray-500 line-clamp-1 mt-0.5">{{ $item->display_description }}</p>
                                                     </div>
                                                     <span class="font-bold text-gray-900 shrink-0">{{ config('pos.currency_symbol') }}{{ number_format($item->price, 2) }}</span>
                                                 </div>
@@ -145,7 +169,7 @@
                                                     </form>
 
                                                     <button type="button"
-                                                            @click="deleteModal = true; deleteType = 'item'; deleteId = {{ $item->id }}; deleteName = '{{ $item->name }}'"
+                                                            @click="deleteModal = true; deleteType = 'item'; deleteId = {{ $item->id }}; deleteName = @js($item->display_name)"
                                                             class="text-red-500 hover:text-red-600 text-xs font-medium flex items-center gap-1">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -239,6 +263,62 @@
                             </form>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Category Modal -->
+        <div x-cloak x-show="editModal"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-50 overflow-y-auto"
+             style="display: none;">
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="editModal = false"></div>
+
+                <div x-show="editModal"
+                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">{{ __('Edit Category') }}</h3>
+                    <form :action="`{{ url('pos/menu/categories') }}/${editCategoryId}`" method="POST" class="space-y-4">
+                        @csrf
+                        @method('PUT')
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Category Name') }}</label>
+                            <input type="text"
+                                   name="name"
+                                   x-model="editCategoryName"
+                                   class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                   required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Category Name (Myanmar)') }}</label>
+                            <input type="text"
+                                   name="name_my"
+                                   x-model="editCategoryNameMy"
+                                   class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        </div>
+                        <div class="flex gap-3 pt-2">
+                            <button type="button"
+                                    @click="editModal = false"
+                                    class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium text-sm text-gray-700 transition-colors">
+                                {{ __('Cancel') }}
+                            </button>
+                            <button type="submit"
+                                    class="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 rounded-xl font-medium text-sm text-white transition-colors">
+                                {{ __('Update Category') }}
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

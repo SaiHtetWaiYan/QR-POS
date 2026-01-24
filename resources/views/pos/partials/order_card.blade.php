@@ -66,7 +66,7 @@
             @foreach($order->orderItems->take(3) as $item)
                 <div class="flex items-center gap-2 text-sm">
                     <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[10px] font-bold">{{ $item->qty }}x</span>
-                    <span class="text-gray-700 truncate">{{ $item->menuItem->name }}</span>
+                    <span class="text-gray-700 truncate">{{ $item->name_snapshot }}</span>
                 </div>
             @endforeach
             @if($order->orderItems->count() > 3)

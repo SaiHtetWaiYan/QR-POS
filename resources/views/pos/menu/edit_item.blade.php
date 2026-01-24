@@ -11,7 +11,7 @@
                 <h2 class="font-bold text-xl text-gray-900 leading-tight">
                     {{ __('Edit Menu Item') }}
                 </h2>
-                <p class="text-sm text-gray-500">{{ $menuItem->name }}</p>
+                <p class="text-sm text-gray-500">{{ $menuItem->display_name }}</p>
             </div>
         </div>
     </x-slot>
@@ -30,7 +30,7 @@
                                 required>
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}" {{ $menuItem->category_id == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
+                                    {{ $category->display_name }}
                                 </option>
                             @endforeach
                         </select>
@@ -43,6 +43,13 @@
                                value="{{ $menuItem->name }}"
                                class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500"
                                required>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-sm text-gray-700 mb-1.5">{{ __('Item Name (Myanmar)') }}</label>
+                        <input type="text"
+                               name="name_my"
+                               value="{{ $menuItem->name_my }}"
+                               class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
 
                     <div>
@@ -66,6 +73,12 @@
                                   rows="3"
                                   class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 resize-none">{{ $menuItem->description }}</textarea>
                     </div>
+                    <div>
+                        <label class="block font-medium text-sm text-gray-700 mb-1.5">{{ __('Description (Myanmar)') }}</label>
+                        <textarea name="description_my"
+                                  rows="3"
+                                  class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 resize-none">{{ $menuItem->description_my }}</textarea>
+                    </div>
 
                     <div>
                         <label class="block font-medium text-sm text-gray-700 mb-1.5">{{ __('Image') }}</label>
@@ -73,7 +86,7 @@
                             <div class="mb-3 flex items-center gap-4">
                                 <img src="{{ asset('storage/' . $menuItem->image_path) }}"
                                      class="w-24 h-24 object-cover rounded-xl border border-gray-200"
-                                     alt="{{ $menuItem->name }}">
+                                     alt="{{ $menuItem->display_name }}">
                                 <div class="text-sm text-gray-500">
                                     <p class="font-medium text-gray-700">{{ __('Current image') }}</p>
                                     <p class="text-xs">{{ __('Upload a new image to replace') }}</p>

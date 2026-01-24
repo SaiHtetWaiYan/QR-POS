@@ -67,6 +67,7 @@ Route::middleware(['auth', 'verified'])->prefix('pos')->name('pos.')->group(func
     // Menu
     Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
     Route::post('/menu/categories', [MenuController::class, 'storeCategory'])->name('menu.categories.store');
+    Route::put('/menu/categories/{category}', [MenuController::class, 'updateCategory'])->name('menu.categories.update');
     Route::delete('/menu/categories/{category}', [MenuController::class, 'destroyCategory'])->name('menu.categories.destroy');
     Route::get('/menu/items/create', [MenuController::class, 'createItem'])->name('menu.items.create');
     Route::post('/menu/items', [MenuController::class, 'storeItem'])->name('menu.items.store');

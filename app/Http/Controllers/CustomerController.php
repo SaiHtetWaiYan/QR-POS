@@ -85,7 +85,7 @@ class CustomerController extends Controller
                 'menu_item_id' => $itemId,
                 'qty' => $request->qty,
                 'note' => $request->note,
-                'name' => $menuItem->name,
+                'name' => $menuItem->display_name,
                 'price' => $menuItem->price,
             ];
         }
@@ -100,7 +100,7 @@ class CustomerController extends Controller
                 'cart_count' => $cartCount,
                 'action' => $action,
                 'line_qty' => $lineQty,
-                'item_name' => $menuItem->name,
+                'item_name' => $menuItem->display_name,
             ]);
         }
 

@@ -97,7 +97,7 @@
                                 @if($topItem->image_path)
                                     <div class="relative w-28 h-28 shrink-0">
                                         <img src="{{ asset('storage/' . $topItem->image_path) }}"
-                                             alt="{{ $topItem->name }}"
+                                             alt="{{ $topItem->display_name }}"
                                              class="w-full h-full object-cover">
                                         @if(!$topItem->is_available)
                                             <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
@@ -115,9 +115,9 @@
 
                                 <div class="flex-1 p-3 flex flex-col justify-between min-w-0">
                                     <div>
-                                        <h3 class="font-semibold text-slate-900 text-sm leading-tight">{{ $topItem->name }}</h3>
-                                        @if($topItem->description)
-                                            <p class="text-xs text-slate-500 mt-1 line-clamp-2">{{ $topItem->description }}</p>
+                                        <h3 class="font-semibold text-slate-900 text-sm leading-tight">{{ $topItem->display_name }}</h3>
+                                        @if($topItem->display_description)
+                                            <p class="text-xs text-slate-500 mt-1 line-clamp-2">{{ $topItem->display_description }}</p>
                                         @endif
                                     </div>
                                     <div class="flex justify-between items-end mt-2">
@@ -199,7 +199,7 @@
                         ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
                     class="whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200">
-                    {{ $category->name }}
+                    {{ $category->display_name }}
                 </button>
             @endforeach
         </div>
@@ -213,7 +213,7 @@
                      x-transition:enter-end="opacity-100 transform translate-y-0"
                      class="space-y-4">
                     <div class="flex items-center gap-3 mb-4">
-                        <h2 class="text-xl font-bold text-slate-900">{{ $category->name }}</h2>
+                        <h2 class="text-xl font-bold text-slate-900">{{ $category->display_name }}</h2>
                         <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-full">
                             {{ $category->menuItems->count() }} {{ trans_choice('ui.customer.items', $category->menuItems->count()) }}
                         </span>
@@ -275,7 +275,7 @@
                                     @if($item->image_path)
                                         <div class="relative w-28 h-28 shrink-0">
                                             <img src="{{ asset('storage/' . $item->image_path) }}"
-                                                 alt="{{ $item->name }}"
+                                                 alt="{{ $item->display_name }}"
                                                  class="w-full h-full object-cover">
                                             @if(!$item->is_available)
                                                 <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
@@ -293,9 +293,9 @@
 
                                     <div class="flex-1 p-3 flex flex-col justify-between min-w-0">
                                         <div>
-                                            <h3 class="font-semibold text-slate-900 text-sm leading-tight">{{ $item->name }}</h3>
-                                            @if($item->description)
-                                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">{{ $item->description }}</p>
+                                            <h3 class="font-semibold text-slate-900 text-sm leading-tight">{{ $item->display_name }}</h3>
+                                            @if($item->display_description)
+                                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">{{ $item->display_description }}</p>
                                             @endif
                                         </div>
                                         <div class="flex justify-between items-end mt-2">

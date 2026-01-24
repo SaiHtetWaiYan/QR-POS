@@ -12,7 +12,9 @@ class MenuItem extends Model
     protected $fillable = [
         'category_id',
         'name',
+        'name_my',
         'description',
+        'description_my',
         'price',
         'image_path',
         'is_available',
@@ -21,5 +23,23 @@ class MenuItem extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        if (app()->getLocale() === 'my' && $this->name_my) {
+            return $this->name_my;
+        }
+
+        return $this->name;
+    }
+
+    public function getDisplayDescriptionAttribute(): ?string
+    {
+        if (app()->getLocale() === 'my' && $this->description_my) {
+            return $this->description_my;
+        }
+
+        return $this->description;
     }
 }

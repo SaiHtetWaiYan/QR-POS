@@ -28,7 +28,7 @@
                                 class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500"
                                 required>
                             @foreach($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                <option value="{{ $category->id }}">{{ $category->display_name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -40,6 +40,13 @@
                                placeholder="{{ __('e.g. Classic Burger, Caesar Salad') }}"
                                class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500"
                                required>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-sm text-gray-700 mb-1.5">{{ __('Item Name (Myanmar)') }}</label>
+                        <input type="text"
+                               name="name_my"
+                               placeholder="{{ __('e.g. Classic Burger, Caesar Salad (Myanmar)') }}"
+                               class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
 
                     <div>
@@ -62,6 +69,13 @@
                         <textarea name="description"
                                   rows="3"
                                   placeholder="{{ __('A brief description of the item...') }}"
+                                  class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-sm text-gray-700 mb-1.5">{{ __('Description (Myanmar)') }}</label>
+                        <textarea name="description_my"
+                                  rows="3"
+                                  placeholder="{{ __('A brief description of the item... (Myanmar)') }}"
                                   class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
                     </div>
 

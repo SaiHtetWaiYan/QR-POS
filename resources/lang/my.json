@@ -1,6 +1,7 @@
 {
   "0.00": "0.00",
   "A brief description of the item...": "ပစ္စည်းအကြောင်းအကျဉ်းချုပ်...",
+  "A brief description of the item... (Myanmar)": "ပစ္စည်းအကြောင်းအကျဉ်းချုပ်... (မြန်မာ)",
   "A customer is waiting for the bill": "ဖောက်သည်သည် ဘီလ်ကို စောင့်ဆိုင်းနေသည်",
   "A new verification link has been sent to the email address you provided during registration.": "စာရင်းသွင်းစဉ် ပေးထားသော အီးမေးလ်လိပ်စာသို့ အတည်ပြုလင့်ခ် အသစ်ပို့ပြီးပါပြီ။",
   "A new verification link has been sent to your email address.": "သင့်အီးမေးလ်လိပ်စာသို့ အတည်ပြုလင့်ခ် အသစ်ပို့ပြီးပါပြီ။",
@@ -49,6 +50,7 @@
   "Cancelled": "ပယ်ဖျက်ပြီး",
   "Category": "အမျိုးအစား",
   "Category name (e.g., Appetizers, Main Course)": "အမျိုးအစားအမည် (ဥပမာ- အရံဟင်း၊ အဓိကဟင်း)",
+  "Category name (Myanmar)": "အမျိုးအစားအမည် (မြန်မာ)",
   "Change": "ပြောင်းရန်",
   "Checking...": "စစ်ဆေးနေသည်...",
   "Click here to re-send the verification email.": "အတည်ပြုအီးမေးလ်ကို ပြန်ပို့ရန် ဒီကို နှိပ်ပါ။",
@@ -86,6 +88,7 @@
   "Delete Item": "ပစ္စည်း ဖျက်ရန်",
   "Delete Table": "စားပွဲ ဖျက်ရန်",
   "Description": "ဖော်ပြချက်",
+  "Description (Myanmar)": "ဖော်ပြချက် (မြန်မာ)",
   "Disable": "ပိတ်ရန်",
   "Disable Coupon": "ကူပွန် ပိတ်ရန်",
   "Disabled": "ပိတ်ထားသည်",
@@ -123,6 +126,7 @@
   "In Kitchen": "မီးဖိုတွင်",
   "Inactive": "မသက်ဝင်",
   "Item Name": "ပစ္စည်းအမည်",
+  "Item Name (Myanmar)": "ပစ္စည်းအမည် (မြန်မာ)",
   "Keep Order": "အော်ဒါ ထိန်းထား",
   "Kitchen": "မီးဖို",
   "Kitchen is clear": "မီးဖိုမှာ အော်ဒါမရှိ",
@@ -307,6 +311,7 @@
   "Your order is empty": "သင့် အော်ဒါ မရှိသေးပါ",
   "coupons worth": "တန်ဖိုးရှိ ကူပွန်",
   "e.g. Classic Burger, Caesar Salad": "ဥပမာ- Classic Burger, Caesar Salad",
+  "e.g. Classic Burger, Caesar Salad (Myanmar)": "ဥပမာ- Classic Burger, Caesar Salad (မြန်မာ)",
   "e.g. Table 1, Patio A": "ဥပမာ- Table 1, Patio A",
   "e.g. t1-patio, table-window": "ဥပမာ- t1-patio, table-window",
   "e.g., 10.00": "ဥပမာ- 10.00",
@@ -316,5 +321,9 @@
   "more items": "ပစ္စည်းများ ထပ်မံ",
   "name@example.com": "name@example.com",
   "ordered": "မှာယူပြီး",
-  "your-code": "သင့်-ကုဒ်"
+  "your-code": "သင့်-ကုဒ်",
+  "Category Name": "အမျိုးအစားအမည်",
+  "Category Name (Myanmar)": "အမျိုးအစားအမည် (မြန်မာ)",
+  "Edit Category": "အမျိုးအစား ပြင်ရန်",
+  "Update Category": "အမျိုးအစား ပြင်ဆင်ရန်"
 }

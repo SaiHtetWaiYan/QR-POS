@@ -9,10 +9,19 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'sort_order'];
+    protected $fillable = ['name', 'name_my', 'sort_order'];
 
     public function menuItems()
     {
         return $this->hasMany(MenuItem::class);
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        if (app()->getLocale() === 'my' && $this->name_my) {
+            return $this->name_my;
+        }
+
+        return $this->name;
     }
 }
