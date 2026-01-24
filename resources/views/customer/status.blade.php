@@ -93,7 +93,7 @@
                 if ($currentIndex === false) $currentIndex = -1;
             @endphp
 
-            <div x-show="currentStatus !== 'cancelled'" class="mb-6">
+            <div x-cloak x-show="currentStatus !== 'cancelled'" class="mb-6">
                 <div class="flex items-center justify-between relative">
                     <div class="absolute top-4 left-0 right-0 h-0.5 bg-slate-200"></div>
                     <div class="absolute top-4 left-0 h-0.5 bg-emerald-500 transition-all duration-500"
@@ -124,7 +124,7 @@
             </div>
 
             <!-- Current Status Banner -->
-            <div x-show="currentStatus !== 'cancelled'"
+            <div x-cloak x-show="currentStatus !== 'cancelled'"
                  class="rounded-2xl p-5 mb-6 shadow-lg animate-fade-in transition-colors duration-500"
                  :class="currentConfig.bg">
                 <div class="flex items-center gap-4">
@@ -165,7 +165,7 @@
                 </a>
             </div>
             <!-- Order Items -->
-            <div x-show="currentStatus !== 'cancelled'"
+            <div x-cloak x-show="currentStatus !== 'cancelled'"
                  class="bg-white rounded-2xl border border-slate-100 overflow-hidden mb-6 shadow-sm">
                     <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
                         <h3 class="font-semibold text-slate-900">{{ __('Order Items') }}</h3>
@@ -231,7 +231,7 @@
             </div>
 
             <!-- Actions -->
-            <div x-show="currentStatus !== 'paid' && currentStatus !== 'cancelled'">
+            <div x-cloak x-show="currentStatus !== 'paid' && currentStatus !== 'cancelled'">
                 @if($order->bill_requested_at)
                     <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg shadow-violet-500/30 animate-fade-in">
                         <div class="flex items-center gap-4">
@@ -294,7 +294,7 @@
                     </div>
 
                         <!-- Request Button -->
-                        <button x-show="!billRequested"
+                        <button x-cloak x-show="!billRequested"
                                 @click="openConfirm()"
                                 :disabled="requesting"
                                 class="w-full bg-gradient-to-r from-slate-800 to-slate-900 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-slate-900/30 hover:shadow-xl transition-all duration-200 disabled:opacity-70 flex items-center justify-center gap-2">
