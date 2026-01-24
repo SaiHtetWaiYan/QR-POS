@@ -241,8 +241,8 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
     async handleStatusChange(newStatus) {
         const card = this.$el;
 
-        // For served/paid, just fade out and remove
-        if (newStatus === 'served' || newStatus === 'paid') {
+        // For paid, just fade out and remove
+        if (newStatus === 'paid') {
             card.style.transition = 'all 0.3s ease-out';
             // Force reflow
             card.offsetHeight;
@@ -257,38 +257,22 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
         if (newStatus === 'accepted') {
             const kitchenColumn = document.getElementById('kitchen-orders');
             if (kitchenColumn) {
-                // Fade out in current position
-                card.style.transition = 'all 0.3s ease-out';
-                card.offsetHeight; // Force reflow
-                card.style.opacity = '0';
-                card.style.transform = 'scale(0.95)';
+                // Move to kitchen immediately and animate in
+                card.style.transition = 'none';
+                card.style.transform = 'translateY(-16px)';
+                card.style.opacity = '0.98';
+                kitchenColumn.insertBefore(card, kitchenColumn.firstChild);
+                card.classList.add('ring-2', 'ring-blue-400', 'ring-offset-2');
 
-                // After fade out, move to kitchen and fade in
+                card.offsetHeight;
+                card.style.transition = 'all 0.25s ease-out';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+
+                this.refreshCardContent(card);
                 setTimeout(() => {
-                    // Reset styles
-                    card.style.transition = 'none';
-                    card.style.transform = 'translateY(-20px)';
-
-                    // Move to kitchen
-                    kitchenColumn.insertBefore(card, kitchenColumn.firstChild);
-
-                    // Add highlight
-                    card.classList.add('ring-2', 'ring-blue-400', 'ring-offset-2');
-
-                    // Force reflow then animate in
-                    card.offsetHeight;
-                    card.style.transition = 'all 0.3s ease-out';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-
-                    // Update button - need to fetch new card for updated button
-                    this.refreshCardContent(card);
-
-                    // Remove highlight after delay
-                    setTimeout(() => {
-                        card.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2');
-                    }, 3000);
-                }, 300);
+                    card.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2');
+                }, 2000);
 
                 this.updateCounts();
                 return;
@@ -296,11 +280,11 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
         }
 
         // For other status changes, fetch and replace card content
-        this.refreshCardContent(card);
+        this.refreshCardContent(card, true);
         this.updateCounts();
     },
 
-    async refreshCardContent(card) {
+    async refreshCardContent(card, animate = false) {
         try {
             const response = await fetch('/pos/orders/' + orderId + '/card');
             if (!response.ok) return;
@@ -308,8 +292,19 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
             const wrapper = document.createElement('div');
             wrapper.innerHTML = html.trim();
             const newCard = wrapper.firstElementChild;
+            if (animate) {
+                newCard.style.opacity = '0';
+                newCard.style.transform = 'translateY(-6px)';
+            }
             card.replaceWith(newCard);
             Alpine.initTree(newCard);
+            if (animate) {
+                requestAnimationFrame(() => {
+                    newCard.style.transition = 'all 0.2s ease-out';
+                    newCard.style.opacity = '1';
+                    newCard.style.transform = 'translateY(0)';
+                });
+            }
         } catch (error) {
             console.error('Failed to refresh card:', error);
         }
