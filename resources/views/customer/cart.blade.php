@@ -183,7 +183,7 @@
                     <div class="flex justify-between items-start gap-3">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-start justify-between">
-                                <h3 class="font-semibold text-slate-900">{{ $item['name'] }}</h3>
+                                <h3 class="font-semibold text-slate-900">{{ $item['display_name'] ?? $item['name'] }}</h3>
                                 <span class="shrink-0 font-bold text-slate-900 ml-2" x-text="formatMoney(lineTotal)"></span>
                             </div>
                             @if($item['note'])

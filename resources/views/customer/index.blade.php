@@ -46,6 +46,7 @@
                             qty: 1, 
                             adding: false,
                             note: '',
+                            noteOpen: false,
                             async addToCart() {
                                 if (this.adding) return;
                                 this.adding = true;
@@ -147,8 +148,16 @@
                             </div>
 
                             <div class="border-t border-slate-100 px-3 py-2.5 bg-slate-50/50">
-                                    <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2">
                                     <span class="text-xs text-slate-500 font-medium">{{ __('Popular') }}</span>
+                                    <button type="button"
+                                            @click="noteOpen = !noteOpen"
+                                            class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                                        </svg>
+                                        <span x-text="noteOpen ? @js(__('Hide note')) : @js(__('Add note'))"></span>
+                                    </button>
                                     <div class="flex-1"></div>
                                     @if($topItem->is_available ?? true)
                                         <button type="submit"
@@ -157,18 +166,28 @@
                                             <svg x-show="!adding" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                             </svg>
-                                                <svg x-show="adding" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                                </svg>
-                                                <span x-text="adding ? @js(__('Adding...')) : @js(__('Add'))"></span>
-                                            </button>
-                                        @else
-                                            <span class="px-4 py-1.5 bg-slate-200 text-slate-500 text-xs font-semibold rounded-full">{{ __('Unavailable') }}</span>
-                                        @endif
-                                    </div>
+                                            <svg x-show="adding" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
+                                            <span x-text="adding ? @js(__('Adding...')) : @js(__('Add'))"></span>
+                                        </button>
+                                    @else
+                                        <span class="px-4 py-1.5 bg-slate-200 text-slate-500 text-xs font-semibold rounded-full">{{ __('Unavailable') }}</span>
+                                    @endif
+                                </div>
+                                <div x-cloak x-show="noteOpen"
+                                     x-transition:enter="transition ease-out duration-150"
+                                     x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                     x-transition:enter-end="opacity-100 transform translate-y-0"
+                                     class="mt-2">
+                                    <input type="text"
+                                           x-model="note"
+                                           placeholder="{{ __('Special instructions (e.g. No onions, extra spicy)') }}"
+                                           class="w-full text-sm border-slate-200 rounded-lg focus:border-amber-500 focus:ring-amber-500 bg-white placeholder:text-slate-400">
                                 </div>
                             </div>
+                        </div>
                     </form>
                 @endforeach
             </div>

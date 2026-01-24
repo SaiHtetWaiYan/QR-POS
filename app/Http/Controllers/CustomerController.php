@@ -111,6 +111,13 @@ class CustomerController extends Controller
     {
         $table = $this->getTable($tableCode);
         $cart = session()->get('cart', []);
+        $menuItemsById = MenuItem::whereIn('id', collect($cart)->pluck('menu_item_id')->unique())
+            ->get()
+            ->keyBy('id');
+        foreach ($cart as $lineId => $item) {
+            $menuItem = $menuItemsById->get($item['menu_item_id']);
+            $cart[$lineId]['display_name'] = $menuItem?->display_name ?? $item['name'];
+        }
         $subtotal = collect($cart)->sum(fn ($item) => $item['price'] * $item['qty']);
 
         return view('customer.cart', compact('table', 'cart', 'subtotal'));
@@ -182,6 +189,10 @@ class CustomerController extends Controller
             return back()->with('error', 'Cart is empty');
         }
 
+        $menuItemsById = MenuItem::whereIn('id', collect($cart)->pluck('menu_item_id')->unique())
+            ->get()
+            ->keyBy('id');
+
         // If an active order exists, append items to it
         $existingOrder = Order::where('table_id', $table->id)
             ->whereIn('status', ['pending', 'accepted', 'preparing', 'served'])
@@ -250,10 +261,11 @@ class CustomerController extends Controller
                 $order = $existingOrder;
 
                 foreach ($cart as $item) {
+                    $menuItemName = $menuItemsById->get($item['menu_item_id'])?->display_name ?? $item['name'];
                     OrderItem::create([
                         'order_id' => $order->id,
                         'menu_item_id' => $item['menu_item_id'],
-                        'name_snapshot' => $item['name'],
+                        'name_snapshot' => $menuItemName,
                         'price_snapshot' => $item['price'],
                         'qty' => $item['qty'],
                         'note' => $item['note'],
@@ -320,10 +332,11 @@ class CustomerController extends Controller
                 }
 
                 foreach ($cart as $item) {
+                    $menuItemName = $menuItemsById->get($item['menu_item_id'])?->display_name ?? $item['name'];
                     OrderItem::create([
                         'order_id' => $order->id,
                         'menu_item_id' => $item['menu_item_id'],
-                        'name_snapshot' => $item['name'],
+                        'name_snapshot' => $menuItemName,
                         'price_snapshot' => $item['price'],
                         'qty' => $item['qty'],
                         'note' => $item['note'],
