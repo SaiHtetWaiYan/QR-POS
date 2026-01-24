@@ -22,7 +22,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-2xl font-bold text-gray-900" data-count="pending">{{ $pendingCount }}</p>
+                            <p class="text-2xl font-bold text-gray-900" x-text="pendingCount"></p>
                             <p class="text-xs text-gray-500">{{ __('Pending') }}</p>
                         </div>
                     </div>
@@ -35,7 +35,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-2xl font-bold text-gray-900" data-count="kitchen">{{ $activeCount }}</p>
+                            <p class="text-2xl font-bold text-gray-900" x-text="activeCount"></p>
                             <p class="text-xs text-gray-500">{{ __('In Kitchen') }}</p>
                         </div>
                     </div>
@@ -84,10 +84,9 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-amber-400 ring-4 ring-amber-100"></span>
                             {{ __('Pending') }}
                         </h3>
-                        <span data-count-badge="pending"
-                              class="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full animate-pulse {{ $pendingCount > 0 ? '' : 'hidden' }}">
-                            {{ $pendingCount }}
-                        </span>
+                        <span x-show="pendingCount > 0"
+                              x-text="pendingCount"
+                              class="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full animate-pulse"></span>
                     </div>
                     <div id="pending-orders" class="bg-gradient-to-b from-amber-50/50 to-white rounded-2xl p-4 min-h-[500px] border border-amber-100/50 space-y-4">
                         @foreach($pending as $order)
@@ -120,10 +119,9 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-blue-100"></span>
                             {{ __('Kitchen') }}
                         </h3>
-                        <span data-count-badge="kitchen"
-                              class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full {{ $activeCount > 0 ? '' : 'hidden' }}">
-                            {{ $activeCount }}
-                        </span>
+                        <span x-show="activeCount > 0"
+                              x-text="activeCount"
+                              class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full"></span>
                     </div>
                     <div id="kitchen-orders" class="bg-gradient-to-b from-blue-50/50 to-white rounded-2xl p-4 min-h-[500px] border border-blue-100/50 space-y-4">
                         @foreach($active as $order)
