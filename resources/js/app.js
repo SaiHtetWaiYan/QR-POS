@@ -326,22 +326,28 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
         const kitchenContainer = document.getElementById('kitchen-orders');
         const activeCount = kitchenContainer ? kitchenContainer.querySelectorAll('[data-order-id]').length : 0;
         const dashboard = document.querySelector('[x-data*="posDashboard"]');
-        if (dashboard && window.Alpine) {
-            const data = window.Alpine.$data(dashboard);
-            if (data) {
-                data.pendingCount = pendingCount;
-                data.activeCount = activeCount;
-            }
+        if (dashboard && dashboard._x_dataStack && dashboard._x_dataStack[0]) {
+            dashboard._x_dataStack[0].pendingCount = pendingCount;
+            dashboard._x_dataStack[0].activeCount = activeCount;
         }
 
+        // Show/hide empty states
         const pendingEmpty = pendingContainer ? pendingContainer.querySelector('.empty-state') : null;
         if (pendingEmpty) {
-            pendingEmpty.classList.toggle('hidden', pendingCount > 0);
+            if (pendingCount > 0) {
+                pendingEmpty.style.display = 'none';
+            } else {
+                pendingEmpty.style.display = '';
+            }
         }
 
         const kitchenEmpty = kitchenContainer ? kitchenContainer.querySelector('.empty-state') : null;
         if (kitchenEmpty) {
-            kitchenEmpty.classList.toggle('hidden', activeCount > 0);
+            if (activeCount > 0) {
+                kitchenEmpty.style.display = 'none';
+            } else {
+                kitchenEmpty.style.display = '';
+            }
         }
     },
 
