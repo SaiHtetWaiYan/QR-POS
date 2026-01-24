@@ -265,8 +265,7 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
             card.style.transform = 'scale(0.95)';
             setTimeout(() => {
                 card.remove();
-                // Directly decrement kitchen count
-                this.adjustCount('kitchen', -1);
+                this.adjustCount();
             }, 300);
             return;
         }
@@ -291,11 +290,8 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
                         card.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2');
                     }, 2000);
 
-                    // Directly adjust counts
-                    if (wasInPending) {
-                        this.adjustCount('pending', -1);
-                    }
-                    this.adjustCount('kitchen', 1);
+                    // Recount cards after move
+                    this.adjustCount();
                 }
 
                 await this.refreshCardContent(card, true);
@@ -307,14 +303,18 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
         await this.refreshCardContent(card, true);
     },
 
-    adjustCount(type, delta) {
+    adjustCount() {
+        // Count actual cards in DOM - more reliable than tracking deltas
+        const pendingContainer = document.getElementById('pending-orders');
+        const kitchenContainer = document.getElementById('kitchen-orders');
         const dashboard = document.querySelector('[x-data*="posDashboard"]');
+
         if (dashboard && dashboard._x_dataStack && dashboard._x_dataStack[0]) {
-            if (type === 'pending') {
-                dashboard._x_dataStack[0].pendingCount = Math.max(0, dashboard._x_dataStack[0].pendingCount + delta);
-            } else if (type === 'kitchen') {
-                dashboard._x_dataStack[0].activeCount = Math.max(0, dashboard._x_dataStack[0].activeCount + delta);
-            }
+            const pendingCards = pendingContainer ? pendingContainer.querySelectorAll('[data-order-id]').length : 0;
+            const kitchenCards = kitchenContainer ? kitchenContainer.querySelectorAll('[data-order-id]').length : 0;
+
+            dashboard._x_dataStack[0].pendingCount = pendingCards;
+            dashboard._x_dataStack[0].activeCount = kitchenCards;
         }
         this.updateEmptyStates();
     },
