@@ -7,7 +7,7 @@ window.Alpine = Alpine;
 // Global bill alert component for POS pages
 Alpine.data('billAlert', () => ({
     showBillAlert: false,
-    billAlertData: null,
+    billAlerts: [],
 
     init() {
         if (typeof Echo !== 'undefined') {
@@ -20,15 +20,12 @@ Alpine.data('billAlert', () => ({
 
     handleBillRequest(data) {
         this.playBillSound();
-        this.billAlertData = data;
-        if (this.showBillAlert) {
-            this.showBillAlert = false;
-            this.$nextTick(() => {
-                this.showBillAlert = true;
-            });
-        } else {
-            this.showBillAlert = true;
+        const existingIndex = this.billAlerts.findIndex((alert) => alert.order_id === data.order_id);
+        if (existingIndex >= 0) {
+            this.billAlerts.splice(existingIndex, 1);
         }
+        this.billAlerts.unshift(data);
+        this.refreshBillAlert();
     },
 
     playBillSound() {
@@ -38,9 +35,29 @@ Alpine.data('billAlert', () => ({
         setTimeout(() => audio.play().catch(() => {}), 300);
     },
 
-    dismissBillAlert() {
-        this.showBillAlert = false;
-        this.billAlertData = null;
+    refreshBillAlert() {
+        if (this.showBillAlert) {
+            this.showBillAlert = false;
+            this.$nextTick(() => {
+                this.showBillAlert = this.billAlerts.length > 0;
+            });
+        } else {
+            this.showBillAlert = this.billAlerts.length > 0;
+        }
+    },
+
+    dismissBillAlert(orderId = null) {
+        if (orderId) {
+            const index = this.billAlerts.findIndex((alert) => alert.order_id === orderId);
+            if (index >= 0) {
+                this.billAlerts.splice(index, 1);
+            }
+        } else {
+            this.billAlerts = [];
+        }
+        if (this.billAlerts.length === 0) {
+            this.showBillAlert = false;
+        }
     }
 }));
 
@@ -50,7 +67,7 @@ Alpine.data('posDashboard', (initialPendingCount = 0) => ({
     showNotification: false,
     notificationMessage: '',
     showBillAlert: false,
-    billAlertData: null,
+    billAlerts: [],
 
     init() {
         if (typeof Echo !== 'undefined') {
@@ -66,15 +83,12 @@ Alpine.data('posDashboard', (initialPendingCount = 0) => ({
 
     handleBillRequest(data) {
         this.playBillSound();
-        this.billAlertData = data;
-        if (this.showBillAlert) {
-            this.showBillAlert = false;
-            this.$nextTick(() => {
-                this.showBillAlert = true;
-            });
-        } else {
-            this.showBillAlert = true;
+        const existingIndex = this.billAlerts.findIndex((alert) => alert.order_id === data.order_id);
+        if (existingIndex >= 0) {
+            this.billAlerts.splice(existingIndex, 1);
         }
+        this.billAlerts.unshift(data);
+        this.refreshBillAlert();
     },
 
     playBillSound() {
@@ -84,9 +98,29 @@ Alpine.data('posDashboard', (initialPendingCount = 0) => ({
         setTimeout(() => audio.play().catch(() => {}), 300);
     },
 
-    dismissBillAlert() {
-        this.showBillAlert = false;
-        this.billAlertData = null;
+    refreshBillAlert() {
+        if (this.showBillAlert) {
+            this.showBillAlert = false;
+            this.$nextTick(() => {
+                this.showBillAlert = this.billAlerts.length > 0;
+            });
+        } else {
+            this.showBillAlert = this.billAlerts.length > 0;
+        }
+    },
+
+    dismissBillAlert(orderId = null) {
+        if (orderId) {
+            const index = this.billAlerts.findIndex((alert) => alert.order_id === orderId);
+            if (index >= 0) {
+                this.billAlerts.splice(index, 1);
+            }
+        } else {
+            this.billAlerts = [];
+        }
+        if (this.billAlerts.length === 0) {
+            this.showBillAlert = false;
+        }
     },
 
     async handleNewOrder(orderData) {

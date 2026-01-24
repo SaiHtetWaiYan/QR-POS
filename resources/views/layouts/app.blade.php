@@ -142,39 +142,53 @@
                          x-transition:leave="transition ease-in duration-200"
                          x-transition:leave-start="opacity-100 transform scale-100"
                          x-transition:leave-end="opacity-0 transform scale-95"
-                         class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
-                        <div class="bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-8 text-center">
-                            <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden">
+                        <div class="bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-6 text-center">
+                            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 animate-pulse">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                                 </svg>
                             </div>
                             <h3 class="text-2xl font-bold text-white">{{ __('Bill Requested!') }}</h3>
                             <p class="text-white/80 mt-1">{{ __('A customer is waiting for the bill') }}</p>
+                            <span x-cloak x-show="billAlerts.length > 1"
+                                  class="mt-2 inline-flex items-center justify-center px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold"
+                                  x-text="billAlerts.length"></span>
                         </div>
-                        <div class="px-6 py-5">
-                            <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                                <span class="text-gray-500">{{ __('Table') }}</span>
-                                <span class="font-bold text-gray-900" x-text="billAlertData?.table || @js(__('Unknown'))"></span>
-                            </div>
-                            <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                                <span class="text-gray-500">{{ __('Order') }}</span>
-                                <span class="font-mono text-gray-900" x-text="'#' + (billAlertData?.order_no || '')"></span>
-                            </div>
-                            <div class="flex items-center justify-between py-3">
-                                <span class="text-gray-500">{{ __('Total') }}</span>
-                                <span class="text-xl font-bold text-gray-900" x-text="'{{ config('pos.currency_symbol') }}' + (billAlertData?.total ? parseFloat(billAlertData.total).toFixed(2) : '0.00')"></span>
-                            </div>
+                        <div class="px-6 py-5 space-y-3 max-h-[50vh] overflow-y-auto">
+                            <template x-for="alert in billAlerts" :key="alert.order_id">
+                                <div class="border border-gray-100 rounded-2xl p-4">
+                                    <div class="flex items-center justify-between text-sm text-gray-500">
+                                        <span>{{ __('Table') }}</span>
+                                        <span class="font-semibold text-gray-900" x-text="alert.table || @js(__('Unknown'))"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm text-gray-500 mt-2">
+                                        <span>{{ __('Order') }}</span>
+                                        <span class="font-mono text-gray-900" x-text="'#' + (alert.order_no || '')"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm text-gray-500 mt-2">
+                                        <span>{{ __('Total') }}</span>
+                                        <span class="text-lg font-bold text-gray-900" x-text="'{{ config('pos.currency_symbol') }}' + (alert.total ? parseFloat(alert.total).toFixed(2) : '0.00')"></span>
+                                    </div>
+                                    <div class="mt-3 flex gap-2">
+                                        <button @click="dismissBillAlert(alert.order_id)"
+                                                class="flex-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition-colors">
+                                            {{ __('Dismiss') }}
+                                        </button>
+                                        <a :href="'/pos/orders/' + (alert.order_id || '')"
+                                           class="flex-1 px-3 py-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-semibold rounded-xl text-center transition-all shadow-lg shadow-violet-600/30">
+                                            {{ __('View Order') }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
-                        <div class="px-6 pb-6 flex gap-3">
-                            <button @click="dismissBillAlert()"
-                                    class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors">
-                                {{ __('Dismiss') }}
+                        <div class="px-6 pb-6">
+                            <button x-cloak x-show="billAlerts.length > 1"
+                                    @click="dismissBillAlert()"
+                                    class="w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors">
+                                {{ __('Dismiss All') }}
                             </button>
-                            <a :href="'/pos/orders/' + (billAlertData?.order_id || '')"
-                               class="flex-1 px-4 py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold rounded-xl text-center transition-all shadow-lg shadow-violet-600/30">
-                                {{ __('View Order') }}
-                            </a>
                         </div>
                     </div>
                 </div>
