@@ -304,23 +304,25 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
     },
 
     adjustCount() {
-        // Count actual cards in DOM - more reliable than tracking deltas
-        const pendingContainer = document.getElementById('pending-orders');
-        const kitchenContainer = document.getElementById('kitchen-orders');
-        const dashboard = document.querySelector('[x-data*="posDashboard"]');
+        // Use setTimeout to ensure DOM has fully settled after card movement
+        setTimeout(() => {
+            const pendingContainer = document.getElementById('pending-orders');
+            const kitchenContainer = document.getElementById('kitchen-orders');
+            const dashboard = document.querySelector('[x-data*="posDashboard"]');
 
-        const pendingCards = pendingContainer ? pendingContainer.querySelectorAll('[data-order-id]').length : 0;
-        const kitchenCards = kitchenContainer ? kitchenContainer.querySelectorAll('[data-order-id]').length : 0;
+            const pendingCards = pendingContainer ? pendingContainer.querySelectorAll('[data-order-id]').length : 0;
+            const kitchenCards = kitchenContainer ? kitchenContainer.querySelectorAll('[data-order-id]').length : 0;
 
-        // Use Alpine's official API to update data
-        if (dashboard) {
-            const data = Alpine.$data(dashboard);
-            if (data) {
-                data.pendingCount = pendingCards;
-                data.activeCount = kitchenCards;
+            // Use Alpine's official API to update data
+            if (dashboard) {
+                const data = Alpine.$data(dashboard);
+                if (data) {
+                    data.pendingCount = pendingCards;
+                    data.activeCount = kitchenCards;
+                }
             }
-        }
-        this.updateEmptyStates();
+            this.updateEmptyStates();
+        }, 100);
     },
 
     updateEmptyStates() {
