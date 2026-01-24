@@ -367,9 +367,12 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
         const kitchenContainer = document.getElementById('kitchen-orders');
         const activeCount = kitchenContainer ? kitchenContainer.querySelectorAll('[data-order-id]').length : 0;
         const dashboard = document.querySelector('[x-data*="posDashboard"]');
-        if (dashboard && dashboard._x_dataStack && dashboard._x_dataStack[0]) {
-            dashboard._x_dataStack[0].pendingCount = pendingCount;
-            dashboard._x_dataStack[0].activeCount = activeCount;
+        if (dashboard && window.Alpine) {
+            const data = window.Alpine.$data(dashboard) || dashboard.__x?.$data || dashboard._x_dataStack?.[0];
+            if (data) {
+                data.pendingCount = pendingCount;
+                data.activeCount = activeCount;
+            }
         }
 
         // Show/hide empty states
