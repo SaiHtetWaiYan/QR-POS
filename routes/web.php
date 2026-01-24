@@ -61,6 +61,7 @@ Route::middleware(['auth', 'verified'])->prefix('pos')->name('pos.')->group(func
     Route::patch('/orders/{order}/status', [PosController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('/orders/{order}/print', [PosController::class, 'print'])->name('orders.print');
     Route::get('/orders/{order}/card', [PosController::class, 'orderCard'])->name('orders.card');
+    Route::post('/orders/{order}/realert', [PosController::class, 'reAlertBill'])->name('orders.realert');
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
 

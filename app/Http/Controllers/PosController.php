@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\BillRequested;
 use App\Events\OrderStatusUpdated;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -221,5 +222,22 @@ class PosController extends Controller
         $order->load(['orderItems.menuItem', 'table']);
 
         return view('pos.partials.order_card', compact('order'));
+    }
+
+    public function reAlertBill(Order $order)
+    {
+        if (! $order->bill_requested_at || $order->status === 'paid') {
+            return back()->with('error', __('No bill request pending for this order.'));
+        }
+
+        try {
+            BillRequested::dispatch($order->load('table'));
+        } catch (\Exception $e) {
+            \Log::warning('Failed to broadcast BillRequested: '.$e->getMessage());
+
+            return back()->with('error', __('Failed to send alert. Please try again.'));
+        }
+
+        return back()->with('success', __('Bill alert sent to all POS screens.'));
     }
 }
