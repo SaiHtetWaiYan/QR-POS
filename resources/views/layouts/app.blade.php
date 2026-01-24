@@ -123,5 +123,95 @@
                 {{ $slot }}
             </main>
         </div>
+
+        @if(request()->routeIs('pos.*') && !request()->routeIs('pos.index'))
+            <div x-data="{
+                    showBillAlert: false,
+                    billAlertData: null,
+                    init() {
+                        if (typeof Echo !== 'undefined') {
+                            Echo.private('pos')
+                                .listen('.BillRequested', (e) => {
+                                    this.handleBillRequest(e);
+                                });
+                        }
+                    },
+                    handleBillRequest(data) {
+                        this.playBillSound();
+                        this.billAlertData = data;
+                        if (this.showBillAlert) {
+                            this.showBillAlert = false;
+                            this.$nextTick(() => {
+                                this.showBillAlert = true;
+                            });
+                        } else {
+                            this.showBillAlert = true;
+                        }
+                    },
+                    playBillSound() {
+                        const audio = new Audio('data:audio/wav;base64,UklGRl9vT19teleVBFZkZXNjcgAAAFNOT1RJRlkgQkVMTCBTT1VORAAAAAAASUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADhAC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAA4T/////AAAAAAAAAAAAAAAAAAAAAP/7kGQAAANUMEoFPeACNQV40, Grilbl AAD/+5JkAA/wAABpAAAACAAADSAAAAEAAAGkAAAAIAAANIAAAAQAAAaQAAAAgAA');
+                        audio.volume = 0.7;
+                        audio.play().catch(() => {});
+                        setTimeout(() => audio.play().catch(() => {}), 300);
+                    },
+                    dismissBillAlert() {
+                        this.showBillAlert = false;
+                        this.billAlertData = null;
+                    }
+                }">
+                <div x-cloak x-show="showBillAlert"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"
+                     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                     @click.self="dismissBillAlert()">
+                    <div x-show="showBillAlert"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform scale-95"
+                         x-transition:enter-end="opacity-100 transform scale-100"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100 transform scale-100"
+                         x-transition:leave-end="opacity-0 transform scale-95"
+                         class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
+                        <div class="bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-8 text-center">
+                            <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white">{{ __('Bill Requested!') }}</h3>
+                            <p class="text-white/80 mt-1">{{ __('A customer is waiting for the bill') }}</p>
+                        </div>
+                        <div class="px-6 py-5">
+                            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                                <span class="text-gray-500">{{ __('Table') }}</span>
+                                <span class="font-bold text-gray-900" x-text="billAlertData?.table || @js(__('Unknown'))"></span>
+                            </div>
+                            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                                <span class="text-gray-500">{{ __('Order') }}</span>
+                                <span class="font-mono text-gray-900" x-text="'#' + (billAlertData?.order_no || '')"></span>
+                            </div>
+                            <div class="flex items-center justify-between py-3">
+                                <span class="text-gray-500">{{ __('Total') }}</span>
+                                <span class="text-xl font-bold text-gray-900" x-text="'{{ config('pos.currency_symbol') }}' + (billAlertData?.total ? parseFloat(billAlertData.total).toFixed(2) : '0.00')"></span>
+                            </div>
+                        </div>
+                        <div class="px-6 pb-6 flex gap-3">
+                            <button @click="dismissBillAlert()"
+                                    class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors">
+                                {{ __('Dismiss') }}
+                            </button>
+                            <a :href="'/pos/orders/' + (billAlertData?.order_id || '')"
+                               class="flex-1 px-4 py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold rounded-xl text-center transition-all shadow-lg shadow-violet-600/30">
+                                {{ __('View Order') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </body>
 </html>

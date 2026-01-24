@@ -31,7 +31,14 @@
         handleBillRequest(data) {
             this.playBillSound();
             this.billAlertData = data;
-            this.showBillAlert = true;
+            if (this.showBillAlert) {
+                this.showBillAlert = false;
+                this.$nextTick(() => {
+                    this.showBillAlert = true;
+                });
+            } else {
+                this.showBillAlert = true;
+            }
         },
         playBillSound() {
             // More urgent sound for bill request
