@@ -325,5 +325,9 @@
   "Category Name": "အမျိုးအစားအမည်",
   "Category Name (Myanmar)": "အမျိုးအစားအမည် (မြန်မာ)",
   "Edit Category": "အမျိုးအစား ပြင်ရန်",
-  "Update Category": "အမျိုးအစား ပြင်ဆင်ရန်"
+  "Update Category": "အမျိုးအစား ပြင်ဆင်ရန်",
+  "Request Again": "ထပ်မံတောင်းရန်",
+  "You can request again in": "ထပ်မံတောင်းနိုင်ရန်",
+  "You can request again now.": "ယခု ထပ်မံတောင်းနိုင်ပါပြီ။",
+  "Please wait :seconds seconds before requesting again.": "ထပ်မံတောင်းရန် :seconds စက္ကန့်စောင့်ပါ။"
 }

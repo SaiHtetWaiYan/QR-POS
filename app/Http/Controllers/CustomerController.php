@@ -450,6 +450,24 @@ class CustomerController extends Controller
             return back();
         }
 
+        $cooldownSeconds = 120;
+        if ($order->bill_requested_at) {
+            $secondsSince = now()->diffInSeconds($order->bill_requested_at);
+            $retryAfter = max(0, $cooldownSeconds - $secondsSince);
+            if ($retryAfter > 0) {
+                $message = __('Please wait :seconds seconds before requesting again.', ['seconds' => $retryAfter]);
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $message,
+                        'retry_after' => $retryAfter,
+                    ], 429);
+                }
+
+                return back()->with('error', $message);
+            }
+        }
+
         $order->update(['bill_requested_at' => now()]);
 
         // Broadcast to POS

@@ -233,7 +233,59 @@
             <!-- Actions -->
             <div x-cloak x-show="currentStatus !== 'paid' && currentStatus !== 'cancelled'">
                 @if($order->bill_requested_at)
-                    <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg shadow-violet-500/30 animate-fade-in">
+                    <div x-data="{
+                            requestedAt: @js(optional($order->bill_requested_at)->timestamp),
+                            cooldownSeconds: 120,
+                            now: Math.floor(Date.now() / 1000),
+                            requesting: false,
+                            retryLabel: @js(__('You can request again in')),
+                            retryNowLabel: @js(__('You can request again now.')),
+                            get remaining() {
+                                if (!this.requestedAt) return 0;
+                                return Math.max(0, this.cooldownSeconds - (this.now - this.requestedAt));
+                            },
+                            get canRequestAgain() {
+                                return this.remaining === 0;
+                            },
+                            get remainingLabel() {
+                                return this.canRequestAgain
+                                    ? this.retryNowLabel
+                                    : `${this.retryLabel} ${this.remaining}s`;
+                            },
+                            init() {
+                                this.timer = setInterval(() => {
+                                    this.now = Math.floor(Date.now() / 1000);
+                                }, 1000);
+                            },
+                            async requestAgain() {
+                                if (this.requesting || !this.canRequestAgain) return;
+                                this.requesting = true;
+                                try {
+                                    const response = await fetch('{{ route('customer.order.bill', [$table->code, $order->id]) }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/json'
+                                        }
+                                    });
+                                    const data = await response.json().catch(() => ({}));
+                                    if (response.ok) {
+                                        this.requestedAt = Math.floor(Date.now() / 1000);
+                                    } else {
+                                        if (data.retry_after) {
+                                            this.requestedAt = Math.floor(Date.now() / 1000) - (this.cooldownSeconds - data.retry_after);
+                                        }
+                                        alert(data.message || @js(__('Failed to request bill. Please try again.')));
+                                    }
+                                } catch (error) {
+                                    alert(@js(__('Network error. Please try again.')));
+                                } finally {
+                                    this.requesting = false;
+                                }
+                            }
+                        }"
+                        class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg shadow-violet-500/30 animate-fade-in">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,14 +297,46 @@
                                 <p class="text-sm text-white/80">{{ __('Staff has been notified') }}</p>
                             </div>
                         </div>
+                        <div class="mt-3 flex items-center justify-between text-xs text-white/80">
+                            <span x-text="remainingLabel"></span>
+                            <button x-cloak
+                                    x-show="canRequestAgain"
+                                    @click="requestAgain()"
+                                    :disabled="requesting"
+                                    class="px-3 py-1.5 rounded-full bg-white/20 text-white font-semibold hover:bg-white/30 transition-colors disabled:opacity-60">
+                                <span x-text="requesting ? @js(__('Requesting...')) : @js(__('Request Again'))"></span>
+                            </button>
+                        </div>
                     </div>
                 @else
                     <div x-data="{
                         requesting: false,
                         billRequested: false,
                         showConfirm: false,
+                        requestedAt: null,
+                        cooldownSeconds: 120,
+                        now: Math.floor(Date.now() / 1000),
+                        retryLabel: @js(__('You can request again in')),
+                        retryNowLabel: @js(__('You can request again now.')),
+                        get remaining() {
+                            if (!this.requestedAt) return 0;
+                            return Math.max(0, this.cooldownSeconds - (this.now - this.requestedAt));
+                        },
+                        get canRequestAgain() {
+                            return this.remaining === 0;
+                        },
+                        get remainingLabel() {
+                            return this.canRequestAgain
+                                ? this.retryNowLabel
+                                : `${this.retryLabel} ${this.remaining}s`;
+                        },
                         openConfirm() {
                             this.showConfirm = true;
+                        },
+                        init() {
+                            this.timer = setInterval(() => {
+                                this.now = Math.floor(Date.now() / 1000);
+                            }, 1000);
                         },
                         async requestBill() {
                             this.showConfirm = false;
@@ -266,15 +350,20 @@
                                         'Content-Type': 'application/json'
                                     }
                                 });
+                                const data = await response.json().catch(() => ({}));
                                 if (response.ok) {
                                     this.billRequested = true;
+                                    this.requestedAt = Math.floor(Date.now() / 1000);
                                 } else {
-                                    this.requesting = false;
-                                    alert(@js(__('Failed to request bill. Please try again.')));
+                                    if (data.retry_after) {
+                                        this.requestedAt = Math.floor(Date.now() / 1000) - (this.cooldownSeconds - data.retry_after);
+                                    }
+                                    alert(data.message || @js(__('Failed to request bill. Please try again.')));
                                 }
                             } catch (error) {
-                                this.requesting = false;
                                 alert(@js(__('Network error. Please try again.')));
+                            } finally {
+                                this.requesting = false;
                             }
                         }
                     }">
@@ -290,6 +379,16 @@
                                 <p class="font-bold text-lg">{{ __('Bill Requested') }}</p>
                                 <p class="text-sm text-white/80">{{ __('Staff has been notified') }}</p>
                             </div>
+                        </div>
+                        <div class="mt-3 flex items-center justify-between text-xs text-white/80">
+                            <span x-text="remainingLabel"></span>
+                            <button x-cloak
+                                    x-show="canRequestAgain"
+                                    @click="requestBill()"
+                                    :disabled="requesting"
+                                    class="px-3 py-1.5 rounded-full bg-white/20 text-white font-semibold hover:bg-white/30 transition-colors disabled:opacity-60">
+                                <span x-text="requesting ? @js(__('Requesting...')) : @js(__('Request Again'))"></span>
+                            </button>
                         </div>
                     </div>
 
