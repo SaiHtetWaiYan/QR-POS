@@ -14,6 +14,18 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::get('/lang/{locale}', function (string $locale) {
+    $locales = config('app.locales', ['en']);
+
+    if (! in_array($locale, $locales, true)) {
+        abort(404);
+    }
+
+    session(['locale' => $locale]);
+
+    return redirect()->back();
+})->name('locale.switch');
+
 // Customer Routes
 Route::prefix('t/{table}')->name('customer.')->middleware(\App\Http\Middleware\CustomerSessionExpired::class)->group(function () {
     Route::get('/', [CustomerController::class, 'index'])->name('index');

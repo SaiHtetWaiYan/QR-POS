@@ -1,4 +1,7 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+    @php
+        $locale = app()->getLocale();
+    @endphp
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -16,7 +19,18 @@
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:items-center sm:ms-6 gap-4">
+                <div class="inline-flex items-center gap-2 text-sm font-semibold">
+                    <a href="{{ route('locale.switch', 'en') }}"
+                       class="{{ $locale === 'en' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-700' }}">
+                        EN
+                    </a>
+                    <span class="text-gray-300">/</span>
+                    <a href="{{ route('locale.switch', 'my') }}"
+                       class="{{ $locale === 'my' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-700' }}">
+                        {{ __('ui.language.myanmar') }}
+                    </a>
+                </div>
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -32,7 +46,7 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('ui.auth.profile') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -42,7 +56,7 @@
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                {{ __('ui.auth.logout') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -71,8 +85,19 @@
             </div>
 
             <div class="mt-3 space-y-1">
+                <div class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-500">
+                    <a href="{{ route('locale.switch', 'en') }}"
+                       class="{{ $locale === 'en' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-700' }}">
+                        EN
+                    </a>
+                    <span class="text-gray-300">/</span>
+                    <a href="{{ route('locale.switch', 'my') }}"
+                       class="{{ $locale === 'my' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-700' }}">
+                        {{ __('ui.language.myanmar') }}
+                    </a>
+                </div>
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    {{ __('ui.auth.profile') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
@@ -82,7 +107,7 @@
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('ui.auth.logout') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

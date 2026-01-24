@@ -44,6 +44,9 @@
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gradient-to-br from-slate-50 via-white to-indigo-50 relative overflow-hidden floating-shapes">
             <div class="relative z-10">
+                @php
+                    $locale = app()->getLocale();
+                @endphp
                 <a href="/" class="flex flex-col items-center group">
                     <div class="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/30 group-hover:shadow-2xl group-hover:shadow-indigo-500/40 transition-all duration-300 group-hover:scale-105">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,8 +54,19 @@
                         </svg>
                     </div>
                     <span class="mt-4 text-2xl font-bold text-gray-900 tracking-tight">{{ config('pos.shop_name', config('app.name', 'QR POS')) }}</span>
-                    <span class="text-sm text-gray-500 mt-1">Restaurant Management System</span>
+                    <span class="text-sm text-gray-500 mt-1">{{ __('ui.guest.tagline') }}</span>
                 </a>
+                <div class="mt-3 flex items-center justify-center gap-2 text-sm font-semibold text-gray-500">
+                    <a href="{{ route('locale.switch', 'en') }}"
+                       class="{{ $locale === 'en' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-700' }}">
+                        EN
+                    </a>
+                    <span class="text-gray-300">/</span>
+                    <a href="{{ route('locale.switch', 'my') }}"
+                       class="{{ $locale === 'my' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-700' }}">
+                        {{ __('ui.language.myanmar') }}
+                    </a>
+                </div>
             </div>
 
             <div class="w-full sm:max-w-md mt-8 px-8 py-8 bg-white/80 backdrop-blur-xl shadow-2xl shadow-gray-200/50 overflow-hidden sm:rounded-3xl border border-white/50 relative z-10">
@@ -60,7 +74,7 @@
             </div>
 
             <div class="mt-8 text-center text-sm text-gray-400 relative z-10">
-                &copy; {{ date('Y') }} {{ config('pos.shop_name', config('app.name', 'QR POS')) }}. All rights reserved.
+                &copy; {{ date('Y') }} {{ config('pos.shop_name', config('app.name', 'QR POS')) }}. {{ __('ui.guest.rights') }}
             </div>
         </div>
     </body>
