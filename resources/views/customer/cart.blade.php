@@ -152,8 +152,8 @@
 
                                         const countEl = document.getElementById('cart-item-count');
                                         const labelEl = document.getElementById('cart-item-label');
-                                        const itemLabelSingle = @json(trans_choice('ui.customer.items', 1));
-                                        const itemLabelPlural = @json(trans_choice('ui.customer.items', 2));
+                                        const itemLabelSingle = @js(trans_choice('ui.customer.items', 1));
+                                        const itemLabelPlural = @js(trans_choice('ui.customer.items', 2));
                                         if (countEl) countEl.textContent = String(count);
                                         if (labelEl) labelEl.textContent = count === 1 ? itemLabelSingle : itemLabelPlural;
 

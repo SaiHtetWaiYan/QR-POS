@@ -177,7 +177,7 @@
 
     <div x-data="{
         activeCategory: '{{ $categories->first()->id ?? '' }}',
-        categoryIds: @json($categories->pluck('id')->values()),
+        categoryIds: @js($categories->pluck('id')->values()),
         showNoteFor: null,
         init() {
             const saved = localStorage.getItem('customer_active_category');
