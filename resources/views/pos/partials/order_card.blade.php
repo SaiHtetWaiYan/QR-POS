@@ -1,4 +1,4 @@
-<div class="relative bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-200 group"
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-200 group"
      data-order-id="{{ $order->id }}"
      x-data="orderCard({{ $order->id }}, '{{ route('pos.orders.updateStatus', $order->id) }}', '{{ csrf_token() }}')">
     <!-- Header -->
@@ -158,10 +158,10 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="absolute inset-0 z-20 flex items-center justify-center px-4"
+         class="fixed inset-0 z-50 flex items-center justify-center px-4"
          aria-modal="true"
          role="dialog">
-        <div class="absolute inset-0 bg-gray-900/40 rounded-2xl" @click="showPaidConfirm = false"></div>
+        <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" @click="showPaidConfirm = false"></div>
         <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 p-6">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
