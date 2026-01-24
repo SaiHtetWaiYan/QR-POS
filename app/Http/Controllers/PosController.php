@@ -108,6 +108,14 @@ class PosController extends Controller
             \Log::warning('Failed to broadcast OrderStatusUpdated: '.$e->getMessage());
         }
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'status' => $order->status,
+                'order_id' => $order->id,
+            ]);
+        }
+
         return back()->with('success', 'Order updated');
     }
 

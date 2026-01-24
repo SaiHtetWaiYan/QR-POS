@@ -1,8 +1,87 @@
 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-200 group"
      data-order-id="{{ $order->id }}"
+     data-order-status="{{ $order->status }}"
      x-data="{
         showPaidConfirm: false,
-        submitPaid() { this.$refs.paidForm.submit(); }
+        loading: false,
+        async updateStatus(newStatus) {
+            if (this.loading) return;
+            this.loading = true;
+            try {
+                const response = await fetch('{{ route('pos.orders.updateStatus', $order->id) }}', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (!response.ok) throw new Error('Failed to update');
+                const data = await response.json();
+                if (data.success) {
+                    this.handleStatusChange(data.status);
+                }
+            } catch (error) {
+                console.error('Failed to update status:', error);
+                this.loading = false;
+            }
+        },
+        async handleStatusChange(newStatus) {
+            const card = this.$el;
+            const orderId = card.dataset.orderId;
+
+            if (newStatus === 'served' || newStatus === 'paid') {
+                card.style.transition = 'all 0.3s ease-out';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => card.remove(), 300);
+                this.updateCounts();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/pos/orders/${orderId}/card`);
+                if (!response.ok) throw new Error('Failed to fetch card');
+                const html = await response.text();
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = html;
+                const newCard = wrapper.firstElementChild;
+
+                if (newStatus === 'accepted') {
+                    const kitchenColumn = document.querySelector('.bg-gradient-to-b.from-blue-50\\/50');
+                    if (kitchenColumn) {
+                        newCard.classList.add('animate-slide-in', 'ring-2', 'ring-blue-400', 'ring-offset-2');
+                        kitchenColumn.insertBefore(newCard, kitchenColumn.firstChild);
+                        card.style.transition = 'all 0.3s ease-out';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.95)';
+                        setTimeout(() => card.remove(), 300);
+                        setTimeout(() => newCard.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2'), 3000);
+                    }
+                } else {
+                    card.replaceWith(newCard);
+                }
+                this.updateCounts();
+            } catch (error) {
+                console.error('Failed to refresh card:', error);
+                window.location.reload();
+            }
+        },
+        updateCounts() {
+            const pendingContainer = document.getElementById('pending-orders');
+            const pendingCount = pendingContainer ? pendingContainer.querySelectorAll('[data-order-id]').length : 0;
+            if (window.Alpine) {
+                const dashboard = document.querySelector('[x-data*=\"posDashboard\"]');
+                if (dashboard && dashboard.__x) {
+                    dashboard.__x.$data.pendingCount = pendingCount;
+                }
+            }
+        },
+        submitPaid() {
+            this.updateStatus('paid');
+            this.showPaidConfirm = false;
+        }
      }">
     <!-- Header -->
     <div class="flex justify-between items-start mb-3">
@@ -88,41 +167,47 @@
         </a>
 
         @if($order->status === 'pending')
-            <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" class="col-span-2">
-                @csrf @method('PATCH')
-                <input type="hidden" name="status" value="accepted">
-                <button type="submit"
-                        class="w-full flex justify-center items-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-semibold text-xs shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    {{ __('Accept Order') }}
-                </button>
-            </form>
+            <button type="button"
+                    @click="updateStatus('accepted')"
+                    :disabled="loading"
+                    class="col-span-2 w-full flex justify-center items-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-semibold text-xs shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl disabled:opacity-50">
+                <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <svg x-cloak x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ __('Accept Order') }}
+            </button>
         @elseif($order->status === 'accepted')
-            <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" class="col-span-2">
-                @csrf @method('PATCH')
-                <input type="hidden" name="status" value="preparing">
-                <button type="submit"
-                        class="w-full flex justify-center items-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white rounded-xl font-semibold text-xs shadow-lg shadow-orange-500/20 transition-all hover:shadow-xl">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
-                    </svg>
-                    {{ __('Start Preparing') }}
-                </button>
-            </form>
+            <button type="button"
+                    @click="updateStatus('preparing')"
+                    :disabled="loading"
+                    class="col-span-2 w-full flex justify-center items-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white rounded-xl font-semibold text-xs shadow-lg shadow-orange-500/20 transition-all hover:shadow-xl disabled:opacity-50">
+                <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+                </svg>
+                <svg x-cloak x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ __('Start Preparing') }}
+            </button>
         @elseif($order->status === 'preparing')
-            <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" class="col-span-2">
-                @csrf @method('PATCH')
-                <input type="hidden" name="status" value="served">
-                <button type="submit"
-                        class="w-full flex justify-center items-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl font-semibold text-xs shadow-lg shadow-indigo-600/20 transition-all hover:shadow-xl">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    {{ __('Mark Served') }}
-                </button>
-            </form>
+            <button type="button"
+                    @click="updateStatus('served')"
+                    :disabled="loading"
+                    class="col-span-2 w-full flex justify-center items-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl font-semibold text-xs shadow-lg shadow-indigo-600/20 transition-all hover:shadow-xl disabled:opacity-50">
+                <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <svg x-cloak x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ __('Mark Served') }}
+            </button>
         @elseif($order->status === 'served')
             <a href="{{ route('pos.orders.print', $order->id) }}" target="_blank"
                class="flex justify-center items-center gap-1.5 w-full px-3 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl font-medium text-xs text-gray-700 transition-colors">
@@ -131,18 +216,19 @@
                 </svg>
                 {{ __('Print') }}
             </a>
-            <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="paidForm">
-                @csrf @method('PATCH')
-                <input type="hidden" name="status" value="paid">
-                <button type="submit"
-                        @click.prevent="showPaidConfirm = true"
-                        class="w-full flex justify-center items-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white rounded-xl font-semibold text-xs shadow-lg shadow-emerald-600/20 transition-all hover:shadow-xl">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                    </svg>
-                    {{ __('Mark Paid') }}
-                </button>
-            </form>
+            <button type="button"
+                    @click="showPaidConfirm = true"
+                    :disabled="loading"
+                    class="w-full flex justify-center items-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white rounded-xl font-semibold text-xs shadow-lg shadow-emerald-600/20 transition-all hover:shadow-xl disabled:opacity-50">
+                <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <svg x-cloak x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ __('Mark Paid') }}
+            </button>
         @endif
     </div>
 
