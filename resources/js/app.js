@@ -240,6 +240,11 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
 
     async handleStatusChange(newStatus) {
         const card = this.$el;
+        const orderSelector = `[data-order-id="${orderId}"]`;
+        const duplicateCards = document.querySelectorAll(orderSelector);
+        duplicateCards.forEach((node) => {
+            if (node !== card) node.remove();
+        });
 
         // For paid, just fade out and remove
         if (newStatus === 'paid') {
@@ -253,27 +258,29 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
             return;
         }
 
-        // For accepted, move card to kitchen column
-        if (newStatus === 'accepted') {
+        // For active statuses, move card to kitchen column and refresh
+        if (['accepted', 'preparing', 'served'].includes(newStatus)) {
             const kitchenColumn = document.getElementById('kitchen-orders');
             if (kitchenColumn) {
-                // Move to kitchen immediately and animate in
-                card.style.transition = 'none';
-                card.style.transform = 'translateY(-16px)';
-                card.style.opacity = '0.98';
-                kitchenColumn.insertBefore(card, kitchenColumn.firstChild);
-                card.classList.add('ring-2', 'ring-blue-400', 'ring-offset-2');
+                const shouldMove = card.parentElement !== kitchenColumn || kitchenColumn.firstElementChild !== card;
+                if (shouldMove) {
+                    card.style.transition = 'none';
+                    card.style.transform = 'translateY(-16px)';
+                    card.style.opacity = '0.98';
+                    kitchenColumn.insertBefore(card, kitchenColumn.firstChild);
+                    card.classList.add('ring-2', 'ring-blue-400', 'ring-offset-2');
 
-                card.offsetHeight;
-                card.style.transition = 'all 0.25s ease-out';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
+                    card.offsetHeight;
+                    card.style.transition = 'all 0.25s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
 
-                this.refreshCardContent(card);
-                setTimeout(() => {
-                    card.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2');
-                }, 2000);
+                    setTimeout(() => {
+                        card.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2');
+                    }, 2000);
+                }
 
+                this.refreshCardContent(card, true);
                 this.updateCounts();
                 return;
             }
