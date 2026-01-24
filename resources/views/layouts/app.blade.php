@@ -125,40 +125,7 @@
         </div>
 
         @if(request()->routeIs('pos.*') && !request()->routeIs('pos.index'))
-            <div x-data="{
-                    showBillAlert: false,
-                    billAlertData: null,
-                    init() {
-                        if (typeof Echo !== 'undefined') {
-                            Echo.private('pos')
-                                .listen('.BillRequested', (e) => {
-                                    this.handleBillRequest(e);
-                                });
-                        }
-                    },
-                    handleBillRequest(data) {
-                        this.playBillSound();
-                        this.billAlertData = data;
-                        if (this.showBillAlert) {
-                            this.showBillAlert = false;
-                            this.$nextTick(() => {
-                                this.showBillAlert = true;
-                            });
-                        } else {
-                            this.showBillAlert = true;
-                        }
-                    },
-                    playBillSound() {
-                        const audio = new Audio('data:audio/wav;base64,UklGRl9vT19teleVBFZkZXNjcgAAAFNOT1RJRlkgQkVMTCBTT1VORAAAAAAASUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADhAC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAA4T/////AAAAAAAAAAAAAAAAAAAAAP/7kGQAAANUMEoFPeACNQV40, Grilbl AAD/+5JkAA/wAABpAAAACAAADSAAAAEAAAGkAAAAIAAANIAAAAQAAAaQAAAAgAA');
-                        audio.volume = 0.7;
-                        audio.play().catch(() => {});
-                        setTimeout(() => audio.play().catch(() => {}), 300);
-                    },
-                    dismissBillAlert() {
-                        this.showBillAlert = false;
-                        this.billAlertData = null;
-                    }
-                }">
+            <div x-data="billAlert()">
                 <div x-cloak x-show="showBillAlert"
                      x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0"
