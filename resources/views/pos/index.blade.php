@@ -121,7 +121,7 @@
                             <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">{{ $activeCount }}</span>
                         @endif
                     </div>
-                    <div class="bg-gradient-to-b from-blue-50/50 to-white rounded-2xl p-4 min-h-[500px] border border-blue-100/50 space-y-4">
+                    <div id="kitchen-orders" class="bg-gradient-to-b from-blue-50/50 to-white rounded-2xl p-4 min-h-[500px] border border-blue-100/50 space-y-4">
                         @foreach($active as $order)
                             @include('pos.partials.order_card', ['order' => $order])
                         @endforeach

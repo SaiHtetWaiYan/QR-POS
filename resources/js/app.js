@@ -207,4 +207,89 @@ Alpine.data('posDashboard', (initialPendingCount = 0) => ({
     }
 }));
 
+// Order Card component for status updates
+Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
+    showPaidConfirm: false,
+    loading: false,
+
+    async updateStatus(newStatus) {
+        if (this.loading) return;
+        this.loading = true;
+        try {
+            const response = await fetch(updateUrl, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (!response.ok) throw new Error('Failed to update');
+            const data = await response.json();
+            if (data.success) {
+                this.handleStatusChange(data.status);
+            }
+        } catch (error) {
+            console.error('Failed to update status:', error);
+            this.loading = false;
+        }
+    },
+
+    async handleStatusChange(newStatus) {
+        const card = this.$el;
+
+        if (newStatus === 'served' || newStatus === 'paid') {
+            card.style.transition = 'all 0.3s ease-out';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => card.remove(), 300);
+            this.updateCounts();
+            return;
+        }
+
+        try {
+            const response = await fetch('/pos/orders/' + orderId + '/card');
+            if (!response.ok) throw new Error('Failed to fetch card');
+            const html = await response.text();
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = html;
+            const newCard = wrapper.firstElementChild;
+
+            if (newStatus === 'accepted') {
+                const kitchenColumn = document.querySelector('#kitchen-orders');
+                if (kitchenColumn) {
+                    newCard.classList.add('animate-slide-in', 'ring-2', 'ring-blue-400', 'ring-offset-2');
+                    kitchenColumn.insertBefore(newCard, kitchenColumn.firstChild);
+                    card.style.transition = 'all 0.3s ease-out';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => card.remove(), 300);
+                    setTimeout(() => newCard.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2'), 3000);
+                }
+            } else {
+                card.replaceWith(newCard);
+            }
+            this.updateCounts();
+        } catch (error) {
+            console.error('Failed to refresh card:', error);
+            window.location.reload();
+        }
+    },
+
+    updateCounts() {
+        const pendingContainer = document.getElementById('pending-orders');
+        const pendingCount = pendingContainer ? pendingContainer.querySelectorAll('[data-order-id]').length : 0;
+        const dashboard = document.querySelector('[x-data*="posDashboard"]');
+        if (dashboard && dashboard._x_dataStack) {
+            dashboard._x_dataStack[0].pendingCount = pendingCount;
+        }
+    },
+
+    submitPaid() {
+        this.updateStatus('paid');
+        this.showPaidConfirm = false;
+    }
+}));
+
 Alpine.start();
