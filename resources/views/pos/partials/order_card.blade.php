@@ -1,4 +1,5 @@
 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-200 group"
+     data-order-id="{{ $order->id }}"
      x-data="{
         showPaidConfirm: false,
         submitPaid() { this.$refs.paidForm.submit(); }

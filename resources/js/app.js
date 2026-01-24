@@ -18,7 +18,7 @@ Alpine.data('billAlert', () => ({
         }
     },
 
-    handleBillRequest(data) {
+    async handleBillRequest(data) {
         this.playBillSound();
         const existingIndex = this.billAlerts.findIndex((alert) => alert.order_id === data.order_id);
         if (existingIndex >= 0) {
@@ -26,6 +26,21 @@ Alpine.data('billAlert', () => ({
         }
         this.billAlerts.unshift(data);
         this.refreshBillAlert();
+
+        const card = document.querySelector(`[data-order-id="${data.order_id}"]`);
+        if (!card) return;
+        try {
+            const response = await fetch(`/pos/orders/${data.order_id}/card`);
+            if (!response.ok) return;
+            const html = await response.text();
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = html;
+            const newCard = wrapper.firstElementChild;
+            if (!newCard) return;
+            card.replaceWith(newCard);
+        } catch (error) {
+            console.error('Failed to refresh order card:', error);
+        }
     },
 
     playBillSound() {
