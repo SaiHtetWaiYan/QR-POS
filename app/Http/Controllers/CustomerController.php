@@ -455,7 +455,7 @@ class CustomerController extends Controller
             $secondsSince = now()->diffInSeconds($order->bill_requested_at);
             $retryAfter = max(0, $cooldownSeconds - $secondsSince);
             if ($retryAfter > 0) {
-                $message = __('Please wait :seconds seconds before requesting again.', ['seconds' => $retryAfter]);
+                $message = __('Please wait before requesting again.');
                 if ($request->expectsJson()) {
                     return response()->json([
                         'success' => false,

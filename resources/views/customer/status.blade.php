@@ -238,7 +238,7 @@
                             cooldownSeconds: 120,
                             now: Math.floor(Date.now() / 1000),
                             requesting: false,
-                            retryLabel: @js(__('You can request again in')),
+                            retryLabel: @js(__('You can request again soon.')),
                             retryNowLabel: @js(__('You can request again now.')),
                             get remaining() {
                                 if (!this.requestedAt) return 0;
@@ -250,12 +250,18 @@
                             get remainingLabel() {
                                 return this.canRequestAgain
                                     ? this.retryNowLabel
-                                    : `${this.retryLabel} ${this.remaining}s`;
+                                    : this.retryLabel;
                             },
                             init() {
                                 this.timer = setInterval(() => {
                                     this.now = Math.floor(Date.now() / 1000);
                                 }, 1000);
+                            },
+                            modalOpen: false,
+                            modalMessage: '',
+                            showModal(message) {
+                                this.modalMessage = message;
+                                this.modalOpen = true;
                             },
                             async requestAgain() {
                                 if (this.requesting || !this.canRequestAgain) return;
@@ -276,10 +282,10 @@
                                         if (data.retry_after) {
                                             this.requestedAt = Math.floor(Date.now() / 1000) - (this.cooldownSeconds - data.retry_after);
                                         }
-                                        alert(data.message || @js(__('Failed to request bill. Please try again.')));
+                                        this.showModal(data.message || @js(__('Failed to request bill. Please try again.')));
                                     }
                                 } catch (error) {
-                                    alert(@js(__('Network error. Please try again.')));
+                                    this.showModal(@js(__('Network error. Please try again.')));
                                 } finally {
                                     this.requesting = false;
                                 }
@@ -307,6 +313,29 @@
                                 <span x-text="requesting ? @js(__('Requesting...')) : @js(__('Request Again'))"></span>
                             </button>
                         </div>
+                        <div x-cloak x-show="modalOpen"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                             aria-modal="true"
+                             role="dialog">
+                            <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="modalOpen = false"></div>
+                            <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 text-slate-900">
+                                <p class="text-base font-semibold text-slate-900">{{ __('Notice') }}</p>
+                                <p class="text-sm text-slate-600 mt-2" x-text="modalMessage"></p>
+                                <div class="mt-4 flex justify-end">
+                                    <button type="button"
+                                            @click="modalOpen = false"
+                                            class="px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors">
+                                        {{ __('OK') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 @else
                     <div x-data="{
@@ -316,7 +345,7 @@
                         requestedAt: null,
                         cooldownSeconds: 120,
                         now: Math.floor(Date.now() / 1000),
-                        retryLabel: @js(__('You can request again in')),
+                        retryLabel: @js(__('You can request again soon.')),
                         retryNowLabel: @js(__('You can request again now.')),
                         get remaining() {
                             if (!this.requestedAt) return 0;
@@ -328,7 +357,13 @@
                         get remainingLabel() {
                             return this.canRequestAgain
                                 ? this.retryNowLabel
-                                : `${this.retryLabel} ${this.remaining}s`;
+                                : this.retryLabel;
+                        },
+                        modalOpen: false,
+                        modalMessage: '',
+                        showModal(message) {
+                            this.modalMessage = message;
+                            this.modalOpen = true;
                         },
                         openConfirm() {
                             this.showConfirm = true;
@@ -358,10 +393,10 @@
                                     if (data.retry_after) {
                                         this.requestedAt = Math.floor(Date.now() / 1000) - (this.cooldownSeconds - data.retry_after);
                                     }
-                                    alert(data.message || @js(__('Failed to request bill. Please try again.')));
+                                    this.showModal(data.message || @js(__('Failed to request bill. Please try again.')));
                                 }
                             } catch (error) {
-                                alert(@js(__('Network error. Please try again.')));
+                                this.showModal(@js(__('Network error. Please try again.')));
                             } finally {
                                 this.requesting = false;
                             }
@@ -389,6 +424,29 @@
                                     class="px-3 py-1.5 rounded-full bg-white/20 text-white font-semibold hover:bg-white/30 transition-colors disabled:opacity-60">
                                 <span x-text="requesting ? @js(__('Requesting...')) : @js(__('Request Again'))"></span>
                             </button>
+                        </div>
+                        <div x-cloak x-show="modalOpen"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                             aria-modal="true"
+                             role="dialog">
+                            <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="modalOpen = false"></div>
+                            <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 text-slate-900">
+                                <p class="text-base font-semibold text-slate-900">{{ __('Notice') }}</p>
+                                <p class="text-sm text-slate-600 mt-2" x-text="modalMessage"></p>
+                                <div class="mt-4 flex justify-end">
+                                    <button type="button"
+                                            @click="modalOpen = false"
+                                            class="px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors">
+                                        {{ __('OK') }}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
