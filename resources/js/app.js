@@ -247,25 +247,29 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
             if (node !== card) node.remove();
         });
 
+        const pendingColumn = document.getElementById('pending-orders');
+        const kitchenColumn = document.getElementById('kitchen-orders');
+        const wasInPending = card.parentElement === pendingColumn;
+        const wasInKitchen = card.parentElement === kitchenColumn;
+
         // For paid, just fade out and remove
         if (newStatus === 'paid') {
             card.style.transition = 'all 0.3s ease-out';
-            // Force reflow
             card.offsetHeight;
             card.style.opacity = '0';
             card.style.transform = 'scale(0.95)';
             setTimeout(() => {
                 card.remove();
-                this.updateCounts();
+                // Directly decrement kitchen count
+                this.adjustCount('kitchen', -1);
             }, 300);
             return;
         }
 
         // For active statuses, move card to kitchen column and refresh
         if (['accepted', 'preparing', 'served'].includes(newStatus)) {
-            const kitchenColumn = document.getElementById('kitchen-orders');
             if (kitchenColumn) {
-                const shouldMove = card.parentElement !== kitchenColumn || kitchenColumn.firstElementChild !== card;
+                const shouldMove = !wasInKitchen;
                 if (shouldMove) {
                     card.style.transition = 'none';
                     card.style.transform = 'translateY(-16px)';
@@ -281,11 +285,14 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
                     setTimeout(() => {
                         card.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2');
                     }, 2000);
+
+                    // Directly adjust counts
+                    if (wasInPending) {
+                        this.adjustCount('pending', -1);
+                    }
+                    this.adjustCount('kitchen', 1);
                 }
 
-                // Update counts immediately after moving the card
-                this.updateCounts();
-                // Then refresh the card content
                 await this.refreshCardContent(card, true);
                 return;
             }
@@ -293,7 +300,39 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
 
         // For other status changes, fetch and replace card content
         await this.refreshCardContent(card, true);
-        this.updateCounts();
+    },
+
+    adjustCount(type, delta) {
+        const dashboard = document.querySelector('[x-data*="posDashboard"]');
+        if (dashboard && dashboard._x_dataStack && dashboard._x_dataStack[0]) {
+            if (type === 'pending') {
+                dashboard._x_dataStack[0].pendingCount = Math.max(0, dashboard._x_dataStack[0].pendingCount + delta);
+            } else if (type === 'kitchen') {
+                dashboard._x_dataStack[0].activeCount = Math.max(0, dashboard._x_dataStack[0].activeCount + delta);
+            }
+        }
+        this.updateEmptyStates();
+    },
+
+    updateEmptyStates() {
+        const pendingContainer = document.getElementById('pending-orders');
+        const kitchenContainer = document.getElementById('kitchen-orders');
+        const dashboard = document.querySelector('[x-data*="posDashboard"]');
+
+        if (!dashboard || !dashboard._x_dataStack) return;
+
+        const pendingCount = dashboard._x_dataStack[0].pendingCount;
+        const activeCount = dashboard._x_dataStack[0].activeCount;
+
+        const pendingEmpty = pendingContainer ? pendingContainer.querySelector('.empty-state') : null;
+        if (pendingEmpty) {
+            pendingEmpty.style.display = pendingCount > 0 ? 'none' : '';
+        }
+
+        const kitchenEmpty = kitchenContainer ? kitchenContainer.querySelector('.empty-state') : null;
+        if (kitchenEmpty) {
+            kitchenEmpty.style.display = activeCount > 0 ? 'none' : '';
+        }
     },
 
     async refreshCardContent(card, animate = false) {
