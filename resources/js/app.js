@@ -375,6 +375,21 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
             }
         }
 
+        document.querySelectorAll('[data-count="pending"]').forEach((el) => {
+            el.textContent = String(pendingCount);
+        });
+        document.querySelectorAll('[data-count="kitchen"]').forEach((el) => {
+            el.textContent = String(activeCount);
+        });
+        document.querySelectorAll('[data-count-badge="pending"]').forEach((el) => {
+            el.textContent = String(pendingCount);
+            el.classList.toggle('hidden', pendingCount === 0);
+        });
+        document.querySelectorAll('[data-count-badge="kitchen"]').forEach((el) => {
+            el.textContent = String(activeCount);
+            el.classList.toggle('hidden', activeCount === 0);
+        });
+
         // Show/hide empty states
         const pendingEmpty = pendingContainer ? pendingContainer.querySelector('.empty-state') : null;
         if (pendingEmpty) {
