@@ -179,18 +179,20 @@
                         {{ __('Print Receipt') }}
                     </a>
 
-                    <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="cancelForm">
-                        @csrf @method('PATCH')
-                        <input type="hidden" name="status" value="cancelled">
-                        <button type="submit"
-                                @click.prevent="showCancelConfirm = true"
-                                class="inline-flex items-center gap-2 px-5 py-2.5 bg-red-50 border border-red-200 rounded-xl font-medium text-sm text-red-700 hover:bg-red-100 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                            {{ __('Cancel Order') }}
-                        </button>
-                    </form>
+                    @if(in_array($order->status, ['pending', 'accepted'], true))
+                        <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="cancelForm">
+                            @csrf @method('PATCH')
+                            <input type="hidden" name="status" value="cancelled">
+                            <button type="submit"
+                                    @click.prevent="showCancelConfirm = true"
+                                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-red-50 border border-red-200 rounded-xl font-medium text-sm text-red-700 hover:bg-red-100 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                {{ __('Cancel Order') }}
+                            </button>
+                        </form>
+                    @endif
 
                     @if($order->status === 'served')
                         <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="paidForm">
