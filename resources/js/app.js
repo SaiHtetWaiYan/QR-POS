@@ -244,6 +244,8 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
         // For served/paid, just fade out and remove
         if (newStatus === 'served' || newStatus === 'paid') {
             card.style.transition = 'all 0.3s ease-out';
+            // Force reflow
+            card.offsetHeight;
             card.style.opacity = '0';
             card.style.transform = 'scale(0.95)';
             setTimeout(() => card.remove(), 300);
@@ -251,66 +253,65 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
             return;
         }
 
-        // For other statuses, fetch updated card HTML
+        // For accepted, move card to kitchen column
+        if (newStatus === 'accepted') {
+            const kitchenColumn = document.getElementById('kitchen-orders');
+            if (kitchenColumn) {
+                // Fade out in current position
+                card.style.transition = 'all 0.3s ease-out';
+                card.offsetHeight; // Force reflow
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+
+                // After fade out, move to kitchen and fade in
+                setTimeout(() => {
+                    // Reset styles
+                    card.style.transition = 'none';
+                    card.style.transform = 'translateY(-20px)';
+
+                    // Move to kitchen
+                    kitchenColumn.insertBefore(card, kitchenColumn.firstChild);
+
+                    // Add highlight
+                    card.classList.add('ring-2', 'ring-blue-400', 'ring-offset-2');
+
+                    // Force reflow then animate in
+                    card.offsetHeight;
+                    card.style.transition = 'all 0.3s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+
+                    // Update button - need to fetch new card for updated button
+                    this.refreshCardContent(card);
+
+                    // Remove highlight after delay
+                    setTimeout(() => {
+                        card.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2');
+                    }, 3000);
+                }, 300);
+
+                this.updateCounts();
+                return;
+            }
+        }
+
+        // For other status changes, fetch and replace card content
+        this.refreshCardContent(card);
+        this.updateCounts();
+    },
+
+    async refreshCardContent(card) {
         try {
             const response = await fetch('/pos/orders/' + orderId + '/card');
-            if (!response.ok) throw new Error('Failed to fetch card');
+            if (!response.ok) return;
             const html = await response.text();
             const wrapper = document.createElement('div');
             wrapper.innerHTML = html.trim();
             const newCard = wrapper.firstElementChild;
-
-            if (newStatus === 'accepted') {
-                const kitchenColumn = document.getElementById('kitchen-orders');
-                if (kitchenColumn) {
-                    // Prepare new card - start hidden
-                    newCard.style.opacity = '0';
-                    newCard.style.transform = 'translateY(-10px)';
-                    newCard.style.transition = 'all 0.3s ease-out';
-                    newCard.classList.add('ring-2', 'ring-blue-400', 'ring-offset-2');
-
-                    // Insert new card into kitchen
-                    kitchenColumn.insertBefore(newCard, kitchenColumn.firstChild);
-                    Alpine.initTree(newCard);
-
-                    // Fade out old card from pending
-                    card.style.transition = 'all 0.3s ease-out';
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.95)';
-
-                    // Animate new card in (after small delay for DOM update)
-                    requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            newCard.style.opacity = '1';
-                            newCard.style.transform = 'translateY(0)';
-                        });
-                    });
-
-                    // Cleanup
-                    setTimeout(() => card.remove(), 300);
-                    setTimeout(() => newCard.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2'), 3000);
-                } else {
-                    // No kitchen column visible, just replace in place
-                    card.replaceWith(newCard);
-                    Alpine.initTree(newCard);
-                }
-            } else {
-                // For preparing or other statuses, replace in place with fade
-                newCard.style.opacity = '0';
-                newCard.style.transition = 'opacity 0.2s ease-out';
-                card.replaceWith(newCard);
-                Alpine.initTree(newCard);
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        newCard.style.opacity = '1';
-                    });
-                });
-            }
-            this.updateCounts();
+            card.replaceWith(newCard);
+            Alpine.initTree(newCard);
         } catch (error) {
             console.error('Failed to refresh card:', error);
-            this.loading = false;
-            window.location.reload();
         }
     },
 
