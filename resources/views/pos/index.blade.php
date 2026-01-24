@@ -42,7 +42,7 @@
                 </div>
             </div>
 
-            @if($topItems->isNotEmpty())
+            @if(false && $topItems->isNotEmpty())
                 <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
