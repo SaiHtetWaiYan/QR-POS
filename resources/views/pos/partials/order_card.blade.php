@@ -1,7 +1,7 @@
 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-200 group"
      data-order-id="{{ $order->id }}"
      x-data="orderCard({{ $order->id }}, '{{ route('pos.orders.updateStatus', $order->id) }}', '{{ csrf_token() }}')"
-     @order-paid.window="if ($event.detail.orderId === {{ $order->id }}) { handleStatusChange('paid') }">
+     @order-paid.window="if ($event.detail && $event.detail.orderId === {{ $order->id }}) { handleStatusChange('paid') }">
     <!-- Header -->
     <div class="flex justify-between items-start mb-3">
         <div class="flex items-start gap-3">
@@ -136,7 +136,7 @@
                 {{ __('Print') }}
             </a>
             <button type="button"
-                    @click="$dispatch('show-paid-confirm', { orderId: {{ $order->id }}, updateUrl: '{{ route('pos.orders.updateStatus', $order->id) }}' })"
+                    @click="window.dispatchEvent(new CustomEvent('show-paid-confirm', { detail: { orderId: {{ $order->id }}, updateUrl: '{{ route('pos.orders.updateStatus', $order->id) }}' } }))"
                     :disabled="loading"
                     class="w-full flex justify-center items-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white rounded-xl font-semibold text-xs shadow-lg shadow-emerald-600/20 transition-all hover:shadow-xl disabled:opacity-50">
                 <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

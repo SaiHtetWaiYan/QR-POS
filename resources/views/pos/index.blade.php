@@ -302,7 +302,7 @@
                                 if (response.ok) {
                                     const data = await response.json();
                                     if (data.success) {
-                                        $dispatch('order-paid', { orderId: orderId });
+                                        window.dispatchEvent(new CustomEvent('order-paid', { detail: { orderId: orderId } }));
                                         show = false;
                                     }
                                 }
