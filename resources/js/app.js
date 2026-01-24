@@ -227,9 +227,14 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
                 body: JSON.stringify({ status: newStatus })
             });
             if (!response.ok) throw new Error('Failed to update');
-            const data = await response.json();
-            if (data.success) {
-                await this.handleStatusChange(data.status);
+            let data = null;
+            try {
+                data = await response.json();
+            } catch (error) {
+                data = { success: true, status: newStatus };
+            }
+            if (data && data.success) {
+                await this.handleStatusChange(data.status || newStatus);
             } else {
                 this.loading = false;
             }
