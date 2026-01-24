@@ -283,14 +283,16 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
                     }, 2000);
                 }
 
-                this.refreshCardContent(card, true);
+                // Update counts immediately after moving the card
                 this.updateCounts();
+                // Then refresh the card content
+                await this.refreshCardContent(card, true);
                 return;
             }
         }
 
         // For other status changes, fetch and replace card content
-        this.refreshCardContent(card, true);
+        await this.refreshCardContent(card, true);
         this.updateCounts();
     },
 
