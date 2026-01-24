@@ -254,8 +254,10 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
             card.offsetHeight;
             card.style.opacity = '0';
             card.style.transform = 'scale(0.95)';
-            setTimeout(() => card.remove(), 300);
-            this.updateCounts();
+            setTimeout(() => {
+                card.remove();
+                this.updateCounts();
+            }, 300);
             return;
         }
 
