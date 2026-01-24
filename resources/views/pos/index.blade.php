@@ -10,7 +10,7 @@
         </div>
     </x-slot>
 
-    <div class="py-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50" x-data="posDashboard({{ $pendingCount }})">
+    <div class="py-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50" x-data="posDashboard({{ $pendingCount }}, {{ $activeCount }})">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
             <!-- Stats Overview -->
             <div class="grid grid-cols-2 gap-4 mb-6">
@@ -35,7 +35,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-2xl font-bold text-gray-900">{{ $activeCount }}</p>
+                            <p class="text-2xl font-bold text-gray-900" x-text="activeCount"></p>
                             <p class="text-xs text-gray-500">{{ __('In Kitchen') }}</p>
                         </div>
                     </div>
@@ -117,16 +117,16 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-blue-100"></span>
                             {{ __('Kitchen') }}
                         </h3>
-                        @if($activeCount > 0)
-                            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">{{ $activeCount }}</span>
-                        @endif
+                        <span x-show="activeCount > 0"
+                              x-text="activeCount"
+                              class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full"></span>
                     </div>
                     <div id="kitchen-orders" class="bg-gradient-to-b from-blue-50/50 to-white rounded-2xl p-4 min-h-[500px] border border-blue-100/50 space-y-4">
                         @foreach($active as $order)
                             @include('pos.partials.order_card', ['order' => $order])
                         @endforeach
                         @if($active->isEmpty())
-                            <div class="flex flex-col items-center justify-center h-48 text-gray-400">
+                            <div class="empty-state flex flex-col items-center justify-center h-48 text-gray-400">
                                 <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-3">
                                     <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>

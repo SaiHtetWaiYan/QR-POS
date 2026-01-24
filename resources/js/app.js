@@ -97,8 +97,9 @@ Alpine.data('billAlert', () => ({
 }));
 
 // POS Dashboard component
-Alpine.data('posDashboard', (initialPendingCount = 0) => ({
+Alpine.data('posDashboard', (initialPendingCount = 0, initialActiveCount = 0) => ({
     pendingCount: initialPendingCount,
+    activeCount: initialActiveCount,
     showNotification: false,
     notificationMessage: '',
     showBillAlert: false,
@@ -320,9 +321,22 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
     updateCounts() {
         const pendingContainer = document.getElementById('pending-orders');
         const pendingCount = pendingContainer ? pendingContainer.querySelectorAll('[data-order-id]').length : 0;
+        const kitchenContainer = document.getElementById('kitchen-orders');
+        const activeCount = kitchenContainer ? kitchenContainer.querySelectorAll('[data-order-id]').length : 0;
         const dashboard = document.querySelector('[x-data*="posDashboard"]');
         if (dashboard && dashboard._x_dataStack) {
             dashboard._x_dataStack[0].pendingCount = pendingCount;
+            dashboard._x_dataStack[0].activeCount = activeCount;
+        }
+
+        const pendingEmpty = pendingContainer ? pendingContainer.querySelector('.empty-state') : null;
+        if (pendingEmpty) {
+            pendingEmpty.classList.toggle('hidden', pendingCount > 0);
+        }
+
+        const kitchenEmpty = kitchenContainer ? kitchenContainer.querySelector('.empty-state') : null;
+        if (kitchenEmpty) {
+            kitchenEmpty.classList.toggle('hidden', activeCount > 0);
         }
     },
 
