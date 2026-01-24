@@ -263,14 +263,30 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
             if (newStatus === 'accepted') {
                 const kitchenColumn = document.getElementById('kitchen-orders');
                 if (kitchenColumn) {
-                    // Move to kitchen column
-                    newCard.classList.add('animate-slide-in', 'ring-2', 'ring-blue-400', 'ring-offset-2');
+                    // Prepare new card - start hidden
+                    newCard.style.opacity = '0';
+                    newCard.style.transform = 'translateY(-10px)';
+                    newCard.style.transition = 'all 0.3s ease-out';
+                    newCard.classList.add('ring-2', 'ring-blue-400', 'ring-offset-2');
+
+                    // Insert new card into kitchen
                     kitchenColumn.insertBefore(newCard, kitchenColumn.firstChild);
                     Alpine.initTree(newCard);
-                    // Fade out old card
+
+                    // Fade out old card from pending
                     card.style.transition = 'all 0.3s ease-out';
                     card.style.opacity = '0';
                     card.style.transform = 'scale(0.95)';
+
+                    // Animate new card in (after small delay for DOM update)
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            newCard.style.opacity = '1';
+                            newCard.style.transform = 'translateY(0)';
+                        });
+                    });
+
+                    // Cleanup
                     setTimeout(() => card.remove(), 300);
                     setTimeout(() => newCard.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2'), 3000);
                 } else {
@@ -279,9 +295,16 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
                     Alpine.initTree(newCard);
                 }
             } else {
-                // For preparing or other statuses, replace in place
+                // For preparing or other statuses, replace in place with fade
+                newCard.style.opacity = '0';
+                newCard.style.transition = 'opacity 0.2s ease-out';
                 card.replaceWith(newCard);
                 Alpine.initTree(newCard);
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        newCard.style.opacity = '1';
+                    });
+                });
             }
             this.updateCounts();
         } catch (error) {
