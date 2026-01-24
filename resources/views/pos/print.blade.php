@@ -34,9 +34,9 @@
     </div>
 
     <div class="border-b">
-        <p>Order: #{{ $order->order_no }}</p>
-        <p>Table: {{ $order->table->name }}</p>
-        <p>Date: {{ $order->created_at->format('Y-m-d H:i') }}</p>
+        <p>{{ __('Order') }}: #{{ $order->order_no }}</p>
+        <p>{{ __('Table') }}: {{ $order->table->name }}</p>
+        <p>{{ __('Date') }}: {{ $order->created_at->format('Y-m-d H:i') }}</p>
     </div>
 
     <table class="mb-2">
@@ -57,31 +57,31 @@
 
     <table>
         <tr>
-            <td>Subtotal</td>
+            <td>{{ __('Subtotal') }}</td>
             <td class="price">{{ number_format($order->subtotal, 2) }}</td>
         </tr>
         <tr>
-            <td>Tax</td>
+            <td>{{ __('Tax') }}</td>
             <td class="price">{{ number_format($order->tax, 2) }}</td>
         </tr>
         <tr>
-            <td>Service</td>
+            <td>{{ __('Service') }}</td>
             <td class="price">{{ number_format($order->service_charge, 2) }}</td>
         </tr>
         @if($order->coupon_amount > 0)
             <tr>
-                <td>Coupon</td>
+                <td>{{ __('Coupon') }}</td>
                 <td class="price">-{{ number_format($order->coupon_amount, 2) }}</td>
             </tr>
         @endif
         <tr class="font-bold" style="font-size: 14px;">
-            <td style="padding-top: 5px;">TOTAL</td>
+            <td style="padding-top: 5px;">{{ __('TOTAL') }}</td>
             <td class="price" style="padding-top: 5px;">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</td>
         </tr>
     </table>
 
     <div class="text-center" style="margin-top: 20px;">
-        <p>Thank you for dining with us!</p>
+        <p>{{ __('Thank you for dining with us!') }}</p>
     </div>
 </body>
 </html>

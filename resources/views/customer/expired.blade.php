@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <title>Session Expired - {{ config('pos.shop_name', config('app.name', 'QR POS')) }}</title>
+    <title>{{ __('Session Expired') }} - {{ config('pos.shop_name', config('app.name', 'QR POS')) }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -15,7 +15,7 @@
         <!-- Header -->
         <header class="bg-gradient-to-r from-slate-800 to-slate-900 safe-area-top">
             <div class="px-5 py-4">
-                <h1 class="text-white font-semibold text-lg tracking-tight text-center">Session Expired</h1>
+                <h1 class="text-white font-semibold text-lg tracking-tight text-center">{{ __('Session Expired') }}</h1>
             </div>
         </header>
 
@@ -30,9 +30,9 @@
                 </div>
 
                 <!-- Message -->
-                <h2 class="text-2xl font-bold text-slate-900 mb-3">Your Session Has Expired</h2>
+                <h2 class="text-2xl font-bold text-slate-900 mb-3">{{ __('Your Session Has Expired') }}</h2>
                 <p class="text-slate-600 mb-8 max-w-xs mx-auto">
-                    For your security, sessions expire after 1 hour of inactivity. Please scan the QR code on your table to continue ordering.
+                    {{ __('For your security, sessions expire after 1 hour of inactivity. Please scan the QR code on your table to continue ordering.') }}
                 </p>
 
                 <!-- QR Code Icon -->
@@ -43,7 +43,7 @@
                 </div>
 
                 <p class="text-sm text-slate-500">
-                    Scan the QR code to start a new session
+                    {{ __('Scan the QR code to start a new session') }}
                 </p>
             </div>
         </main>

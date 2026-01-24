@@ -2,15 +2,15 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="font-bold text-2xl text-gray-900 leading-tight">Create Coupon Campaign</h2>
-                <p class="text-sm text-gray-500 mt-1">Set up a new coupon campaign. Coupons will be automatically generated based on total amount divided by coupon value.</p>
+                <h2 class="font-bold text-2xl text-gray-900 leading-tight">{{ __('Create Coupon Campaign') }}</h2>
+                <p class="text-sm text-gray-500 mt-1">{{ __('Set up a new coupon campaign. Coupons will be automatically generated based on total amount divided by coupon value.') }}</p>
             </div>
             <a href="{{ route('pos.coupons.index') }}"
                class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 text-sm font-semibold shadow-sm hover:bg-gray-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                Back to List
+                {{ __('Back to List') }}
             </a>
         </div>
     </x-slot>
@@ -22,9 +22,9 @@
                     @csrf
 
                     <div>
-                        <label for="title" class="block text-sm font-medium text-gray-700">Campaign Title</label>
+                        <label for="title" class="block text-sm font-medium text-gray-700">{{ __('Campaign Title') }}</label>
                         <input type="text" name="title" id="title" value="{{ old('title') }}" required autofocus
-                               placeholder="e.g., Holiday Sale 2024"
+                               placeholder="{{ __('e.g., Holiday Sale 2024') }}"
                                class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         @error('title')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -33,10 +33,10 @@
 
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
-                            <label for="total_amount" class="block text-sm font-medium text-gray-700">Total Campaign Amount ({{ config('pos.currency_symbol') }})</label>
+                            <label for="total_amount" class="block text-sm font-medium text-gray-700">{{ __('Total Campaign Amount') }} ({{ config('pos.currency_symbol') }})</label>
                             <input type="number" name="total_amount" id="total_amount" step="0.01" min="1"
                                    value="{{ old('total_amount') }}" required x-model="totalAmount"
-                                   placeholder="e.g., 1000.00"
+                                   placeholder="{{ __('e.g., 1000.00') }}"
                                    class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             @error('total_amount')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -44,10 +44,10 @@
                         </div>
 
                         <div>
-                            <label for="coupon_value" class="block text-sm font-medium text-gray-700">Value Per Coupon ({{ config('pos.currency_symbol') }})</label>
+                            <label for="coupon_value" class="block text-sm font-medium text-gray-700">{{ __('Value Per Coupon') }} ({{ config('pos.currency_symbol') }})</label>
                             <input type="number" name="coupon_value" id="coupon_value" step="0.01" min="0.01"
                                    value="{{ old('coupon_value') }}" required x-model="couponValue"
-                                   placeholder="e.g., 10.00"
+                                   placeholder="{{ __('e.g., 10.00') }}"
                                    class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             @error('coupon_value')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -64,7 +64,7 @@
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm text-blue-700">
-                                    This campaign will generate <span class="font-semibold" x-text="calculatedCoupons"></span> coupons worth {{ config('pos.currency_symbol') }}<span x-text="parseFloat(couponValue || 0).toFixed(2)"></span> each.
+                                    {{ __('This campaign will generate') }} <span class="font-semibold" x-text="calculatedCoupons"></span> {{ __('coupons worth') }} {{ config('pos.currency_symbol') }}<span x-text="parseFloat(couponValue || 0).toFixed(2)"></span> {{ __('each') }}.
                                 </p>
                             </div>
                         </div>
@@ -87,7 +87,7 @@
                             this.viewYear = viewBase.getFullYear();
                         },
                         get formatted() {
-                            if (!this.selected) return 'Select date';
+                            if (!this.selected) return @js(__('Select date'));
                             const date = new Date(this.selected + 'T00:00:00');
                             return date.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
                         },
@@ -147,7 +147,7 @@
                             }
                         }
                     }" @keydown.escape.window="open = false">
-                        <label for="ends_at" class="block text-sm font-medium text-gray-700 mb-2">Expiration Date</label>
+                        <label for="ends_at" class="block text-sm font-medium text-gray-700 mb-2">{{ __('Expiration Date') }}</label>
                         <button type="button"
                                 @click="open = !open"
                                 class="w-full max-w-xs flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all">
@@ -159,7 +159,7 @@
                                 </span>
                                 <span x-text="formatted"></span>
                             </span>
-                            <span class="text-gray-400 text-xs">Change</span>
+                            <span class="text-gray-400 text-xs">{{ __('Change') }}</span>
                         </button>
                         <div x-cloak x-show="open"
                              x-transition:enter="transition ease-out duration-150"
@@ -188,13 +188,13 @@
                                     </button>
                                 </div>
                                 <div class="grid grid-cols-7 gap-1 text-[10px] text-gray-400 mb-2">
-                                    <span class="text-center">Su</span>
-                                    <span class="text-center">Mo</span>
-                                    <span class="text-center">Tu</span>
-                                    <span class="text-center">We</span>
-                                    <span class="text-center">Th</span>
-                                    <span class="text-center">Fr</span>
-                                    <span class="text-center">Sa</span>
+                                    <span class="text-center">{{ __('Su') }}</span>
+                                    <span class="text-center">{{ __('Mo') }}</span>
+                                    <span class="text-center">{{ __('Tu') }}</span>
+                                    <span class="text-center">{{ __('We') }}</span>
+                                    <span class="text-center">{{ __('Th') }}</span>
+                                    <span class="text-center">{{ __('Fr') }}</span>
+                                    <span class="text-center">{{ __('Sa') }}</span>
                                 </div>
                                 <div class="grid grid-cols-7 gap-1">
                                     <template x-for="(day, index) in days" :key="index">
@@ -220,9 +220,9 @@
                                     <button type="button"
                                             @click="open = false"
                                             class="text-xs font-semibold text-gray-500 hover:text-gray-600">
-                                        Close
+                                        {{ __('Close') }}
                                     </button>
-                                    <span class="text-[10px] text-gray-400">Select a future date</span>
+                                    <span class="text-[10px] text-gray-400">{{ __('Select a future date') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -238,10 +238,10 @@
                     </div>
 
                     <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
-                        <a href="{{ route('pos.coupons.index') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">Cancel</a>
+                        <a href="{{ route('pos.coupons.index') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">{{ __('Cancel') }}</a>
                         <button type="submit"
                                 class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-indigo-500 transition">
-                            Create Campaign
+                            {{ __('Create Campaign') }}
                         </button>
                     </div>
                 </form>

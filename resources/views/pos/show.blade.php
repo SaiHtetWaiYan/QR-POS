@@ -10,7 +10,7 @@
                 </a>
                 <div>
                     <h2 class="font-bold text-xl text-gray-900 leading-tight">
-                        Order #{{ $order->order_no }}
+                        {{ __('Order') }} #{{ $order->order_no }}
                     </h2>
                     <p class="text-sm text-gray-500">{{ $order->table->name }}</p>
                 </div>
@@ -26,7 +26,7 @@
                 ];
             @endphp
             <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide {{ $statusColors[$order->status] ?? 'bg-gray-100 text-gray-700' }}">
-                {{ $order->status }}
+                {{ __(ucfirst($order->status)) }}
             </span>
         </div>
     </x-slot>
@@ -54,7 +54,7 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm text-gray-500">Total Amount</p>
+                            <p class="text-sm text-gray-500">{{ __('Total Amount') }}</p>
                             <p class="text-3xl font-bold text-gray-900">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</p>
                         </div>
                     </div>
@@ -69,7 +69,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-red-800">Customer Note</p>
+                                <p class="text-sm font-semibold text-red-800">{{ __('Customer Note') }}</p>
                                 <p class="text-sm text-red-700 mt-0.5">{{ $order->customer_note }}</p>
                             </div>
                         </div>
@@ -81,7 +81,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3 text-white">
                                 <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                                <span class="font-bold">Bill Requested</span>
+                                <span class="font-bold">{{ __('Bill Requested') }}</span>
                             </div>
                             <span class="text-white/80 text-sm">{{ $order->bill_requested_at->diffForHumans() }}</span>
                         </div>
@@ -96,7 +96,7 @@
                         <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
-                        Order Items
+                        {{ __('Order Items') }}
                     </h3>
                 </div>
 
@@ -130,21 +130,21 @@
                 <!-- Totals -->
                 <div class="bg-gray-50 px-6 py-4 space-y-2">
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Subtotal</span>
+                        <span class="text-gray-600">{{ __('Subtotal') }}</span>
                         <span class="font-medium text-gray-900">{{ config('pos.currency_symbol') }}{{ number_format($order->subtotal, 2) }}</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-500">Tax ({{ config('pos.tax_rate') * 100 }}%)</span>
+                        <span class="text-gray-500">{{ __('Tax') }} ({{ config('pos.tax_rate') * 100 }}%)</span>
                         <span class="text-gray-600">{{ config('pos.currency_symbol') }}{{ number_format($order->tax, 2) }}</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-500">Service Charge ({{ config('pos.service_charge') * 100 }}%)</span>
+                        <span class="text-gray-500">{{ __('Service Charge') }} ({{ config('pos.service_charge') * 100 }}%)</span>
                         <span class="text-gray-600">{{ config('pos.currency_symbol') }}{{ number_format($order->service_charge, 2) }}</span>
                     </div>
                     @if($order->coupon_amount > 0)
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">
-                                Coupon
+                                {{ __('Coupon') }}
                                 @if($order->coupon_type === 'percent')
                                     ({{ number_format($order->coupon_value, 2) }}%)
                                 @elseif($order->coupon_type === 'fixed')
@@ -155,7 +155,7 @@
                         </div>
                     @endif
                     <div class="flex justify-between pt-3 border-t border-gray-200 mt-2">
-                        <span class="font-bold text-gray-900">Total</span>
+                        <span class="font-bold text-gray-900">{{ __('Total') }}</span>
                         <span class="font-bold text-xl text-gray-900">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</span>
                     </div>
                 </div>
@@ -176,7 +176,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                         </svg>
-                        Print Receipt
+                        {{ __('Print Receipt') }}
                     </a>
 
                     <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="cancelForm">
@@ -188,7 +188,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
-                            Cancel Order
+                            {{ __('Cancel Order') }}
                         </button>
                     </form>
 
@@ -202,7 +202,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                                 </svg>
-                                Mark Paid
+                                {{ __('Mark Paid') }}
                             </button>
                         </form>
                     @endif
@@ -227,20 +227,20 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-base font-semibold text-gray-900">Cancel this order?</p>
-                                    <p class="text-sm text-gray-500">This action cannot be undone.</p>
+                                    <p class="text-base font-semibold text-gray-900">{{ __('Cancel this order?') }}</p>
+                                    <p class="text-sm text-gray-500">{{ __('This action cannot be undone.') }}</p>
                                 </div>
                             </div>
                             <div class="flex gap-3">
                                 <button type="button"
                                         @click="showCancelConfirm = false"
                                         class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
-                                    Keep Order
+                                    {{ __('Keep Order') }}
                                 </button>
                                 <button type="button"
                                         @click="submitCancel()"
                                         class="flex-1 py-2.5 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors">
-                                    Cancel Order
+                                    {{ __('Cancel Order') }}
                                 </button>
                             </div>
                         </div>
@@ -266,20 +266,20 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-base font-semibold text-gray-900">Confirm payment received?</p>
-                                    <p class="text-sm text-gray-500">This will mark the order as paid.</p>
+                                    <p class="text-base font-semibold text-gray-900">{{ __('Confirm payment received?') }}</p>
+                                    <p class="text-sm text-gray-500">{{ __('This will mark the order as paid.') }}</p>
                                 </div>
                             </div>
                             <div class="flex gap-3">
                                 <button type="button"
                                         @click="showPaidConfirm = false"
                                         class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
-                                    Not Yet
+                                    {{ __('Not Yet') }}
                                 </button>
                                 <button type="button"
                                         @click="submitPaid()"
                                         class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors">
-                                    Mark Paid
+                                    {{ __('Mark Paid') }}
                                 </button>
                             </div>
                         </div>
@@ -294,8 +294,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
                     </div>
-                    <p class="font-bold text-xl">Payment Complete</p>
-                    <p class="text-emerald-100 text-sm mt-1">This order has been paid in full</p>
+                    <p class="font-bold text-xl">{{ __('Payment Complete') }}</p>
+                    <p class="text-emerald-100 text-sm mt-1">{{ __('This order has been paid in full') }}</p>
                 </div>
             @endif
 
@@ -306,8 +306,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </div>
-                    <p class="font-bold text-xl">Order Cancelled</p>
-                    <p class="text-red-100 text-sm mt-1">This order has been cancelled</p>
+                    <p class="font-bold text-xl">{{ __('Order Cancelled') }}</p>
+                    <p class="text-red-100 text-sm mt-1">{{ __('This order has been cancelled') }}</p>
                 </div>
             @endif
         </div>

@@ -24,7 +24,7 @@
                     @method('PUT')
 
                     <div>
-                        <label class="block font-medium text-sm text-gray-700 mb-1.5">Category</label>
+                        <label class="block font-medium text-sm text-gray-700 mb-1.5">{{ __('Category') }}</label>
                         <select name="category_id"
                                 class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500"
                                 required>
@@ -37,7 +37,7 @@
                     </div>
 
                     <div>
-                        <label class="block font-medium text-sm text-gray-700 mb-1.5">Item Name</label>
+                        <label class="block font-medium text-sm text-gray-700 mb-1.5">{{ __('Item Name') }}</label>
                         <input type="text"
                                name="name"
                                value="{{ $menuItem->name }}"
@@ -46,7 +46,7 @@
                     </div>
 
                     <div>
-                        <label class="block font-medium text-sm text-gray-700 mb-1.5">Price</label>
+                        <label class="block font-medium text-sm text-gray-700 mb-1.5">{{ __('Price') }}</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                 <span class="text-gray-500 font-medium">{{ config('pos.currency_symbol', '$') }}</span>
@@ -61,22 +61,22 @@
                     </div>
 
                     <div>
-                        <label class="block font-medium text-sm text-gray-700 mb-1.5">Description</label>
+                        <label class="block font-medium text-sm text-gray-700 mb-1.5">{{ __('Description') }}</label>
                         <textarea name="description"
                                   rows="3"
                                   class="w-full border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 resize-none">{{ $menuItem->description }}</textarea>
                     </div>
 
                     <div>
-                        <label class="block font-medium text-sm text-gray-700 mb-1.5">Image</label>
+                        <label class="block font-medium text-sm text-gray-700 mb-1.5">{{ __('Image') }}</label>
                         @if($menuItem->image_path)
                             <div class="mb-3 flex items-center gap-4">
                                 <img src="{{ asset('storage/' . $menuItem->image_path) }}"
                                      class="w-24 h-24 object-cover rounded-xl border border-gray-200"
                                      alt="{{ $menuItem->name }}">
                                 <div class="text-sm text-gray-500">
-                                    <p class="font-medium text-gray-700">Current image</p>
-                                    <p class="text-xs">Upload a new image to replace</p>
+                                    <p class="font-medium text-gray-700">{{ __('Current image') }}</p>
+                                    <p class="text-xs">{{ __('Upload a new image to replace') }}</p>
                                 </div>
                             </div>
                         @endif
@@ -88,21 +88,21 @@
                                    name="image"
                                    accept="image/*"
                                    class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
-                            <p class="text-xs text-gray-400 mt-2">PNG, JPG up to 2MB</p>
+                            <p class="text-xs text-gray-400 mt-2">{{ __('PNG, JPG up to 2MB') }}</p>
                         </div>
                     </div>
 
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
                         <a href="{{ route('pos.menu.index') }}"
                            class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium text-sm transition-colors">
-                            Cancel
+                            {{ __('Cancel') }}
                         </a>
                         <button type="submit"
                                 class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/20 hover:shadow-xl transition-all flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            Update Item
+                            {{ __('Update Item') }}
                         </button>
                     </div>
                 </form>

@@ -5,7 +5,7 @@
                 <h2 class="font-bold text-2xl text-slate-900 leading-tight">
                     {{ __('Order History') }}
                 </h2>
-                <p class="text-sm text-slate-500 mt-1">Review orders by day</p>
+                <p class="text-sm text-slate-500 mt-1">{{ __('Review orders by day') }}</p>
             </div>
         </div>
     </x-slot>
@@ -25,7 +25,7 @@
                             this.viewYear = base.getFullYear();
                         },
                         get formatted() {
-                            if (!this.selected) return 'Select date';
+                            if (!this.selected) return @js(__('Select date'));
                             const date = new Date(this.selected + 'T00:00:00');
                             return date.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
                         },
@@ -80,7 +80,7 @@
                             }
                         }
                     }" @keydown.escape.window="open = false">
-                        <label for="history_date" class="block text-sm font-medium text-gray-700 mb-2">Select Date</label>
+                        <label for="history_date" class="block text-sm font-medium text-gray-700 mb-2">{{ __('Select Date') }}</label>
                         <button type="button"
                                 @click="open = !open"
                                 class="w-full max-w-xs flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all">
@@ -92,7 +92,7 @@
                                 </span>
                                 <span x-text="formatted"></span>
                             </span>
-                            <span class="text-gray-400 text-xs">Change</span>
+                            <span class="text-gray-400 text-xs">{{ __('Change') }}</span>
                         </button>
                         <div x-cloak x-show="open"
                              x-transition:enter="transition ease-out duration-150"
@@ -121,13 +121,13 @@
                                     </button>
                                 </div>
                                 <div class="grid grid-cols-7 gap-1 text-[10px] text-gray-400 mb-2">
-                                    <span class="text-center">Su</span>
-                                    <span class="text-center">Mo</span>
-                                    <span class="text-center">Tu</span>
-                                    <span class="text-center">We</span>
-                                    <span class="text-center">Th</span>
-                                    <span class="text-center">Fr</span>
-                                    <span class="text-center">Sa</span>
+                                    <span class="text-center">{{ __('Su') }}</span>
+                                    <span class="text-center">{{ __('Mo') }}</span>
+                                    <span class="text-center">{{ __('Tu') }}</span>
+                                    <span class="text-center">{{ __('We') }}</span>
+                                    <span class="text-center">{{ __('Th') }}</span>
+                                    <span class="text-center">{{ __('Fr') }}</span>
+                                    <span class="text-center">{{ __('Sa') }}</span>
                                 </div>
                                 <div class="grid grid-cols-7 gap-1">
                                     <template x-for="(day, index) in days" :key="index">
@@ -150,12 +150,12 @@
                                     <button type="button"
                                             @click="selectDate(new Date())"
                                             class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
-                                        Today
+                                        {{ __('Today') }}
                                     </button>
                                     <button type="button"
                                             @click="open = false"
                                             class="text-xs font-semibold text-gray-500 hover:text-gray-600">
-                                        Close
+                                        {{ __('Close') }}
                                     </button>
                                 </div>
                             </div>
@@ -166,14 +166,14 @@
                                value="{{ $date }}"
                                x-model="selected"
                                class="sr-only">
-                        <p class="text-xs text-gray-400 mt-2">Pick a date to review completed orders.</p>
+                        <p class="text-xs text-gray-400 mt-2">{{ __('Pick a date to review completed orders.') }}</p>
                     </div>
                     <button type="submit"
                             class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 border border-transparent rounded-xl font-medium text-sm text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h3.28a1 1 0 01.948.684l1.2 3.6a1 1 0 00.95.684h7.244a1 1 0 01.894 1.447l-3.5 7A1 1 0 0114.118 17H7a1 1 0 01-.948-.684L3.28 5.684A1 1 0 013 4z"/>
                         </svg>
-                        View
+                        {{ __('View') }}
                     </button>
                 </form>
 
@@ -191,19 +191,19 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                    <p class="text-xs text-gray-500">Orders</p>
+                    <p class="text-xs text-gray-500">{{ __('Orders') }}</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $totalOrders }}</p>
                 </div>
                 <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                    <p class="text-xs text-gray-500">Revenue</p>
+                    <p class="text-xs text-gray-500">{{ __('Revenue') }}</p>
                     <p class="text-2xl font-bold text-gray-900">{{ config('pos.currency_symbol') }}{{ number_format($totalRevenue, 2) }}</p>
                 </div>
                 <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                    <p class="text-xs text-gray-500">Date</p>
+                    <p class="text-xs text-gray-500">{{ __('Date') }}</p>
                     <p class="text-sm font-semibold text-gray-900">{{ \Illuminate\Support\Carbon::parse($date)->format('M d, Y') }}</p>
                 </div>
                 <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                    <p class="text-xs text-gray-500">Statuses</p>
+                    <p class="text-xs text-gray-500">{{ __('Statuses') }}</p>
                     <p class="text-sm font-semibold text-gray-900">{{ $orders->groupBy('status')->count() }}</p>
                 </div>
             </div>
@@ -212,7 +212,7 @@
                 $ordersJson = $orders->map(fn ($order) => [
                     'id' => $order->id,
                     'order_no' => $order->order_no,
-                    'table' => $order->table->name ?? 'Table',
+                    'table' => $order->table->name ?? __('Table'),
                     'time' => $order->created_at->format('h:i A'),
                     'status' => $order->status,
                     'total' => $order->total,
@@ -224,6 +224,14 @@
                     query: '',
                     visible: 10,
                     orders: {{ Js::from($ordersJson) }},
+                    statusLabels: {
+                        pending: @js(__('Pending')),
+                        accepted: @js(__('Accepted')),
+                        preparing: @js(__('Preparing')),
+                        served: @js(__('Served')),
+                        paid: @js(__('Paid')),
+                        cancelled: @js(__('Cancelled'))
+                    },
                     get filtered() {
                         if (!this.query) return this.orders;
                         const q = this.query.toLowerCase();
@@ -251,12 +259,12 @@
                  }">
                 <div class="flex items-center justify-between gap-4 mb-4">
                     <div>
-                        <h3 class="font-semibold text-gray-900">Orders</h3>
+                        <h3 class="font-semibold text-gray-900">{{ __('Orders') }}</h3>
                         <span class="text-xs text-gray-500" x-text="`${filtered.length} of ${orders.length}`"></span>
                     </div>
                     <input type="text"
                            x-model="query"
-                           placeholder="Search..."
+                           placeholder="{{ __('Search...') }}"
                            class="w-40 rounded-xl border border-gray-200 px-3 py-2 text-xs text-gray-700 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                 </div>
 
@@ -267,7 +275,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <p class="text-sm font-medium">No orders for this day</p>
+                        <p class="text-sm font-medium">{{ __('No orders for this day') }}</p>
                     </div>
                 </template>
 
@@ -278,7 +286,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <p class="text-sm font-medium">No matching orders</p>
+                        <p class="text-sm font-medium">{{ __('No matching orders') }}</p>
                     </div>
                 </template>
 
@@ -294,11 +302,11 @@
                             <div class="flex items-center gap-3">
                                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
                                       :class="statusClass(order.status)"
-                                      x-text="order.status.charAt(0).toUpperCase() + order.status.slice(1)"></span>
+                                      x-text="statusLabels[order.status] || order.status"></span>
                                 <span class="font-semibold text-gray-900" x-text="formatMoney(order.total)"></span>
                                 <a :href="order.url"
                                    class="text-xs text-indigo-600 hover:text-indigo-700 font-semibold">
-                                    View
+                                    {{ __('View') }}
                                 </a>
                             </div>
                         </div>
@@ -309,7 +317,7 @@
                     <button type="button"
                             @click="visible += 10"
                             class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-sm text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all">
-                        Load more
+                        {{ __('Load more') }}
                     </button>
                 </div>
             </div>

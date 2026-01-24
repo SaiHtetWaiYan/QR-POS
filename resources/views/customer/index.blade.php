@@ -5,7 +5,7 @@
 @endsection
 
 @section('subheader')
-    Browse our menu
+    {{ __('Browse our menu') }}
 @endsection
 
 @section('content')
@@ -19,12 +19,12 @@
                     </svg>
                 </div>
                 <div class="text-white">
-                    <p class="font-semibold text-sm">Order #{{ $activeOrder->order_no }}</p>
-                    <p class="text-xs text-white/80">{{ ucfirst($activeOrder->status) }}</p>
+                    <p class="font-semibold text-sm">{{ __('Order') }} #{{ $activeOrder->order_no }}</p>
+                    <p class="text-xs text-white/80">{{ __(ucfirst($activeOrder->status)) }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 text-white">
-                <span class="text-sm font-medium">View</span>
+                <span class="text-sm font-medium">{{ __('View') }}</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
@@ -36,8 +36,8 @@
         <div class="mb-5">
             <div class="flex items-center justify-between mb-3">
                 <div>
-                    <p class="text-xs uppercase tracking-wide text-slate-400 font-semibold">Most ordered today</p>
-                    <p class="text-base font-semibold text-slate-900">Popular picks</p>
+                    <p class="text-xs uppercase tracking-wide text-slate-400 font-semibold">{{ __('Most ordered today') }}</p>
+                    <p class="text-base font-semibold text-slate-900">{{ __('Popular picks') }}</p>
                 </div>
             </div>
             <div class="space-y-4">
@@ -81,11 +81,11 @@
                                         this.adding = false;
                                     } else {
                                         this.adding = false;
-                                        alert(data.message || 'Failed to add item. Please try again.');
+                                        alert(data.message || @js(__('Failed to add item. Please try again.')));
                                     }
                                 } catch (error) {
                                     this.adding = false;
-                                    alert('Network error. Please check your connection.');
+                                    alert(@js(__('Network error. Please check your connection.')));
                                 }
                             }
                         }" @submit.prevent="addToCart()">
@@ -101,7 +101,7 @@
                                              class="w-full h-full object-cover">
                                         @if(!$topItem->is_available)
                                             <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
-                                                <span class="text-white text-xs font-bold">Sold Out</span>
+                                                <span class="text-white text-xs font-bold">{{ __('Sold Out') }}</span>
                                             </div>
                                         @endif
                                     </div>
@@ -147,8 +147,8 @@
                             </div>
 
                             <div class="border-t border-slate-100 px-3 py-2.5 bg-slate-50/50">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs text-slate-500 font-medium">Popular</span>
+                                    <div class="flex items-center gap-2">
+                                    <span class="text-xs text-slate-500 font-medium">{{ __('Popular') }}</span>
                                     <div class="flex-1"></div>
                                     @if($topItem->is_available ?? true)
                                         <button type="submit"
@@ -157,18 +157,18 @@
                                             <svg x-show="!adding" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                             </svg>
-                                            <svg x-show="adding" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                            </svg>
-                                            <span x-text="adding ? 'Adding...' : 'Add'"></span>
-                                        </button>
-                                    @else
-                                        <span class="px-4 py-1.5 bg-slate-200 text-slate-500 text-xs font-semibold rounded-full">Unavailable</span>
-                                    @endif
+                                                <svg x-show="adding" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                </svg>
+                                                <span x-text="adding ? @js(__('Adding...')) : @js(__('Add'))"></span>
+                                            </button>
+                                        @else
+                                            <span class="px-4 py-1.5 bg-slate-200 text-slate-500 text-xs font-semibold rounded-full">{{ __('Unavailable') }}</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                     </form>
                 @endforeach
             </div>
@@ -214,7 +214,9 @@
                      class="space-y-4">
                     <div class="flex items-center gap-3 mb-4">
                         <h2 class="text-xl font-bold text-slate-900">{{ $category->name }}</h2>
-                        <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-full">{{ $category->menuItems->count() }} items</span>
+                        <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-full">
+                            {{ $category->menuItems->count() }} {{ trans_choice('ui.customer.items', $category->menuItems->count()) }}
+                        </span>
                     </div>
 
                     @foreach($category->menuItems as $item)
@@ -249,22 +251,22 @@
                                             if (typeof data.cart_count === 'number') {
                                                 window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count } }));
                                             }
-                                            if (data.message) {
-                                                const itemName = data.item_name ? `: ${data.item_name}` : '';
-                                                const message = `${data.message}${itemName}`;
-                                                window.dispatchEvent(new CustomEvent('toast', { detail: { message } }));
-                                            }
-                                            this.adding = false;
-                                        } else {
-                                            this.adding = false;
-                                            alert(data.message || 'Failed to add item. Please try again.');
+                                        if (data.message) {
+                                            const itemName = data.item_name ? `: ${data.item_name}` : '';
+                                            const message = `${data.message}${itemName}`;
+                                            window.dispatchEvent(new CustomEvent('toast', { detail: { message } }));
                                         }
-                                    } catch (error) {
                                         this.adding = false;
-                                        alert('Network error. Please check your connection.');
+                                    } else {
+                                        this.adding = false;
+                                        alert(data.message || @js(__('Failed to add item. Please try again.')));
                                     }
+                                } catch (error) {
+                                    this.adding = false;
+                                    alert(@js(__('Network error. Please check your connection.')));
                                 }
-                            }" @submit.prevent="addToCart()">
+                            }
+                        }" @submit.prevent="addToCart()">
                             <input type="hidden" name="menu_item_id" value="{{ $item->id }}">
                             <input type="hidden" name="qty" :value="qty">
 
@@ -277,7 +279,7 @@
                                                  class="w-full h-full object-cover">
                                             @if(!$item->is_available)
                                                 <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
-                                                    <span class="text-white text-xs font-bold">Sold Out</span>
+                                                    <span class="text-white text-xs font-bold">{{ __('Sold Out') }}</span>
                                                 </div>
                                             @endif
                                         </div>
@@ -325,13 +327,13 @@
                                 <!-- Expandable Note & Add Section -->
                                 <div class="border-t border-slate-100 px-3 py-2.5 bg-slate-50/50">
                                     <div class="flex items-center gap-2">
-                                        <button type="button"
-                                                @click="showNoteFor = showNoteFor === {{ $item->id }} ? null : {{ $item->id }}"
-                                                class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 transition-colors">
+                                                <button type="button"
+                                                        @click="showNoteFor = showNoteFor === {{ $item->id }} ? null : {{ $item->id }}"
+                                                        class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
                                             </svg>
-                                            <span x-text="showNoteFor === {{ $item->id }} ? 'Hide note' : 'Add note'"></span>
+                                            <span x-text="showNoteFor === {{ $item->id }} ? @js(__('Hide note')) : @js(__('Add note'))"></span>
                                         </button>
                                         <div class="flex-1"></div>
                                         @if($item->is_available ?? true)
@@ -341,16 +343,16 @@
                                                 <svg x-show="!adding" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                                 </svg>
-                                                <svg x-show="adding" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                                </svg>
-                                                <span x-text="adding ? 'Adding...' : 'Add'"></span>
-                                            </button>
-                                        @else
-                                            <span class="px-4 py-1.5 bg-slate-200 text-slate-500 text-xs font-semibold rounded-full">Unavailable</span>
-                                        @endif
-                                    </div>
+                                                    <svg x-show="adding" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                    </svg>
+                                                    <span x-text="adding ? @js(__('Adding...')) : @js(__('Add'))"></span>
+                                                </button>
+                                            @else
+                                                <span class="px-4 py-1.5 bg-slate-200 text-slate-500 text-xs font-semibold rounded-full">{{ __('Unavailable') }}</span>
+                                            @endif
+                                        </div>
                                     <div x-cloak x-show="showNoteFor === {{ $item->id }}"
                                          x-transition:enter="transition ease-out duration-150"
                                          x-transition:enter-start="opacity-0 transform -translate-y-2"
@@ -358,7 +360,7 @@
                                          class="mt-2">
                                         <input type="text"
                                                x-model="note"
-                                               placeholder="Special instructions (e.g. No onions, extra spicy)"
+                                               placeholder="{{ __('Special instructions (e.g. No onions, extra spicy)') }}"
                                                class="w-full text-sm border-slate-200 rounded-lg focus:border-amber-500 focus:ring-amber-500 bg-white placeholder:text-slate-400">
                                     </div>
                                 </div>
@@ -373,7 +375,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                 </svg>
                             </div>
-                            <p class="text-slate-500 text-sm">No items in this category</p>
+                            <p class="text-slate-500 text-sm">{{ __('No items in this category') }}</p>
                         </div>
                     @endif
                 </div>

@@ -22,6 +22,7 @@ return [
         'menu' => 'မီနူး',
         'cart' => 'စျေးခြင်းတောင်း',
         'orders' => 'မှာယူမှုများ',
+        'items' => '{1} ခု|[2,*] ခု',
     ],
     'language' => [
         'english' => 'English',

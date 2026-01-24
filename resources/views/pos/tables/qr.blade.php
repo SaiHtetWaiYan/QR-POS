@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            QR Code for {{ $table->name }}
+            {{ __('QR Code for') }} {{ $table->name }}
         </h2>
     </x-slot>
 
@@ -18,10 +18,10 @@
 
                 <div class="flex justify-center gap-4 no-print">
                     <button onclick="window.print()" class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 font-bold">
-                        Print QR Code
+                        {{ __('Print QR Code') }}
                     </button>
                     <a href="{{ route('pos.tables.index') }}" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-bold">
-                        Back
+                        {{ __('Back') }}
                     </a>
                 </div>
             </div>

@@ -5,7 +5,7 @@
                 <h2 class="font-bold text-2xl text-slate-900 leading-tight">
                     {{ __('POS Dashboard') }}
                 </h2>
-                <p class="text-sm text-slate-500 mt-1">Manage incoming orders in real-time</p>
+                <p class="text-sm text-slate-500 mt-1">{{ __('Manage incoming orders in real-time') }}</p>
             </div>
         </div>
     </x-slot>
@@ -76,7 +76,7 @@
                     this.pendingCount++;
 
                     // Show notification toast
-                    this.showToast(`New order from ${orderData.table || 'Table'}: ${orderData.order_no}`);
+                    this.showToast(`{{ __('New order from') }} ${orderData.table || @js(__('Table'))}: ${orderData.order_no}`);
 
                     // Remove highlight after 5 seconds
                     setTimeout(() => {
@@ -117,7 +117,7 @@
                         </div>
                         <div>
                             <p class="text-2xl font-bold text-gray-900" x-text="pendingCount"></p>
-                            <p class="text-xs text-gray-500">Pending</p>
+                            <p class="text-xs text-gray-500">{{ __('Pending') }}</p>
                         </div>
                     </div>
                 </div>
@@ -130,7 +130,7 @@
                         </div>
                         <div>
                             <p class="text-2xl font-bold text-gray-900">{{ $activeCount }}</p>
-                            <p class="text-xs text-gray-500">In Kitchen</p>
+                            <p class="text-xs text-gray-500">{{ __('In Kitchen') }}</p>
                         </div>
                     </div>
                 </div>
@@ -140,8 +140,8 @@
                 <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <p class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Most ordered items</p>
-                            <p class="text-sm text-gray-500">All time</p>
+                            <p class="text-xs uppercase tracking-wide text-gray-400 font-semibold">{{ __('Most ordered items') }}</p>
+                            <p class="text-sm text-gray-500">{{ __('All time') }}</p>
                         </div>
                     </div>
                     <div class="flex gap-4">
@@ -160,7 +160,7 @@
                                 @endif
                                 <div class="min-w-0">
                                     <p class="text-sm font-semibold text-gray-900 truncate">{{ $item->name_snapshot }}</p>
-                                    <p class="text-xs text-emerald-600 font-semibold mt-1">{{ $item->total_qty }} ordered</p>
+                                    <p class="text-xs text-emerald-600 font-semibold mt-1">{{ $item->total_qty }} {{ __('ordered') }}</p>
                                 </div>
                             </div>
                         @endforeach
@@ -176,7 +176,7 @@
                     <div class="flex items-center justify-between mb-4 px-1">
                         <h3 class="font-semibold text-gray-800 flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-amber-400 ring-4 ring-amber-100"></span>
-                            Pending
+                            {{ __('Pending') }}
                         </h3>
                         <span x-show="pendingCount > 0" x-text="pendingCount" class="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full animate-pulse"></span>
                     </div>
@@ -191,14 +191,14 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                 </div>
-                                <p class="text-sm font-medium text-gray-500">No pending orders</p>
-                                <p class="text-xs text-gray-400 mt-1">New orders will appear here</p>
+                                <p class="text-sm font-medium text-gray-500">{{ __('No pending orders') }}</p>
+                                <p class="text-xs text-gray-400 mt-1">{{ __('New orders will appear here') }}</p>
                             </div>
                         @endif
                         @if($pendingCount > 20)
                             <a href="{{ route('pos.history') }}"
                                class="block text-center text-xs text-indigo-600 hover:text-indigo-700 font-semibold pt-2">
-                                View all pending orders
+                                {{ __('View all pending orders') }}
                             </a>
                         @endif
                     </div>
@@ -209,7 +209,7 @@
                     <div class="flex items-center justify-between mb-4 px-1">
                         <h3 class="font-semibold text-gray-800 flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-blue-100"></span>
-                            Kitchen
+                            {{ __('Kitchen') }}
                         </h3>
                         @if($activeCount > 0)
                             <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">{{ $activeCount }}</span>
@@ -226,14 +226,14 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
                                     </svg>
                                 </div>
-                                <p class="text-sm font-medium text-gray-500">Kitchen is clear</p>
-                                <p class="text-xs text-gray-400 mt-1">Accept orders to start cooking</p>
+                                <p class="text-sm font-medium text-gray-500">{{ __('Kitchen is clear') }}</p>
+                                <p class="text-xs text-gray-400 mt-1">{{ __('Accept orders to start cooking') }}</p>
                             </div>
                         @endif
                         @if($activeCount > 20)
                             <a href="{{ route('pos.history') }}"
                                class="block text-center text-xs text-indigo-600 hover:text-indigo-700 font-semibold pt-2">
-                                View all kitchen orders
+                                {{ __('View all kitchen orders') }}
                             </a>
                         @endif
                     </div>
@@ -267,21 +267,21 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-white">Bill Requested!</h3>
-                    <p class="text-white/80 mt-1">A customer is waiting for the bill</p>
+                    <h3 class="text-2xl font-bold text-white">{{ __('Bill Requested!') }}</h3>
+                    <p class="text-white/80 mt-1">{{ __('A customer is waiting for the bill') }}</p>
                 </div>
                 <!-- Content -->
                 <div class="px-6 py-5">
                     <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                        <span class="text-gray-500">Table</span>
-                        <span class="font-bold text-gray-900" x-text="billAlertData?.table || 'Unknown'"></span>
+                        <span class="text-gray-500">{{ __('Table') }}</span>
+                        <span class="font-bold text-gray-900" x-text="billAlertData?.table || @js(__('Unknown'))"></span>
                     </div>
                     <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                        <span class="text-gray-500">Order</span>
+                        <span class="text-gray-500">{{ __('Order') }}</span>
                         <span class="font-mono text-gray-900" x-text="'#' + (billAlertData?.order_no || '')"></span>
                     </div>
                     <div class="flex items-center justify-between py-3">
-                        <span class="text-gray-500">Total</span>
+                        <span class="text-gray-500">{{ __('Total') }}</span>
                         <span class="text-xl font-bold text-gray-900" x-text="'{{ config('pos.currency_symbol') }}' + (billAlertData?.total ? parseFloat(billAlertData.total).toFixed(2) : '0.00')"></span>
                     </div>
                 </div>
@@ -289,11 +289,11 @@
                 <div class="px-6 pb-6 flex gap-3">
                     <button @click="dismissBillAlert()"
                             class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors">
-                        Dismiss
+                        {{ __('Dismiss') }}
                     </button>
                     <a :href="'/pos/orders/' + (billAlertData?.order_id || '')"
                        class="flex-1 px-4 py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold rounded-xl text-center transition-all shadow-lg shadow-violet-600/30">
-                        View Order
+                        {{ __('View Order') }}
                     </a>
                 </div>
             </div>
@@ -315,7 +315,7 @@
                     </svg>
                 </div>
                 <div class="flex-1">
-                    <p class="font-bold text-sm">New Order!</p>
+                    <p class="font-bold text-sm">{{ __('New Order!') }}</p>
                     <p class="text-white/90 text-sm" x-text="notificationMessage"></p>
                 </div>
                 <button @click="showNotification = false" class="text-white/70 hover:text-white">

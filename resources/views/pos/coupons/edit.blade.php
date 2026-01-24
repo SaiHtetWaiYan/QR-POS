@@ -2,15 +2,15 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="font-bold text-2xl text-gray-900 leading-tight">Edit Campaign</h2>
-                <p class="text-sm text-gray-500 mt-1">Update campaign settings. Total amount and coupon value cannot be changed.</p>
+                <h2 class="font-bold text-2xl text-gray-900 leading-tight">{{ __('Edit Campaign') }}</h2>
+                <p class="text-sm text-gray-500 mt-1">{{ __('Update campaign settings. Total amount and coupon value cannot be changed.') }}</p>
             </div>
             <a href="{{ route('pos.coupons.show', $campaign) }}"
                class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 text-sm font-semibold shadow-sm hover:bg-gray-50 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                Back to Campaign
+                {{ __('Back to Campaign') }}
             </a>
         </div>
     </x-slot>
@@ -26,24 +26,24 @@
             <!-- Campaign Stats (Read-only) -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-6">
                 <div class="border-b border-gray-200 px-6 py-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Campaign Summary</h3>
-                    <p class="text-sm text-gray-500 mt-1">These values are locked and cannot be modified.</p>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ __('Campaign Summary') }}</h3>
+                    <p class="text-sm text-gray-500 mt-1">{{ __('These values are locked and cannot be modified.') }}</p>
                 </div>
                 <div class="p-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
                     <div>
-                        <div class="text-sm font-medium text-gray-500">Total Amount</div>
+                        <div class="text-sm font-medium text-gray-500">{{ __('Total Amount') }}</div>
                         <div class="mt-1 text-xl font-semibold text-gray-900">
                             {{ config('pos.currency_symbol') }}{{ number_format($campaign->total_amount ?? 0, 2) }}
                         </div>
                     </div>
                     <div>
-                        <div class="text-sm font-medium text-gray-500">Coupon Value</div>
+                        <div class="text-sm font-medium text-gray-500">{{ __('Coupon Value') }}</div>
                         <div class="mt-1 text-xl font-semibold text-gray-900">
                             {{ config('pos.currency_symbol') }}{{ number_format($campaign->coupon_value ?? 0, 2) }}
                         </div>
                     </div>
                     <div>
-                        <div class="text-sm font-medium text-gray-500">Total Coupons</div>
+                        <div class="text-sm font-medium text-gray-500">{{ __('Total Coupons') }}</div>
                         <div class="mt-1 text-xl font-semibold text-gray-900">
                             {{ $campaign->total_codes ?? $campaign->coupons()->count() }}
                         </div>
@@ -58,7 +58,7 @@
                     @method('PUT')
 
                     <div>
-                        <label for="title" class="block text-sm font-medium text-gray-700">Campaign Title</label>
+                        <label for="title" class="block text-sm font-medium text-gray-700">{{ __('Campaign Title') }}</label>
                         <input type="text" name="title" id="title" value="{{ old('title', $campaign->title) }}" required
                                class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         @error('title')
@@ -83,7 +83,7 @@
                             this.viewYear = viewBase.getFullYear();
                         },
                         get formatted() {
-                            if (!this.selected) return 'Select date';
+                            if (!this.selected) return @js(__('Select date'));
                             const date = new Date(this.selected + 'T00:00:00');
                             return date.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
                         },
@@ -143,7 +143,7 @@
                             }
                         }
                     }" @keydown.escape.window="open = false">
-                        <label for="ends_at" class="block text-sm font-medium text-gray-700 mb-2">Expiration Date</label>
+                        <label for="ends_at" class="block text-sm font-medium text-gray-700 mb-2">{{ __('Expiration Date') }}</label>
                         <button type="button"
                                 @click="open = !open"
                                 class="w-full max-w-xs flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all">
@@ -155,7 +155,7 @@
                                 </span>
                                 <span x-text="formatted"></span>
                             </span>
-                            <span class="text-gray-400 text-xs">Change</span>
+                            <span class="text-gray-400 text-xs">{{ __('Change') }}</span>
                         </button>
                         <div x-cloak x-show="open"
                              x-transition:enter="transition ease-out duration-150"
@@ -184,13 +184,13 @@
                                     </button>
                                 </div>
                                 <div class="grid grid-cols-7 gap-1 text-[10px] text-gray-400 mb-2">
-                                    <span class="text-center">Su</span>
-                                    <span class="text-center">Mo</span>
-                                    <span class="text-center">Tu</span>
-                                    <span class="text-center">We</span>
-                                    <span class="text-center">Th</span>
-                                    <span class="text-center">Fr</span>
-                                    <span class="text-center">Sa</span>
+                                    <span class="text-center">{{ __('Su') }}</span>
+                                    <span class="text-center">{{ __('Mo') }}</span>
+                                    <span class="text-center">{{ __('Tu') }}</span>
+                                    <span class="text-center">{{ __('We') }}</span>
+                                    <span class="text-center">{{ __('Th') }}</span>
+                                    <span class="text-center">{{ __('Fr') }}</span>
+                                    <span class="text-center">{{ __('Sa') }}</span>
                                 </div>
                                 <div class="grid grid-cols-7 gap-1">
                                     <template x-for="(day, index) in days" :key="index">
@@ -216,9 +216,9 @@
                                     <button type="button"
                                             @click="open = false"
                                             class="text-xs font-semibold text-gray-500 hover:text-gray-600">
-                                        Close
+                                        {{ __('Close') }}
                                     </button>
-                                    <span class="text-[10px] text-gray-400">Select a future date</span>
+                                    <span class="text-[10px] text-gray-400">{{ __('Select a future date') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -238,16 +238,16 @@
                                {{ old('is_active', $campaign->is_active) ? 'checked' : '' }}
                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                         <label for="is_active" class="text-sm font-medium text-gray-700">
-                            Active Campaign
+                            {{ __('Active Campaign') }}
                         </label>
                     </div>
-                    <p class="text-sm text-gray-500 -mt-4">When disabled, all unused coupons in this campaign will also be deactivated.</p>
+                    <p class="text-sm text-gray-500 -mt-4">{{ __('When disabled, all unused coupons in this campaign will also be deactivated.') }}</p>
 
                     <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
-                        <a href="{{ route('pos.coupons.show', $campaign) }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">Cancel</a>
+                        <a href="{{ route('pos.coupons.show', $campaign) }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">{{ __('Cancel') }}</a>
                         <button type="submit"
                                 class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-indigo-500 transition">
-                            Save Changes
+                            {{ __('Save Changes') }}
                         </button>
                     </div>
                 </form>

@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="mb-8 text-center">
-        <h2 class="text-2xl font-bold text-gray-900">Welcome Back</h2>
-        <p class="text-sm text-gray-500 mt-2">Sign in to access your dashboard</p>
+        <h2 class="text-2xl font-bold text-gray-900">{{ __('Welcome Back') }}</h2>
+        <p class="text-sm text-gray-500 mt-2">{{ __('Sign in to access your dashboard') }}</p>
     </div>
 
     <!-- Session Status -->
@@ -27,7 +27,7 @@
                               required
                               autofocus
                               autocomplete="username"
-                              placeholder="name@example.com" />
+                              placeholder="{{ __('name@example.com') }}" />
             </div>
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
@@ -47,7 +47,7 @@
                               name="password"
                               required
                               autocomplete="current-password"
-                              placeholder="Enter your password" />
+                              placeholder="{{ __('Enter your password') }}" />
             </div>
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>

@@ -1,12 +1,12 @@
 @extends('layouts.customer')
 
 @section('header')
-    Your Cart
+    {{ __('Your Cart') }}
 @endsection
 
 @section('subheader')
     <span id="cart-item-count">{{ count($cart ?? []) }}</span>
-    <span id="cart-item-label">{{ Str::plural('item', count($cart ?? [])) }}</span>
+    <span id="cart-item-label">{{ trans_choice('ui.customer.items', count($cart ?? [])) }}</span>
 @endsection
 
 @section('content')
@@ -24,14 +24,14 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
             </div>
-            <h2 class="text-xl font-semibold text-slate-900 mb-2">Your cart is empty</h2>
-            <p class="text-slate-500 mb-8 text-sm">Discover our delicious menu and add items to get started.</p>
+            <h2 class="text-xl font-semibold text-slate-900 mb-2">{{ __('Your cart is empty') }}</h2>
+            <p class="text-slate-500 mb-8 text-sm">{{ __('Discover our delicious menu and add items to get started.') }}</p>
             <a href="{{ route('customer.index', $table->code) }}"
                class="inline-flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-full font-semibold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                 </svg>
-                Browse Menu
+                {{ __('Browse Menu') }}
             </a>
         </div>
     </div>
@@ -91,10 +91,10 @@
                                     const itemEl = this.$el.closest('[data-cart-item]');
                                     if (itemEl) itemEl.dataset.lineTotal = String(data.line_total);
                                 } else {
-                                    alert(data.message || 'Failed to update item. Please try again.');
+                                    alert(data.message || @js(__('Failed to update item. Please try again.')));
                                 }
                             } catch (error) {
-                                alert('Network error. Please check your connection.');
+                                alert(@js(__('Network error. Please check your connection.')));
                             } finally {
                                 this.updating = false;
                             }
@@ -152,8 +152,10 @@
 
                                         const countEl = document.getElementById('cart-item-count');
                                         const labelEl = document.getElementById('cart-item-label');
+                                        const itemLabelSingle = @json(trans_choice('ui.customer.items', 1));
+                                        const itemLabelPlural = @json(trans_choice('ui.customer.items', 2));
                                         if (countEl) countEl.textContent = String(count);
-                                        if (labelEl) labelEl.textContent = count === 1 ? 'item' : 'items';
+                                        if (labelEl) labelEl.textContent = count === 1 ? itemLabelSingle : itemLabelPlural;
 
                                         if (count === 0) {
                                             const emptyState = document.getElementById('cart-empty-state');
@@ -170,11 +172,11 @@
                                     }
                                 } else {
                                     this.removing = false;
-                                    alert(data.message || 'Failed to remove item. Please try again.');
+                                    alert(data.message || @js(__('Failed to remove item. Please try again.')));
                                 }
                             } catch (error) {
                                 this.removing = false;
-                                alert('Network error. Please check your connection.');
+                                alert(@js(__('Network error. Please check your connection.')));
                             }
                         }
                      }">
@@ -213,7 +215,7 @@
                                             </svg>
                                         </button>
                                     </div>
-                                    <span x-text="`${currency}${Number(price).toFixed(2)} each`"></span>
+                                    <span x-text="`${currency}${Number(price).toFixed(2)} {{ __('each') }}`"></span>
                                 </div>
                                 <form action="{{ route('customer.cart.remove', [$table->code, $lineId]) }}"
                                       method="POST"
@@ -226,7 +228,7 @@
                                         <svg x-show="!removing" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
-                                        <span x-text="removing ? 'Removing...' : 'Remove'"></span>
+                                        <span x-text="removing ? @js(__('Removing...')) : @js(__('Remove'))"></span>
                                     </button>
                                 </form>
                             </div>
@@ -242,24 +244,24 @@
                 <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                 </svg>
-                Order Summary
+                {{ __('Order Summary') }}
             </h3>
             <div class="space-y-2">
                 <div class="flex justify-between text-sm">
-                    <span class="text-slate-600">Subtotal</span>
+                    <span class="text-slate-600">{{ __('Subtotal') }}</span>
                     <span id="cart-subtotal" class="font-medium text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($subtotal, 2) }}</span>
                 </div>
                 <div class="flex justify-between text-sm">
-                    <span class="text-slate-500">Tax ({{ config('pos.tax_rate', 0) * 100 }}%)</span>
+                    <span class="text-slate-500">{{ __('Tax') }} ({{ config('pos.tax_rate', 0) * 100 }}%)</span>
                     <span id="cart-tax" class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($subtotal * config('pos.tax_rate', 0), 2) }}</span>
                 </div>
                 <div class="flex justify-between text-sm">
-                    <span class="text-slate-500">Service ({{ config('pos.service_charge', 0) * 100 }}%)</span>
+                    <span class="text-slate-500">{{ __('Service') }} ({{ config('pos.service_charge', 0) * 100 }}%)</span>
                     <span id="cart-service" class="text-slate-600">{{ config('pos.currency_symbol') }}{{ number_format($subtotal * config('pos.service_charge', 0), 2) }}</span>
                 </div>
                 <div class="border-t border-slate-200 pt-3 mt-3">
                     <div class="flex justify-between items-center">
-                        <span class="font-semibold text-slate-900">Estimated Total</span>
+                        <span class="font-semibold text-slate-900">{{ __('Estimated Total') }}</span>
                         <span id="cart-total" class="text-xl font-bold text-slate-900">{{ config('pos.currency_symbol') }}{{ number_format($subtotal * (1 + config('pos.tax_rate', 0) + config('pos.service_charge', 0)), 2) }}</span>
                     </div>
                 </div>
@@ -309,7 +311,7 @@
                         this.couponMeta = data.valid ? { type: data.type, value: data.value } : null;
                     } catch (error) {
                         this.couponValid = false;
-                        this.couponMessage = 'Unable to validate coupon right now.';
+                        this.couponMessage = @js(__('Unable to validate coupon right now.'));
                         this.couponMeta = null;
                     } finally {
                         this.couponChecking = false;
@@ -334,40 +336,40 @@
                         const data = await response.json();
                         if (response.ok && data.success) {
                             this.submitting = false;
-                            this.successMessage = data.message || 'Order updated';
+                            this.successMessage = data.message || @js(__('Order updated'));
                             this.redirectTo = data.redirect || '';
                             this.showSuccess = true;
                         } else {
                             this.submitting = false;
-                            this.errorMessage = data.message || 'Failed to place order. Please try again.';
+                            this.errorMessage = data.message || @js(__('Failed to place order. Please try again.'));
                             this.showError = true;
                         }
                     } catch (error) {
                         this.submitting = false;
-                        this.errorMessage = 'Network error. Please check your connection.';
+                        this.errorMessage = @js(__('Network error. Please check your connection.'));
                         this.showError = true;
                     }
                 }
             }" @submit.prevent="placeOrder()">
             <div class="mb-5">
-                <label for="customer_note" class="block text-sm font-medium text-slate-700 mb-2">Special Instructions</label>
+                <label for="customer_note" class="block text-sm font-medium text-slate-700 mb-2">{{ __('Special Instructions') }}</label>
                 <textarea x-model="customerNote"
                           id="customer_note"
                           rows="2"
                           class="w-full border-slate-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 resize-none text-sm placeholder:text-slate-400"
-                          placeholder="Any allergies or special requests for the kitchen?"></textarea>
+                          placeholder="{{ __('Any allergies or special requests for the kitchen?') }}"></textarea>
             </div>
             <div class="mb-5">
-                <label for="coupon_code" class="block text-sm font-medium text-slate-700 mb-2">Coupon Code</label>
+                <label for="coupon_code" class="block text-sm font-medium text-slate-700 mb-2">{{ __('Coupon Code') }}</label>
                 <input x-model="couponCode"
                        @input="couponCheckTimeout = setTimeout(() => checkCoupon(), 500)"
                        @blur="checkCoupon()"
                        id="coupon_code"
                        type="text"
                        class="w-full border-slate-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 text-sm placeholder:text-slate-400 uppercase"
-                       placeholder="ENTER COUPON">
+                       placeholder="{{ __('ENTER COUPON') }}">
                 <div class="mt-2 flex items-center gap-2 text-xs">
-                    <span x-show="couponChecking" class="text-slate-400">Checking...</span>
+                    <span x-show="couponChecking" class="text-slate-400">{{ __('Checking...') }}</span>
                     <span x-show="!couponChecking && couponMessage"
                           :class="couponValid ? 'text-emerald-600' : 'text-red-600'"
                           x-text="couponMessage"></span>
@@ -375,7 +377,7 @@
                           class="text-slate-400"
                           x-text="couponMeta ? `${couponMeta.type === 'percent' ? couponMeta.value + '%' : '{{ config('pos.currency_symbol') }}' + Number(couponMeta.value).toFixed(2)}` : ''"></span>
                 </div>
-                <p class="text-xs text-slate-400 mt-2">Optional. Coupon applies to the whole order.</p>
+                <p class="text-xs text-slate-400 mt-2">{{ __('Optional. Coupon applies to the whole order.') }}</p>
             </div>
             <button type="submit"
                     :disabled="submitting"
@@ -387,7 +389,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                 </svg>
-                <span x-text="submitting ? 'Placing Order...' : 'Place Order'"></span>
+                <span x-text="submitting ? @js(__('Placing Order...')) : @js(__('Place Order'))"></span>
             </button>
 
             <!-- Error Dialog -->
@@ -410,7 +412,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-base font-semibold text-slate-900">Notice</p>
+                            <p class="text-base font-semibold text-slate-900">{{ __('Notice') }}</p>
                             <p class="text-sm text-slate-500" x-text="errorMessage"></p>
                         </div>
                     </div>
@@ -418,7 +420,7 @@
                         <button type="button"
                                 @click="showError = false"
                                 class="flex-1 py-2.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors">
-                            OK
+                            {{ __('OK') }}
                         </button>
                     </div>
                 </div>
@@ -444,7 +446,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-base font-semibold text-slate-900">Success</p>
+                            <p class="text-base font-semibold text-slate-900">{{ __('Success') }}</p>
                             <p class="text-sm text-slate-500" x-text="successMessage"></p>
                         </div>
                     </div>
@@ -452,7 +454,7 @@
                         <button type="button"
                                 @click="showSuccess = false; if (redirectTo) { window.location.href = redirectTo; }"
                                 class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors">
-                            OK
+                            {{ __('OK') }}
                         </button>
                     </div>
                 </div>
@@ -465,7 +467,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Add more items
+                {{ __('Add more items') }}
             </a>
         </div>
     </div>

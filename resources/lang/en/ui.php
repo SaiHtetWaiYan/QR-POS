@@ -22,6 +22,7 @@ return [
         'menu' => 'Menu',
         'cart' => 'Cart',
         'orders' => 'Orders',
+        'items' => '{1} item|[2,*] items',
     ],
     'language' => [
         'english' => 'English',

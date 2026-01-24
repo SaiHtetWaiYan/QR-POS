@@ -4,7 +4,7 @@
             <h2 class="font-bold text-2xl text-gray-900 leading-tight">
                 {{ __('Table Management') }}
             </h2>
-            <p class="text-sm text-gray-500 mt-1">Manage your restaurant tables and QR codes</p>
+            <p class="text-sm text-gray-500 mt-1">{{ __('Manage your restaurant tables and QR codes') }}</p>
         </div>
     </x-slot>
 
@@ -16,7 +16,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Add Table
+                    {{ __('Add Table') }}
                 </a>
             </div>
             @if($tables->isEmpty())
@@ -26,14 +26,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M3 14h18M5 6h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z"/>
                         </svg>
                     </div>
-                    <h3 class="font-semibold text-gray-900 text-lg">No tables yet</h3>
-                    <p class="text-gray-500 text-sm mt-1 mb-4">Add your first table to generate a QR code for ordering.</p>
+                    <h3 class="font-semibold text-gray-900 text-lg">{{ __('No tables yet') }}</h3>
+                    <p class="text-gray-500 text-sm mt-1 mb-4">{{ __('Add your first table to generate a QR code for ordering.') }}</p>
                     <a href="{{ route('pos.tables.create') }}"
                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 rounded-xl font-medium text-sm text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-500 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Add First Table
+                        {{ __('Add First Table') }}
                     </a>
                 </div>
             @else
@@ -54,7 +54,7 @@
                                         </div>
                                     </div>
                                     <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide {{ $table->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}">
-                                        {{ $table->is_active ? 'Active' : 'Inactive' }}
+                                        {{ $table->is_active ? __('Active') : __('Inactive') }}
                                     </span>
                                 </div>
 
@@ -64,7 +64,7 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                                         </svg>
-                                        View QR
+                                        {{ __('View QR') }}
                                     </a>
                                     <button type="button"
                                             @click="deleteModal = true; deleteTableId = {{ $table->id }}; deleteTableName = '{{ $table->name }}'"
@@ -111,21 +111,21 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Delete Table</h3>
-                        <p class="text-gray-500 mb-6">Are you sure you want to delete <span class="font-semibold text-gray-700" x-text="deleteTableName"></span>? This action cannot be undone.</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ __('Delete Table') }}</h3>
+                        <p class="text-gray-500 mb-6">{{ __('Are you sure you want to delete') }} <span class="font-semibold text-gray-700" x-text="deleteTableName"></span>? {{ __('This action cannot be undone.') }}</p>
 
                         <div class="flex gap-3">
                             <button type="button"
                                     @click="deleteModal = false"
                                     class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium text-sm text-gray-700 transition-colors">
-                                Cancel
+                                {{ __('Cancel') }}
                             </button>
                             <form :action="`{{ url('pos/tables') }}/${deleteTableId}`" method="POST" class="flex-1">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
                                         class="w-full px-4 py-2.5 bg-red-600 hover:bg-red-700 rounded-xl font-medium text-sm text-white transition-colors">
-                                    Delete Table
+                                    {{ __('Delete Table') }}
                                 </button>
                             </form>
                         </div>

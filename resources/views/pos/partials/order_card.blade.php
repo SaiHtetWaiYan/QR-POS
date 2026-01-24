@@ -25,7 +25,7 @@
                 {{ $order->status === 'served' ? 'bg-indigo-100 text-indigo-700' : '' }}
                 {{ $order->status === 'paid' ? 'bg-emerald-100 text-emerald-700' : '' }}
             ">
-                {{ ucfirst($order->status) }}
+                {{ __(ucfirst($order->status)) }}
             </span>
         </div>
     </div>
@@ -37,7 +37,7 @@
                 <svg class="w-3.5 h-3.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
-                <span><strong class="font-semibold">Note:</strong> {{ $order->customer_note }}</span>
+                <span><strong class="font-semibold">{{ __('Note') }}:</strong> {{ $order->customer_note }}</span>
             </p>
         </div>
     @endif
@@ -46,7 +46,7 @@
         <div class="bg-gradient-to-r from-violet-600 to-purple-600 text-white text-xs font-bold px-3 py-2.5 rounded-xl shadow-lg shadow-violet-600/20 mb-3 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                <span>BILL REQUESTED</span>
+                <span>{{ __('Bill Requested') }}</span>
             </div>
             <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -57,7 +57,9 @@
     <!-- Items Summary -->
     <div class="border-t border-gray-100 pt-3 mb-3">
         <div class="flex justify-between items-center text-sm">
-            <span class="text-gray-600 font-medium">{{ $order->orderItems->sum('qty') }} items</span>
+            <span class="text-gray-600 font-medium">
+                {{ $order->orderItems->sum('qty') }} {{ trans_choice('ui.customer.items', $order->orderItems->sum('qty')) }}
+            </span>
             <span class="text-xs text-gray-400">{{ $order->created_at->format('h:i A') }}</span>
         </div>
         <div class="mt-2 space-y-1">
@@ -68,7 +70,7 @@
                 </div>
             @endforeach
             @if($order->orderItems->count() > 3)
-                <p class="text-xs text-gray-400 pl-7">+{{ $order->orderItems->count() - 3 }} more items</p>
+                <p class="text-xs text-gray-400 pl-7">+{{ $order->orderItems->count() - 3 }} {{ __('more items') }}</p>
             @endif
         </div>
     </div>
@@ -81,7 +83,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
             </svg>
-            View Details
+            {{ __('View Details') }}
         </a>
 
         @if($order->status === 'pending')
@@ -93,7 +95,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Accept Order
+                    {{ __('Accept Order') }}
                 </button>
             </form>
         @elseif($order->status === 'accepted')
@@ -105,7 +107,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
                     </svg>
-                    Start Preparing
+                    {{ __('Start Preparing') }}
                 </button>
             </form>
         @elseif($order->status === 'preparing')
@@ -117,7 +119,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Mark Served
+                    {{ __('Mark Served') }}
                 </button>
             </form>
         @elseif($order->status === 'served')
@@ -126,7 +128,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                 </svg>
-                Print
+                {{ __('Print') }}
             </a>
             <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="paidForm">
                 @csrf @method('PATCH')
@@ -137,7 +139,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
-                    Mark Paid
+                    {{ __('Mark Paid') }}
                 </button>
             </form>
         @endif
@@ -163,20 +165,20 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-base font-semibold text-gray-900">Confirm payment received?</p>
-                    <p class="text-sm text-gray-500">This will mark the order as paid.</p>
+                    <p class="text-base font-semibold text-gray-900">{{ __('Confirm payment received?') }}</p>
+                    <p class="text-sm text-gray-500">{{ __('This will mark the order as paid.') }}</p>
                 </div>
             </div>
             <div class="flex gap-3">
                 <button type="button"
                         @click="showPaidConfirm = false"
                         class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
-                    Not Yet
+                    {{ __('Not Yet') }}
                 </button>
                 <button type="button"
                         @click="submitPaid()"
                         class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors">
-                    Mark Paid
+                    {{ __('Mark Paid') }}
                 </button>
             </div>
         </div>
