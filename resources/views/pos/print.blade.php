@@ -37,6 +37,10 @@
         <p>{{ __('Order') }}: #{{ $order->order_no }}</p>
         <p>{{ __('Table') }}: {{ $order->table->name }}</p>
         <p>{{ __('Date') }}: {{ $order->created_at->format('Y-m-d H:i') }}</p>
+        @php($printPaymentMethod = $order->payment_method ?? $order->bill_payment_method)
+        @if($printPaymentMethod)
+            <p>{{ __('ui.payment.method') }}: {{ __('ui.payment.methods.'.$printPaymentMethod) }}</p>
+        @endif
     </div>
 
     <table class="mb-2">

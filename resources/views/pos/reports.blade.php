@@ -219,6 +219,25 @@
                             </div>
                         @endforeach
                     </div>
+                    <div class="mt-6">
+                        <h4 class="text-sm font-semibold text-gray-900">{{ __('ui.reports.payment_methods') }}</h4>
+                        <p class="text-xs text-gray-500">{{ __('ui.reports.payment_mix') }}</p>
+                        <div class="mt-3 space-y-3">
+                            @foreach($paymentMix as $row)
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs uppercase tracking-wide text-gray-400 font-semibold">{{ __('ui.payment.methods.'.$row['method']) }}</span>
+                                    <span class="text-sm font-semibold text-gray-900">{{ $row['count'] }}</span>
+                                </div>
+                                <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
+                                    <div class="h-full bg-emerald-500" style="width: {{ $paidMonthlyCount > 0 ? ($row['count'] / $paidMonthlyCount) * 100 : 0 }}%;"></div>
+                                </div>
+                                <div class="text-xs text-gray-500 text-right">
+                                    {{ __('ui.reports.revenue') }}:
+                                    {{ config('pos.currency_symbol') }}{{ number_format($row['revenue'], 2) }}
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
 

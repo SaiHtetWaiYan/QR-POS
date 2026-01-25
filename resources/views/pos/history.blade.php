@@ -168,6 +168,19 @@
                                class="sr-only">
                         <p class="text-xs text-gray-400 mt-2">{{ __('Pick a date to review completed orders.') }}</p>
                     </div>
+                    <div class="w-full sm:w-56">
+                        <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">{{ __('ui.payment.method') }}</label>
+                        <select id="payment_method"
+                                name="payment_method"
+                                class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all">
+                            <option value="">{{ __('All') }}</option>
+                            @foreach($paymentMethods as $method)
+                                <option value="{{ $method }}" {{ $paymentMethod === $method ? 'selected' : '' }}>
+                                    {{ __('ui.payment.methods.'.$method) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <button type="submit"
                             class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 border border-transparent rounded-xl font-medium text-sm text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +193,7 @@
                 @if($availableDates->isNotEmpty())
                     <div class="flex flex-wrap gap-2 mt-4">
                         @foreach($availableDates->take(10) as $availableDate)
-                            <a href="{{ route('pos.history', ['date' => $availableDate]) }}"
+                            <a href="{{ route('pos.history', ['date' => $availableDate, 'payment_method' => $paymentMethod]) }}"
                                class="px-3 py-1.5 rounded-full text-xs font-semibold border {{ $availableDate === $date ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300' }}">
                                 {{ \Illuminate\Support\Carbon::parse($availableDate)->format('M d, Y') }}
                             </a>
@@ -216,6 +229,7 @@
                     'time' => $order->created_at->format('h:i A'),
                     'status' => $order->status,
                     'total' => $order->total,
+                    'payment_method' => $order->payment_method,
                     'url' => route('pos.orders.show', $order->id),
                 ]);
             @endphp
@@ -232,6 +246,7 @@
                         paid: @js(__('Paid')),
                         cancelled: @js(__('Cancelled'))
                     },
+                    paymentLabels: @js(collect($paymentMethods)->mapWithKeys(fn ($method) => [$method => __('ui.payment.methods.'.$method)])->all()),
                     get filtered() {
                         if (!this.query) return this.orders;
                         const q = this.query.toLowerCase();
@@ -297,6 +312,10 @@
                                 <p class="font-semibold text-gray-900" x-text="order.order_no"></p>
                                 <p class="text-xs text-gray-500">
                                     <span x-text="order.table"></span> • <span x-text="order.time"></span>
+                                </p>
+                                <p class="text-xs text-gray-400" x-show="order.payment_method">
+                                    {{ __('ui.payment.method') }}:
+                                    <span x-text="paymentLabels[order.payment_method] || order.payment_method"></span>
                                 </p>
                             </div>
                             <div class="flex items-center gap-3">

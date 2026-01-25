@@ -61,6 +61,8 @@ return [
         'busiest' => 'Busiest',
         'status_mix' => 'Status mix',
         'monthly_order_distribution' => 'Monthly order distribution',
+        'payment_methods' => 'Payment methods',
+        'payment_mix' => 'Monthly payment mix',
         'top_items' => 'Top items',
         'most_ordered' => 'Most ordered this month',
         'item' => 'Item',

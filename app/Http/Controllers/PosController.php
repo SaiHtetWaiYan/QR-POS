@@ -60,9 +60,15 @@ class PosController extends Controller
         $date = $dateParam && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateParam)
             ? Carbon::parse($dateParam)->toDateString()
             : now()->toDateString();
+        $paymentMethod = $request->query('payment_method');
+        $paymentMethods = config('pos.payment_methods', []);
+        if ($paymentMethod && ! in_array($paymentMethod, $paymentMethods, true)) {
+            $paymentMethod = null;
+        }
 
         $orders = Order::with(['table', 'orderItems'])
             ->whereDate('created_at', $date)
+            ->when($paymentMethod, fn ($query) => $query->where('payment_method', $paymentMethod))
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -74,7 +80,15 @@ class PosController extends Controller
         $totalOrders = $orders->count();
         $totalRevenue = $orders->sum('total');
 
-        return view('pos.history', compact('orders', 'date', 'availableDates', 'totalOrders', 'totalRevenue'));
+        return view('pos.history', compact(
+            'orders',
+            'date',
+            'availableDates',
+            'totalOrders',
+            'totalRevenue',
+            'paymentMethod',
+            'paymentMethods'
+        ));
     }
 
     public function show(Order $order)
@@ -156,6 +170,9 @@ class PosController extends Controller
             ->where('status', 'cancelled')
             ->count();
         $monthlyCancelRate = $monthlyTotalCount > 0 ? ($monthlyCancelledCount / $monthlyTotalCount) * 100 : 0;
+        $paidMonthlyCount = Order::whereBetween('created_at', [$monthStart.' 00:00:00', $monthEnd.' 23:59:59'])
+            ->whereNotNull('payment_method')
+            ->count();
 
         $trendStart = now()->subDays(13)->startOfDay();
         $trendEnd = now()->endOfDay();
@@ -230,6 +247,22 @@ class PosController extends Controller
             ->limit(6)
             ->get();
 
+        $paymentRows = Order::selectRaw('payment_method, COUNT(*) as count, SUM(total) as revenue')
+            ->whereBetween('created_at', [$monthStart.' 00:00:00', $monthEnd.' 23:59:59'])
+            ->whereNotNull('payment_method')
+            ->groupBy('payment_method')
+            ->get()
+            ->keyBy('payment_method');
+        $paymentMix = [];
+        foreach (config('pos.payment_methods', []) as $method) {
+            $row = $paymentRows->get($method);
+            $paymentMix[] = [
+                'method' => $method,
+                'count' => (int) ($row->count ?? 0),
+                'revenue' => (float) ($row->revenue ?? 0),
+            ];
+        }
+
         $recentOrders = Order::with('table')
             ->orderBy('created_at', 'desc')
             ->limit(7)
@@ -245,6 +278,7 @@ class PosController extends Controller
             'monthlyTotalCount',
             'monthlyCancelledCount',
             'monthlyCancelRate',
+            'paidMonthlyCount',
             'today',
             'trend',
             'trendMaxOrders',
@@ -255,6 +289,7 @@ class PosController extends Controller
             'busiestHourOrders',
             'statusBreakdown',
             'topItems',
+            'paymentMix',
             'recentOrders'
         ));
     }
