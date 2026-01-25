@@ -37,6 +37,7 @@ Route::prefix('t/{table}')->name('customer.')->middleware(\App\Http\Middleware\C
     Route::post('/order', [CustomerController::class, 'placeOrder'])->name('order.place');
     Route::get('/status', [CustomerController::class, 'status'])->name('status');
     Route::post('/order/{order}/bill', [CustomerController::class, 'requestBill'])->name('order.bill');
+    Route::get('/order/{order}/status', [CustomerController::class, 'orderStatus'])->name('order.status');
 });
 
 // POS / Admin Routes

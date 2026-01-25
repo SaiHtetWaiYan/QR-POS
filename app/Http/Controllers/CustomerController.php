@@ -491,4 +491,17 @@ class CustomerController extends Controller
 
         return back()->with('success', 'Bill requested. The waiter is coming!');
     }
+
+    public function orderStatus($tableCode, Order $order)
+    {
+        $table = $this->getTable($tableCode);
+        if ($order->table_id !== $table->id) {
+            abort(404);
+        }
+
+        return response()->json([
+            'status' => $order->status,
+            'bill_requested_at' => optional($order->bill_requested_at)->timestamp,
+        ]);
+    }
 }

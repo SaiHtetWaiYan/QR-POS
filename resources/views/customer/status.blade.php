@@ -37,6 +37,7 @@
     @else
         <div x-data="{
             currentStatus: '{{ $order->status }}',
+            billRequestedAt: @js(optional($order->bill_requested_at)->timestamp),
             statuses: ['pending', 'accepted', 'preparing', 'served', 'paid'],
             statusLabels: {
                 'pending': @js(__('Pending')),
@@ -77,6 +78,44 @@
                                 setTimeout(() => window.location.reload(), 2000);
                             }
                         });
+                }
+
+                this.startPolling();
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        this.checkStatus();
+                    }
+                });
+            },
+            startPolling() {
+                this.checkStatus();
+                this.pollInterval = setInterval(() => {
+                    if (!document.hidden) {
+                        this.checkStatus();
+                    }
+                }, 15000);
+            },
+            async checkStatus() {
+                try {
+                    const response = await fetch('{{ route('customer.order.status', [$table->code, $order->id]) }}', {
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    if (data.bill_requested_at !== this.billRequestedAt) {
+                        window.location.reload();
+                        return;
+                    }
+                    if (data.status && data.status !== this.currentStatus) {
+                        if (['paid', 'cancelled'].includes(data.status)) {
+                            window.location.reload();
+                            return;
+                        }
+                        this.currentStatus = data.status;
+                        this.showToast(this.statusConfig[data.status]?.text || data.status);
+                    }
+                } catch (error) {
+                    // ignore transient errors
                 }
             },
             showToast(message) {
