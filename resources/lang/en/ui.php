@@ -74,4 +74,14 @@ return [
         'total' => 'Total',
         'no_recent_orders' => 'No recent orders',
     ],
+    'payment' => [
+        'method' => 'Payment method',
+        'select_method' => 'Select payment method',
+        'paid_with' => 'Paid with',
+        'methods' => [
+            'cash' => 'Cash',
+            'card' => 'Card',
+            'mobile' => 'Mobile wallet',
+        ],
+    ],
 ];

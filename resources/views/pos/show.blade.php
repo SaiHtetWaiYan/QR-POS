@@ -195,7 +195,7 @@
                     @endif
 
                     @if($order->status === 'served')
-                        <form action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="paidForm">
+                        <form id="paid-form" action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="paidForm">
                             @csrf @method('PATCH')
                             <input type="hidden" name="status" value="paid">
                             <button type="submit"
@@ -272,6 +272,24 @@
                                     <p class="text-sm text-gray-500">{{ __('This will mark the order as paid.') }}</p>
                                 </div>
                             </div>
+                            <div class="mb-4">
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                                    {{ __('ui.payment.method') }}
+                                </label>
+                                @php($paymentMethods = config('pos.payment_methods', []))
+                                <select name="payment_method"
+                                        form="paid-form"
+                                        required
+                                        class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-emerald-500 focus:ring-emerald-200">
+                                    @if(empty($paymentMethods))
+                                        <option value="">{{ __('ui.payment.select_method') }}</option>
+                                    @else
+                                        @foreach($paymentMethods as $method)
+                                            <option value="{{ $method }}" {{ $loop->first ? 'selected' : '' }}>{{ __('ui.payment.methods.'.$method) }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
                             <div class="flex gap-3">
                                 <button type="button"
                                         @click="showPaidConfirm = false"
@@ -298,6 +316,11 @@
                     </div>
                     <p class="font-bold text-xl">{{ __('Payment Complete') }}</p>
                     <p class="text-emerald-100 text-sm mt-1">{{ __('This order has been paid in full') }}</p>
+                    @if($order->payment_method)
+                        <p class="text-emerald-100 text-sm mt-2">
+                            {{ __('ui.payment.paid_with') }} {{ __('ui.payment.methods.'.$order->payment_method) }}
+                        </p>
+                    @endif
                 </div>
             @endif
 

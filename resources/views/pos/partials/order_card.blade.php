@@ -1,6 +1,6 @@
 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-200 group"
      data-order-id="{{ $order->id }}"
-     x-data="orderCard({{ $order->id }}, '{{ route('pos.orders.updateStatus', $order->id) }}', '{{ csrf_token() }}')"
+     x-data="orderCard({{ $order->id }}, '{{ route('pos.orders.updateStatus', $order->id) }}', '{{ csrf_token() }}', @js(config('pos.payment_methods')[0] ?? ''))"
      @order-paid.window="if ($event.detail && $event.detail.orderId === {{ $order->id }}) { handleStatusChange('paid') }">
     <!-- Header -->
     <div class="flex justify-between items-start mb-3">
@@ -175,7 +175,19 @@
                         <p class="text-sm text-gray-500">{{ __('This will mark the order as paid.') }}</p>
                     </div>
                 </div>
-                <div class="flex gap-3">
+                <div class="mt-4">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                        {{ __('ui.payment.method') }}
+                    </label>
+                    <select x-model="paymentMethod"
+                            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-emerald-500 focus:ring-emerald-200">
+                        <option value="" disabled>{{ __('ui.payment.select_method') }}</option>
+                        @foreach(config('pos.payment_methods', []) as $method)
+                            <option value="{{ $method }}">{{ __('ui.payment.methods.'.$method) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex gap-3 mt-4">
                     <button type="button"
                             @click="showPaidConfirm = false"
                             class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
@@ -183,7 +195,8 @@
                     </button>
                     <button type="button"
                             @click="submitPaid()"
-                            class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors">
+                            :disabled="loading || !paymentMethod"
+                            class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50">
                         {{ __('Mark Paid') }}
                     </button>
                 </div>

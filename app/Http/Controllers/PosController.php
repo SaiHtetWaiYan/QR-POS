@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 
 class PosController extends Controller
 {
@@ -85,11 +86,15 @@ class PosController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
-        $request->validate(['status' => 'required|in:pending,accepted,preparing,served,paid,cancelled']);
+        $request->validate([
+            'status' => 'required|in:pending,accepted,preparing,served,paid,cancelled',
+            'payment_method' => ['required_if:status,paid', Rule::in(config('pos.payment_methods', []))],
+        ]);
 
         $data = ['status' => $request->status];
         if ($request->status === 'paid') {
             $data['paid_at'] = now();
+            $data['payment_method'] = $request->input('payment_method');
         }
 
         $order->update($data);

@@ -22,6 +22,7 @@ class Order extends Model
         'coupon_value',
         'coupon_amount',
         'total',
+        'payment_method',
         'bill_requested_at',
         'paid_at',
     ];

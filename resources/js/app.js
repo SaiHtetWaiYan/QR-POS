@@ -209,14 +209,19 @@ Alpine.data('posDashboard', (initialPendingCount = 0, initialActiveCount = 0) =>
 }));
 
 // Order Card component for status updates
-Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
+Alpine.data('orderCard', (orderId, updateUrl, csrfToken, defaultPaymentMethod = '') => ({
     showPaidConfirm: false,
     loading: false,
+    paymentMethod: defaultPaymentMethod,
 
-    async updateStatus(newStatus) {
+    async updateStatus(newStatus, paymentMethod = null) {
         if (this.loading) return;
         this.loading = true;
         try {
+            const payload = { status: newStatus };
+            if (newStatus === 'paid') {
+                payload.payment_method = paymentMethod;
+            }
             const response = await fetch(updateUrl, {
                 method: 'PATCH',
                 headers: {
@@ -224,7 +229,7 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
                     'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ status: newStatus })
+                body: JSON.stringify(payload)
             });
             if (!response.ok) throw new Error('Failed to update');
             let data = null;
@@ -425,7 +430,7 @@ Alpine.data('orderCard', (orderId, updateUrl, csrfToken) => ({
 
     submitPaid() {
         this.showPaidConfirm = false;
-        this.updateStatus('paid');
+        this.updateStatus('paid', this.paymentMethod);
     }
 }));
 
