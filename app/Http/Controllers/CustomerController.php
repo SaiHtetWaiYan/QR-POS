@@ -12,6 +12,7 @@ use App\Models\Table;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
@@ -442,6 +443,10 @@ class CustomerController extends Controller
 
     public function requestBill(Request $request, $tableCode, Order $order)
     {
+        $request->validate([
+            'payment_method' => ['required', Rule::in(config('pos.bill_payment_methods', []))],
+        ]);
+
         if ($order->status === 'paid') {
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => 'Order already paid'], 400);
@@ -468,7 +473,10 @@ class CustomerController extends Controller
             }
         }
 
-        $order->update(['bill_requested_at' => now()]);
+        $order->update([
+            'bill_requested_at' => now(),
+            'bill_payment_method' => $request->input('payment_method'),
+        ]);
 
         // Broadcast to POS
         try {

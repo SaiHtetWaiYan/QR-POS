@@ -247,7 +247,7 @@
     </div>
 
     <!-- Global Mark Paid Confirmation Modal -->
-    <div x-data="{ show: false, orderId: null, updateUrl: '', csrfToken: '{{ csrf_token() }}', loading: false, paymentMethod: @js(config('pos.payment_methods')[0] ?? '') }"
+    <div x-data="{ show: false, orderId: null, updateUrl: '', csrfToken: '{{ csrf_token() }}', loading: false }"
          @show-paid-confirm.window="show = true; orderId = $event.detail.orderId; updateUrl = $event.detail.updateUrl"
          @close-paid-confirm.window="show = false"
          x-cloak
@@ -281,18 +281,6 @@
                     <p class="text-sm text-gray-500">{{ __('This will mark the order as paid.') }}</p>
                 </div>
             </div>
-            <div class="mb-4">
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                    {{ __('ui.payment.method') }}
-                </label>
-                <select x-model="paymentMethod"
-                        class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-emerald-500 focus:ring-emerald-200">
-                    <option value="" disabled>{{ __('ui.payment.select_method') }}</option>
-                    @foreach(config('pos.payment_methods', []) as $method)
-                        <option value="{{ $method }}">{{ __('ui.payment.methods.'.$method) }}</option>
-                    @endforeach
-                </select>
-            </div>
             <div class="flex gap-3">
                 <button type="button"
                         @click="show = false"
@@ -308,10 +296,10 @@
                                     method: 'PATCH',
                                     headers: {
                                         'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': csrfToken,
-                                        'Accept': 'application/json'
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'Accept': 'application/json'
                                     },
-                                    body: JSON.stringify({ status: 'paid', payment_method: paymentMethod })
+                                    body: JSON.stringify({ status: 'paid' })
                                 });
                                 if (response.ok) {
                                     const data = await response.json();
@@ -326,7 +314,7 @@
                                 loading = false;
                             }
                         }"
-                        :disabled="loading || !paymentMethod"
+                        :disabled="loading"
                         class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50">
                     <span x-show="!loading">{{ __('Mark Paid') }}</span>
                     <span x-show="loading" class="flex items-center justify-center">

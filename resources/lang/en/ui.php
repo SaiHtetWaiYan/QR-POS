@@ -77,11 +77,13 @@ return [
     'payment' => [
         'method' => 'Payment method',
         'select_method' => 'Select payment method',
+        'select_prompt' => 'Please select a payment method.',
         'paid_with' => 'Paid with',
         'methods' => [
             'cash' => 'Cash',
             'card' => 'Card',
             'mobile' => 'Mobile wallet',
+            'qr' => 'QR Pay',
         ],
     ],
 ];

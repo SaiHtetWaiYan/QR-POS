@@ -1,6 +1,6 @@
 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-200 group"
      data-order-id="{{ $order->id }}"
-     x-data="orderCard({{ $order->id }}, '{{ route('pos.orders.updateStatus', $order->id) }}', '{{ csrf_token() }}', @js(config('pos.payment_methods')[0] ?? ''))"
+     x-data="orderCard({{ $order->id }}, '{{ route('pos.orders.updateStatus', $order->id) }}', '{{ csrf_token() }}')"
      @order-paid.window="if ($event.detail && $event.detail.orderId === {{ $order->id }}) { handleStatusChange('paid') }">
     <!-- Header -->
     <div class="flex justify-between items-start mb-3">
@@ -47,6 +47,11 @@
                 <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                 <span>{{ __('Bill Requested') }}</span>
             </div>
+            @if($order->bill_payment_method)
+                <span class="text-[10px] font-semibold uppercase tracking-wide text-white/80">
+                    {{ __('ui.payment.methods.'.$order->bill_payment_method) }}
+                </span>
+            @endif
             <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
             </svg>
@@ -175,18 +180,11 @@
                         <p class="text-sm text-gray-500">{{ __('This will mark the order as paid.') }}</p>
                     </div>
                 </div>
-                <div class="mt-4">
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                        {{ __('ui.payment.method') }}
-                    </label>
-                    <select x-model="paymentMethod"
-                            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-emerald-500 focus:ring-emerald-200">
-                        <option value="" disabled>{{ __('ui.payment.select_method') }}</option>
-                        @foreach(config('pos.payment_methods', []) as $method)
-                            <option value="{{ $method }}">{{ __('ui.payment.methods.'.$method) }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                @if($order->bill_payment_method)
+                    <p class="text-xs text-gray-500 mt-2">
+                        {{ __('ui.payment.method') }}: {{ __('ui.payment.methods.'.$order->bill_payment_method) }}
+                    </p>
+                @endif
                 <div class="flex gap-3 mt-4">
                     <button type="button"
                             @click="showPaidConfirm = false"
@@ -195,7 +193,7 @@
                     </button>
                     <button type="button"
                             @click="submitPaid()"
-                            :disabled="loading || !paymentMethod"
+                            :disabled="loading"
                             class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50">
                         {{ __('Mark Paid') }}
                     </button>

@@ -24,6 +24,7 @@ class Order extends Model
         'total',
         'payment_method',
         'bill_requested_at',
+        'bill_payment_method',
         'paid_at',
     ];
 

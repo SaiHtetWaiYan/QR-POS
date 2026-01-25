@@ -84,6 +84,11 @@
                                 <span class="font-bold">{{ __('Bill Requested') }}</span>
                                 <span class="text-white/80 text-sm">{{ $order->bill_requested_at->diffForHumans() }}</span>
                             </div>
+                            @if($order->bill_payment_method)
+                                <span class="text-xs font-semibold uppercase tracking-wide text-white/80">
+                                    {{ __('ui.payment.methods.'.$order->bill_payment_method) }}
+                                </span>
+                            @endif
                         </div>
                     </div>
                 @endif
@@ -198,6 +203,10 @@
                         <form id="paid-form" action="{{ route('pos.orders.updateStatus', $order->id) }}" method="POST" x-ref="paidForm">
                             @csrf @method('PATCH')
                             <input type="hidden" name="status" value="paid">
+                            @php($defaultPaymentMethod = $order->bill_payment_method ?? (config('pos.payment_methods')[0] ?? ''))
+                            @if($defaultPaymentMethod)
+                                <input type="hidden" name="payment_method" value="{{ $defaultPaymentMethod }}">
+                            @endif
                             <button type="submit"
                                     @click.prevent="showPaidConfirm = true"
                                     class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-green-500 rounded-xl font-semibold text-sm text-white shadow-lg shadow-emerald-500/20 hover:shadow-xl transition-all">
@@ -272,24 +281,11 @@
                                     <p class="text-sm text-gray-500">{{ __('This will mark the order as paid.') }}</p>
                                 </div>
                             </div>
-                            <div class="mb-4">
-                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                                    {{ __('ui.payment.method') }}
-                                </label>
-                                @php($paymentMethods = config('pos.payment_methods', []))
-                                <select name="payment_method"
-                                        form="paid-form"
-                                        required
-                                        class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-emerald-500 focus:ring-emerald-200">
-                                    @if(empty($paymentMethods))
-                                        <option value="">{{ __('ui.payment.select_method') }}</option>
-                                    @else
-                                        @foreach($paymentMethods as $method)
-                                            <option value="{{ $method }}" {{ $loop->first ? 'selected' : '' }}>{{ __('ui.payment.methods.'.$method) }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
+                            @if($order->bill_payment_method)
+                                <p class="text-sm text-gray-500 mb-4">
+                                    {{ __('ui.payment.method') }}: {{ __('ui.payment.methods.'.$order->bill_payment_method) }}
+                                </p>
+                            @endif
                             <div class="flex gap-3">
                                 <button type="button"
                                         @click="showPaidConfirm = false"

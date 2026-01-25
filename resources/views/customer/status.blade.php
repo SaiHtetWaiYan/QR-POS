@@ -238,6 +238,7 @@
                             cooldownSeconds: 120,
                             now: Math.floor(Date.now() / 1000),
                             requesting: false,
+                            paymentMethod: @js($order->bill_payment_method ?? (config('pos.bill_payment_methods')[0] ?? null)),
                             retryLabel: @js(__('You can request again soon.')),
                             retryNowLabel: @js(__('You can request again now.')),
                             get remaining() {
@@ -273,7 +274,8 @@
                                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                                             'Accept': 'application/json',
                                             'Content-Type': 'application/json'
-                                        }
+                                        },
+                                        body: JSON.stringify({ payment_method: this.paymentMethod })
                                     });
                                     const data = await response.json().catch(() => ({}));
                                     if (response.ok) {
@@ -301,6 +303,11 @@
                             <div>
                                 <p class="font-bold text-lg">{{ __('Bill Requested') }}</p>
                                 <p class="text-sm text-white/80">{{ __('Staff has been notified') }}</p>
+                                @if($order->bill_payment_method)
+                                    <p class="text-xs text-white/80 mt-1">
+                                        {{ __('ui.payment.method') }}: {{ __('ui.payment.methods.'.$order->bill_payment_method) }}
+                                    </p>
+                                @endif
                             </div>
                         </div>
                         <div class="mt-3 flex items-center justify-between text-xs text-white/80">
@@ -342,6 +349,10 @@
                         requesting: false,
                         billRequested: false,
                         showConfirm: false,
+                        paymentMethod: @js(config('pos.bill_payment_methods')[0] ?? null),
+                        paymentLabels: @js(collect(config('pos.bill_payment_methods', []))
+                            ->mapWithKeys(fn ($method) => [$method => __('ui.payment.methods.'.$method)])
+                            ->all()),
                         requestedAt: null,
                         cooldownSeconds: 120,
                         now: Math.floor(Date.now() / 1000),
@@ -375,6 +386,10 @@
                         },
                         async requestBill() {
                             this.showConfirm = false;
+                            if (!this.paymentMethod) {
+                                this.showModal(@js(__('ui.payment.select_prompt')));
+                                return;
+                            }
                             this.requesting = true;
                             try {
                                 const response = await fetch('{{ route('customer.order.bill', [$table->code, $order->id]) }}', {
@@ -383,7 +398,8 @@
                                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                                         'Accept': 'application/json',
                                         'Content-Type': 'application/json'
-                                    }
+                                    },
+                                    body: JSON.stringify({ payment_method: this.paymentMethod })
                                 });
                                 const data = await response.json().catch(() => ({}));
                                 if (response.ok) {
@@ -413,6 +429,10 @@
                             <div>
                                 <p class="font-bold text-lg">{{ __('Bill Requested') }}</p>
                                 <p class="text-sm text-white/80">{{ __('Staff has been notified') }}</p>
+                                <p x-cloak x-show="paymentMethod" class="text-xs text-white/80 mt-1">
+                                    {{ __('ui.payment.method') }}:
+                                    <span x-text="paymentLabels[paymentMethod] || paymentMethod"></span>
+                                </p>
                             </div>
                         </div>
                         <div class="mt-3 flex items-center justify-between text-xs text-white/80">
@@ -483,15 +503,26 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-base font-semibold text-slate-900">{{ __('Request the bill?') }}</p>
-                                        <p class="text-sm text-slate-500">{{ __('We will notify staff to bring it to your table.') }}</p>
-                                    </div>
                                 </div>
-                                <div class="flex gap-3">
-                                    <button type="button"
-                                            @click="showConfirm = false"
+                                <div>
+                                    <p class="text-base font-semibold text-slate-900">{{ __('Request the bill?') }}</p>
+                                    <p class="text-sm text-slate-500">{{ __('We will notify staff to bring it to your table.') }}</p>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                                    {{ __('ui.payment.method') }}
+                                </label>
+                                <select x-model="paymentMethod"
+                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-amber-500 focus:ring-amber-200">
+                                    @foreach(config('pos.bill_payment_methods', []) as $method)
+                                        <option value="{{ $method }}">{{ __('ui.payment.methods.'.$method) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="flex gap-3">
+                                <button type="button"
+                                        @click="showConfirm = false"
                                             class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors">
                                         {{ __('Cancel') }}
                                     </button>

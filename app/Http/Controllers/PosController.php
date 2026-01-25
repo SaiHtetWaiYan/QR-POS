@@ -86,15 +86,21 @@ class PosController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
+        $paymentMethods = config('pos.payment_methods', []);
         $request->validate([
             'status' => 'required|in:pending,accepted,preparing,served,paid,cancelled',
-            'payment_method' => ['required_if:status,paid', Rule::in(config('pos.payment_methods', []))],
+            'payment_method' => ['nullable', Rule::in($paymentMethods)],
         ]);
 
         $data = ['status' => $request->status];
         if ($request->status === 'paid') {
             $data['paid_at'] = now();
-            $data['payment_method'] = $request->input('payment_method');
+            $selectedMethod = $request->input('payment_method')
+                ?? $order->bill_payment_method
+                ?? ($paymentMethods[0] ?? null);
+            if ($selectedMethod) {
+                $data['payment_method'] = $selectedMethod;
+            }
         }
 
         $order->update($data);
