@@ -53,6 +53,7 @@ class BillRequested implements ShouldBroadcastNow
             'order_no' => $this->order->order_no,
             'table' => $this->order->table?->name,
             'total' => $this->order->total,
+            'bill_payment_method' => $this->order->bill_payment_method,
         ];
     }
 }

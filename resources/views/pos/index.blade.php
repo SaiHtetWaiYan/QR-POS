@@ -10,7 +10,8 @@
         </div>
     </x-slot>
 
-    <div class="py-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50" x-data="posDashboard({{ $pendingCount }}, {{ $activeCount }})">
+    <div class="py-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50"
+         x-data="posDashboard({{ $pendingCount }}, {{ $activeCount }}, @js(collect(config('pos.bill_payment_methods', []))->mapWithKeys(fn ($method) => [$method => __('ui.payment.methods.'.$method)])->all()))">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
             <!-- Stats Overview -->
             <div class="grid grid-cols-2 gap-4 mb-6">
@@ -194,6 +195,10 @@
                             <div class="flex items-center justify-between text-sm text-gray-500 mt-2">
                                 <span>{{ __('Total') }}</span>
                                 <span class="text-lg font-bold text-gray-900" x-text="'{{ config('pos.currency_symbol') }}' + (alert.total ? parseFloat(alert.total).toFixed(2) : '0.00')"></span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mt-2" x-show="alert.bill_payment_method">
+                                <span>{{ __('ui.payment.method') }}</span>
+                                <span class="font-semibold text-gray-900" x-text="paymentLabels[alert.bill_payment_method] || alert.bill_payment_method"></span>
                             </div>
                             <div class="mt-3 flex gap-2">
                                 <button @click="dismissBillAlert(alert.order_id)"

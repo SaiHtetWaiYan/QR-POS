@@ -97,13 +97,14 @@ Alpine.data('billAlert', () => ({
 }));
 
 // POS Dashboard component
-Alpine.data('posDashboard', (initialPendingCount = 0, initialActiveCount = 0) => ({
+Alpine.data('posDashboard', (initialPendingCount = 0, initialActiveCount = 0, paymentLabels = {}) => ({
     pendingCount: initialPendingCount,
     activeCount: initialActiveCount,
     showNotification: false,
     notificationMessage: '',
     showBillAlert: false,
     billAlerts: [],
+    paymentLabels,
 
     init() {
         if (typeof Echo !== 'undefined') {
