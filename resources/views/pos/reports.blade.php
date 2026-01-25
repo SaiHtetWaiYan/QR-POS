@@ -62,6 +62,53 @@
                 </div>
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-xs uppercase tracking-wide text-gray-400 font-semibold">{{ __('Avg order value') }}</p>
+                            <p class="text-lg font-semibold text-gray-900">{{ config('pos.currency_symbol') }}{{ number_format($avgOrderValue, 2) }}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h11M9 21V7m10 9H8m11 4H8m5-16h6m-3-3v6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500">{{ __('Based on non-cancelled orders this month') }}</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-xs uppercase tracking-wide text-gray-400 font-semibold">{{ __('Items sold') }}</p>
+                            <p class="text-lg font-semibold text-gray-900">{{ number_format($monthlyItemsSold) }}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M5 7l1 12h12l1-12M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500">{{ __('Monthly quantity across all menu items') }}</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-xs uppercase tracking-wide text-gray-400 font-semibold">{{ __('Cancelled') }}</p>
+                            <p class="text-lg font-semibold text-gray-900">{{ $monthlyCancelledCount }} / {{ $monthlyTotalCount }}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500">{{ number_format($monthlyCancelRate, 1) }}% {{ __('cancellation rate this month') }}</p>
+                </div>
+            </div>
+
             <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -126,6 +173,117 @@
                         <p class="mt-3 text-xs text-gray-500">
                             {{ __('Values reflect paid + active orders, excluding cancelled.') }}
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm xl:col-span-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">{{ __('Peak hours') }}</h3>
+                            <p class="text-sm text-gray-500">{{ __('Orders by hour (last 14 days)') }}</p>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            {{ __('Busiest') }}: <span class="font-semibold text-gray-700">{{ $busiestHourLabel }}</span>
+                            ({{ $busiestHourOrders }})
+                        </div>
+                    </div>
+                    <div class="flex items-end gap-1 h-32">
+                        @foreach($hourly as $hour)
+                            <div class="flex-1 flex flex-col items-center gap-2 min-w-0">
+                                <div class="w-full h-24 rounded-lg bg-white border border-gray-200 flex items-end overflow-hidden">
+                                    <div class="w-full bg-sky-500" style="height: {{ $hourMax > 0 ? ($hour['orders'] / $hourMax) * 100 : 0 }}%;"></div>
+                                </div>
+                                <span class="text-[10px] text-gray-400 leading-none">
+                                    {{ $loop->index % 3 === 0 ? $hour['label'] : '' }}
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('Status mix') }}</h3>
+                        <p class="text-sm text-gray-500">{{ __('Monthly order distribution') }}</p>
+                    </div>
+                    <div class="space-y-3">
+                        @foreach($statusBreakdown as $row)
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs uppercase tracking-wide text-gray-400 font-semibold">{{ __($row['status']) }}</span>
+                                <span class="text-sm font-semibold text-gray-900">{{ $row['count'] }}</span>
+                            </div>
+                            <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
+                                <div class="h-full bg-indigo-500" style="width: {{ $monthlyTotalCount > 0 ? ($row['count'] / $monthlyTotalCount) * 100 : 0 }}%;"></div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('Top items') }}</h3>
+                        <p class="text-sm text-gray-500">{{ __('Most ordered this month') }}</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead>
+                                <tr class="text-left text-xs uppercase tracking-wide text-gray-400">
+                                    <th class="pb-2">{{ __('Item') }}</th>
+                                    <th class="pb-2 text-right">{{ __('Qty') }}</th>
+                                    <th class="pb-2 text-right">{{ __('Revenue') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse($topItems as $item)
+                                    <tr>
+                                        <td class="py-3 text-gray-900 font-medium">{{ $item->name_snapshot }}</td>
+                                        <td class="py-3 text-right text-gray-700">{{ number_format($item->total_qty) }}</td>
+                                        <td class="py-3 text-right text-gray-700">{{ config('pos.currency_symbol') }}{{ number_format($item->total_revenue, 2) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td class="py-6 text-center text-gray-500" colspan="3">{{ __('No items yet') }}</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ __('Recent orders') }}</h3>
+                        <p class="text-sm text-gray-500">{{ __('Latest activity') }}</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead>
+                                <tr class="text-left text-xs uppercase tracking-wide text-gray-400">
+                                    <th class="pb-2">{{ __('Order') }}</th>
+                                    <th class="pb-2">{{ __('Table') }}</th>
+                                    <th class="pb-2">{{ __('Status') }}</th>
+                                    <th class="pb-2 text-right">{{ __('Total') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse($recentOrders as $order)
+                                    <tr>
+                                        <td class="py-3 text-gray-900 font-medium">{{ $order->order_no }}</td>
+                                        <td class="py-3 text-gray-700">{{ $order->table->name ?? '—' }}</td>
+                                        <td class="py-3 text-gray-700 capitalize">{{ $order->status }}</td>
+                                        <td class="py-3 text-right text-gray-700">{{ config('pos.currency_symbol') }}{{ number_format($order->total, 2) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td class="py-6 text-center text-gray-500" colspan="4">{{ __('No recent orders') }}</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

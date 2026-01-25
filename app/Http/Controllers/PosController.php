@@ -134,6 +134,17 @@ class PosController extends Controller
         $monthlyCount = $monthlyOrders->count();
         $dailyRevenue = $dailyOrders->sum('total');
         $monthlyRevenue = $monthlyOrders->sum('total');
+        $monthlyItemsSold = OrderItem::join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereBetween('orders.created_at', [$monthStart.' 00:00:00', $monthEnd.' 23:59:59'])
+            ->where('orders.status', '!=', 'cancelled')
+            ->sum('order_items.qty');
+        $avgOrderValue = $monthlyCount > 0 ? $monthlyRevenue / $monthlyCount : 0;
+
+        $monthlyTotalCount = Order::whereBetween('created_at', [$monthStart.' 00:00:00', $monthEnd.' 23:59:59'])->count();
+        $monthlyCancelledCount = Order::whereBetween('created_at', [$monthStart.' 00:00:00', $monthEnd.' 23:59:59'])
+            ->where('status', 'cancelled')
+            ->count();
+        $monthlyCancelRate = $monthlyTotalCount > 0 ? ($monthlyCancelledCount / $monthlyTotalCount) * 100 : 0;
 
         $trendStart = now()->subDays(13)->startOfDay();
         $trendEnd = now()->endOfDay();
@@ -163,15 +174,77 @@ class PosController extends Controller
             ];
         }
 
+        $hourRows = Order::selectRaw('HOUR(created_at) as hour, COUNT(*) as orders_count')
+            ->whereBetween('created_at', [$trendStart, $trendEnd])
+            ->where('status', '!=', 'cancelled')
+            ->groupBy('hour')
+            ->get()
+            ->keyBy('hour');
+
+        $hourly = [];
+        $hourMax = 1;
+        for ($hour = 0; $hour < 24; $hour++) {
+            $count = (int) ($hourRows->get($hour)->orders_count ?? 0);
+            $hourMax = max($hourMax, $count);
+            $hourly[] = [
+                'hour' => $hour,
+                'label' => Carbon::createFromTime($hour)->format('ga'),
+                'orders' => $count,
+            ];
+        }
+
+        $busiestHour = collect($hourly)->sortByDesc('orders')->first();
+        $busiestHourLabel = $busiestHour['label'] ?? '—';
+        $busiestHourOrders = $busiestHour['orders'] ?? 0;
+
+        $statusRows = Order::selectRaw('status, COUNT(*) as count')
+            ->whereBetween('created_at', [$monthStart.' 00:00:00', $monthEnd.' 23:59:59'])
+            ->groupBy('status')
+            ->get()
+            ->keyBy('status');
+        $statusBreakdown = [];
+        foreach (['pending', 'accepted', 'preparing', 'served', 'paid', 'cancelled'] as $status) {
+            $statusBreakdown[] = [
+                'status' => $status,
+                'count' => (int) ($statusRows->get($status)->count ?? 0),
+            ];
+        }
+
+        $topItems = OrderItem::selectRaw('name_snapshot, SUM(qty) as total_qty, SUM(line_total) as total_revenue')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereBetween('orders.created_at', [$monthStart.' 00:00:00', $monthEnd.' 23:59:59'])
+            ->where('orders.status', '!=', 'cancelled')
+            ->groupBy('name_snapshot')
+            ->orderByDesc('total_qty')
+            ->limit(6)
+            ->get();
+
+        $recentOrders = Order::with('table')
+            ->orderBy('created_at', 'desc')
+            ->limit(7)
+            ->get();
+
         return view('pos.reports', compact(
             'dailyCount',
             'monthlyCount',
             'dailyRevenue',
             'monthlyRevenue',
+            'monthlyItemsSold',
+            'avgOrderValue',
+            'monthlyTotalCount',
+            'monthlyCancelledCount',
+            'monthlyCancelRate',
             'today',
             'trend',
             'trendMaxOrders',
-            'trendMaxRevenue'
+            'trendMaxRevenue',
+            'hourly',
+            'hourMax',
+            'busiestHourLabel',
+            'busiestHourOrders',
+            'statusBreakdown',
+            'topItems',
+            'recentOrders'
         ));
     }
 
